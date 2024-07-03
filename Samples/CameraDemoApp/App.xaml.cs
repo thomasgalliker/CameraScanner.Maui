@@ -1,12 +1,15 @@
-﻿namespace CameraDemoApp
+﻿using CameraDemoApp.Views;
+
+namespace CameraDemoApp
 {
     public partial class App : Application
     {
-        public App()
+        public App(IServiceProvider serviceProvider)
         {
-            InitializeComponent();
+            this.InitializeComponent();
 
-            MainPage = new AppShell();
+            var mainPage = serviceProvider.GetRequiredService<MainPage>();
+            this.MainPage = new NavigationPage(mainPage);
         }
     }
 }
