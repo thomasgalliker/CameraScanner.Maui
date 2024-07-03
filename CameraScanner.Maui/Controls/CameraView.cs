@@ -6,14 +6,20 @@ namespace CameraScanner.Maui
 {
     public partial class CameraView : View
     {
+        private readonly IVibration vibration;
         private readonly HashSet<BarcodeResult> pooledResults;
         private readonly Timer poolingTimer;
 
-        public CameraView()
+        public CameraView() : this(Vibration.Default)
         {
             this.pooledResults = [];
             this.poolingTimer = new Timer { AutoReset = false };
             this.poolingTimer.Elapsed += this.PoolingTimer_Elapsed; // TODO: Memory leak!
+        }
+
+        internal CameraView(IVibration vibration)
+        {
+            this.vibration = vibration;
         }
 
         public static readonly BindableProperty OnDetectionFinishedCommandProperty = BindableProperty.Create(
@@ -403,7 +409,7 @@ namespace CameraScanner.Maui
             {
                 if (this.VibrationOnDetected)
                 {
-                    Vibration.Vibrate();
+                    this.vibration.Vibrate();
                 }
             }
             catch
