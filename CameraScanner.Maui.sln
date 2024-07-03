@@ -1,0 +1,75 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.7.34031.279
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{43D800CC-EC47-409A-94E4-1C6960F1EA6F}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+		.gitignore = .gitignore
+		azure-pipelines.yml = azure-pipelines.yml
+		README.md = README.md
+	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraScanner.Maui", "CameraScanner.Maui\CameraScanner.Maui.csproj", "{49F1F62D-5A20-49A6-B508-408BE32B0DC6}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Samples", "Samples", "{94199B6E-4C10-49DB-8949-63E808A75741}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{698B398F-F742-4F63-9771-E7FDF3400C87}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CameraScanner.Maui.Tests", "Tests\CameraScanner.Maui.Tests\CameraScanner.Maui.Tests.csproj", "{49FF9913-B8D2-4730-A4F4-9127694005CE}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{DA1A2C3C-F292-4402-BDDF-7DB53EA96DB3}"
+	ProjectSection(SolutionItems) = preProject
+		.github\ISSUE_TEMPLATE\bug_report.md = .github\ISSUE_TEMPLATE\bug_report.md
+		.github\ISSUE_TEMPLATE\feature_request.md = .github\ISSUE_TEMPLATE\feature_request.md
+		.github\PULL_REQUEST_TEMPLATE\pull_request_template.md = .github\PULL_REQUEST_TEMPLATE\pull_request_template.md
+		.github\ISSUE_TEMPLATE\refactoring.md = .github\ISSUE_TEMPLATE\refactoring.md
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Device = Debug|Device
+		Debug|Simulator = Debug|Simulator
+		Release|Any CPU = Release|Any CPU
+		Release|Device = Release|Device
+		Release|Simulator = Release|Simulator
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Device.ActiveCfg = Debug|Device
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Device.Build.0 = Debug|Device
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Simulator.ActiveCfg = Debug|Simulator
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Debug|Simulator.Build.0 = Debug|Simulator
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Device.ActiveCfg = Release|Device
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Device.Build.0 = Release|Device
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Simulator.ActiveCfg = Release|Simulator
+		{49F1F62D-5A20-49A6-B508-408BE32B0DC6}.Release|Simulator.Build.0 = Release|Simulator
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Device.ActiveCfg = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Device.Build.0 = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Simulator.ActiveCfg = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Debug|Simulator.Build.0 = Debug|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Device.ActiveCfg = Release|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Device.Build.0 = Release|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Simulator.ActiveCfg = Release|Any CPU
+		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Simulator.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{49FF9913-B8D2-4730-A4F4-9127694005CE} = {698B398F-F742-4F63-9771-E7FDF3400C87}
+		{DA1A2C3C-F292-4402-BDDF-7DB53EA96DB3} = {43D800CC-EC47-409A-94E4-1C6960F1EA6F}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7B8DC381-9814-41DE-BF03-5CDA4E66F53A}
+	EndGlobalSection
+EndGlobal
