@@ -2,7 +2,7 @@
 {
     public static class MauiAppBuilderExtensions
     {
-        public static MauiAppBuilder UseBarcodeScanning(this MauiAppBuilder builder)
+        public static MauiAppBuilder UseCameraScanner(this MauiAppBuilder builder)
         {
 #if (ANDROID || IOS)
             builder.ConfigureMauiHandlers(handlers =>
