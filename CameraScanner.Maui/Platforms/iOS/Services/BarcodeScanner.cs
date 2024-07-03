@@ -1,5 +1,4 @@
 ﻿using AVFoundation;
-using CameraScanner.Maui;
 using CoreGraphics;
 using CoreImage;
 using Foundation;
@@ -8,7 +7,7 @@ using System.Text;
 using UIKit;
 using Vision;
 
-namespace CameraScanner.Maui
+namespace CameraScanner.Maui.Platforms.Services
 {
     public class BarcodeScanner : IBarcodeScanner
     {

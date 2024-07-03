@@ -27,6 +27,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{DA1A
 		.github\ISSUE_TEMPLATE\refactoring.md = .github\ISSUE_TEMPLATE\refactoring.md
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CameraDemoApp", "Samples\CameraDemoApp\CameraDemoApp.csproj", "{BFFFCB20-211D-4CCC-B913-05E053C95922}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -61,6 +63,24 @@ Global
 		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Device.Build.0 = Release|Any CPU
 		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Simulator.ActiveCfg = Release|Any CPU
 		{49FF9913-B8D2-4730-A4F4-9127694005CE}.Release|Simulator.Build.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Device.ActiveCfg = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Device.Build.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Device.Deploy.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Simulator.ActiveCfg = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Simulator.Build.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Debug|Simulator.Deploy.0 = Debug|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Any CPU.Deploy.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Device.ActiveCfg = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Device.Build.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Device.Deploy.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Simulator.ActiveCfg = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Simulator.Build.0 = Release|Any CPU
+		{BFFFCB20-211D-4CCC-B913-05E053C95922}.Release|Simulator.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -68,6 +88,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{49FF9913-B8D2-4730-A4F4-9127694005CE} = {698B398F-F742-4F63-9771-E7FDF3400C87}
 		{DA1A2C3C-F292-4402-BDDF-7DB53EA96DB3} = {43D800CC-EC47-409A-94E4-1C6960F1EA6F}
+		{BFFFCB20-211D-4CCC-B913-05E053C95922} = {94199B6E-4C10-49DB-8949-63E808A75741}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {7B8DC381-9814-41DE-BF03-5CDA4E66F53A}

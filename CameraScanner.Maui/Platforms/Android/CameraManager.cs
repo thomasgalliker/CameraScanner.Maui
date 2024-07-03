@@ -116,9 +116,9 @@ namespace CameraScanner.Maui
                 {
                     lifecycleOwner = (this.context as ContextWrapper)?.BaseContext as ILifecycleOwner;
                 }
-                else if (Platform.CurrentActivity is ILifecycleOwner)
+                else if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity is ILifecycleOwner l)
                 {
-                    lifecycleOwner = Platform.CurrentActivity as ILifecycleOwner;
+                    lifecycleOwner = l;
                 }
 
                 if (lifecycleOwner is null)
@@ -364,15 +364,15 @@ namespace CameraScanner.Maui
             using var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
             using var results = await this.barcodeScanner.Process(image);
 
-            BarcodeScanner.ProcessBarcodeResult(results, this.barcodeResults, coordinateTransform);
+            Platforms.Services.BarcodeScanner.ProcessBarcodeResult(results, this.barcodeResults, coordinateTransform);
 
             if (this.cameraView.ForceInverted)
             {
-                BarcodeScanner.InvertLuminance(proxy.Image);
+                Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
                 using var invertedImage = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
                 using var invertedResults = await this.barcodeScanner.Process(invertedImage);
 
-                BarcodeScanner.ProcessBarcodeResult(invertedResults, this.barcodeResults, coordinateTransform);
+                Platforms.Services.BarcodeScanner.ProcessBarcodeResult(invertedResults, this.barcodeResults, coordinateTransform);
             }
 
             if (this.cameraView.AimMode)

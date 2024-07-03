@@ -12,35 +12,11 @@ using Xamarin.Google.MLKit.Vision.Common;
 using Image = Android.Media.Image;
 using Paint = Android.Graphics.Paint;
 using RectF = Microsoft.Maui.Graphics.RectF;
-using Size = Android.Util.Size;
 
-namespace CameraScanner.Maui
+namespace CameraScanner.Maui.Platforms.Services
 {
-    public class BarcodeScanner : IBarcodeScanner
+    public partial class BarcodeScanner : IBarcodeScanner
     {
-        private static Lazy<IBarcodeScanner> Implementation = new Lazy<IBarcodeScanner>(CreateBarcodeScanner, LazyThreadSafetyMode.PublicationOnly);
-
-        /// <summary>
-        /// Current plugin implementation to use
-        /// </summary>
-        public static IBarcodeScanner Current
-        {
-            get => Implementation.Value;
-        }
-
-        private static IBarcodeScanner CreateBarcodeScanner()
-        {
-#if (ANDROID || IOS)
-            return new BarcodeScanner();
-#else
-            throw Exceptions.NotImplementedInReferenceAssembly();
-#endif
-        }
-
-        private BarcodeScanner()
-        {
-        }
-
         private static readonly ParallelOptions ParallelOptions = new() { MaxDegreeOfParallelism = Environment.ProcessorCount * 2 };
 
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(byte[] imageArray)

@@ -61,7 +61,7 @@ namespace CameraScanner.Maui
                 if (error is null)
                 {
                     var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
-                    BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.barcodeResults, this.previewLayer);
+                    Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.barcodeResults, this.previewLayer);
                 }
                 else
                 {
