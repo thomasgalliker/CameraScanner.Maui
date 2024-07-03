@@ -106,32 +106,6 @@ steps:
     command: restore
     projects: '$(solution)'
 
-- task: DownloadSecureFile@1
-  name: GoogleServiceFileAndroid
-  displayName: 'Download secure file google-services.json'
-  inputs:
-    secureFile: 'google-services.json'
-   
-- task: DownloadSecureFile@1
-  name: GoogleServiceFileiOS
-  displayName: 'Download secure file GoogleService-Info.plist'
-  inputs:
-    secureFile: 'GoogleService-Info.plist'
-
-- task: CopyFiles@2
-  displayName: 'Copy file google-services.json'
-  inputs:
-    SourceFolder: '$(Agent.TempDirectory)'
-    Contents: '$(GoogleServiceFileAndroid.secureFilePath)'
-    TargetFolder: '$(Build.SourcesDirectory)\Samples\MauiSampleApp\Platforms\Android\Resources'
-    
-- task: CopyFiles@2
-  displayName: 'Copy file GoogleService-Info.plist'
-  inputs:
-    SourceFolder: '$(Agent.TempDirectory)'
-    Contents: '$(GoogleServiceFileiOS.secureFilePath)'
-    TargetFolder: '$(Build.SourcesDirectory)\Samples\MauiSampleApp\Platforms\iOS'
-
 - task: DotNetCoreCLI@2
   displayName: 'Build solution'
   inputs:
