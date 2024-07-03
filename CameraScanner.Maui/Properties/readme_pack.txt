@@ -1,1 +1,1 @@
-﻿dotnet pack .\CameraScanner.Maui\CameraScanner.Maui.csproj /p:Version=2.0.0-pre
+﻿dotnet pack .\CameraScanner.Maui\CameraScanner.Maui.csproj /p:Version=1.0.0-pre
