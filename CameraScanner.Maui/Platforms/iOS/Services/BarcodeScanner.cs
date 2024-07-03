@@ -1,9 +1,9 @@
-﻿using AVFoundation;
+﻿using System.Text;
+using AVFoundation;
 using CoreGraphics;
 using CoreImage;
 using Foundation;
 using Microsoft.Maui.Graphics.Platform;
-using System.Text;
 using UIKit;
 using Vision;
 

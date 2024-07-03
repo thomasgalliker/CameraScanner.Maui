@@ -2,7 +2,6 @@
 using Android.Graphics;
 using Android.Runtime;
 using AndroidX.Camera.View.Transform;
-using CameraScanner.Maui;
 using Java.Net;
 using Java.Util;
 using Microsoft.Maui.Graphics.Platform;

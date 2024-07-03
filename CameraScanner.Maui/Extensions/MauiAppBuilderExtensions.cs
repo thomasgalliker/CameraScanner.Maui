@@ -10,7 +10,7 @@
                 handlers.AddHandler<CameraView, CameraViewHandler>();
             });
 
-            builder.Services.AddSingleton<IPermissionService>(_ => PermissionService.Current);
+            builder.Services.AddSingleton<ICameraPermissions>(_ => CameraPermissions.Current);
             builder.Services.AddSingleton<IBarcodeScanner>(_ => BarcodeScanner.Current);
 #endif
 

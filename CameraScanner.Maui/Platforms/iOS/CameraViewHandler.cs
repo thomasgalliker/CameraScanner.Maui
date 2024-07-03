@@ -10,7 +10,7 @@ namespace CameraScanner.Maui
                 this.loggerFactory.CreateLogger<CameraManager>(),
                 this.loggerFactory,
                 this.VirtualView);
-            
+
             return this.cameraManager.BarcodeView;
         }
     }

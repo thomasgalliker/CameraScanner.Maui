@@ -42,7 +42,6 @@ namespace CameraScanner.Maui
 
         private BarcodeAnalyzer barcodeAnalyzer;
         private IMLKitBarcodeScanner barcodeScanner;
-        private bool cameraRunning;
 
         internal CameraManager(
             ILogger<CameraManager> logger,
@@ -93,6 +92,8 @@ namespace CameraScanner.Maui
             DeviceDisplay.Current.MainDisplayInfoChanged += this.Current_MainDisplayInfoChanged;
         }
 
+        internal bool IsRunning { get; private set; }
+
         internal BarcodeView BarcodeView { get; }
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
@@ -101,10 +102,10 @@ namespace CameraScanner.Maui
         {
             if (this.cameraController is not null)
             {
-                if (this.cameraRunning)
+                if (this.IsRunning)
                 {
                     this.cameraController.Unbind();
-                    this.cameraRunning = false;
+                    this.IsRunning = false;
                 }
 
                 ILifecycleOwner lifecycleOwner = null;
@@ -141,7 +142,7 @@ namespace CameraScanner.Maui
                 this.UpdateTorch();
 
                 this.cameraController.BindToLifecycle(lifecycleOwner);
-                this.cameraRunning = true;
+                this.IsRunning = true;
             }
         }
 
@@ -159,12 +160,12 @@ namespace CameraScanner.Maui
                     }
                 }
 
-                if (this.cameraRunning)
+                if (this.IsRunning)
                 {
                     this.cameraController.Unbind();
                 }
 
-                this.cameraRunning = false;
+                this.IsRunning = false;
             }
         }
 
@@ -280,7 +281,7 @@ namespace CameraScanner.Maui
                 lifecycleCameraController.ImageAnalysisTargetSize = new CameraController.OutputSize(resolution);
             }
 
-            if (this.cameraRunning)
+            if (this.IsRunning)
             {
                 this.Start();
             }
@@ -433,7 +434,7 @@ namespace CameraScanner.Maui
                 {
                     try
                     {
-                        if (this.cameraRunning && this.cameraView.CameraEnabled)
+                        if (this.IsRunning && this.cameraView.CameraEnabled)
                         {
                             this.UpdateCaptureQuality();
                         }

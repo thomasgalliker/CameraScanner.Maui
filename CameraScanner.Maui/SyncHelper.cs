@@ -1,6 +1,4 @@
-﻿using System.Diagnostics;
-
-namespace CameraScanner.Maui
+﻿namespace CameraScanner.Maui
 {
     internal class SyncHelper
     {

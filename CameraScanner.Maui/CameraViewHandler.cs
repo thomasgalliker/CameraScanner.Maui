@@ -33,6 +33,17 @@ namespace CameraScanner.Maui
             this.loggerFactory = loggerFactory;
         }
 
+        // TODO: Make sure camera scanner is started by default (ScannerEnabled = true)
+        //protected override void ConnectHandler(BarcodeView platformView)
+        //{
+        //    base.ConnectHandler(platformView);
+
+        //    //if (!this.cameraManager.IsRunning && this.VirtualView.CameraEnabled)
+        //    //{
+        //    //    this.cameraManager.Start();
+        //    //}
+        //}
+
         protected override void DisconnectHandler(BarcodeView barcodeView)
         {
             this.cameraManager.Dispose();

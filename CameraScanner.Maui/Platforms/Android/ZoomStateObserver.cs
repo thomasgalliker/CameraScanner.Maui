@@ -1,6 +1,5 @@
 using AndroidX.Camera.Core;
 using AndroidX.Lifecycle;
-using CameraScanner.Maui;
 
 namespace CameraScanner.Maui.Platforms.Android
 {

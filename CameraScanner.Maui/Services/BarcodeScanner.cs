@@ -2,7 +2,7 @@
 {
     public static class BarcodeScanner
     {
-        private static Lazy<IBarcodeScanner> Implementation = new Lazy<IBarcodeScanner>(CreateBarcodeScanner, LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<IBarcodeScanner> Implementation = new Lazy<IBarcodeScanner>(CreateBarcodeScanner, LazyThreadSafetyMode.PublicationOnly);
 
         public static IBarcodeScanner Current
         {

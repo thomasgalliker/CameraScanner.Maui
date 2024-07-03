@@ -4,14 +4,12 @@ using CoreFoundation;
 using CoreGraphics;
 using CoreImage;
 using CoreMedia;
-using Foundation;
-using Microsoft.Maui.Graphics.Platform;
-using System.Diagnostics;
 using CoreVideo;
+using Foundation;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Graphics.Platform;
 using UIKit;
 using Vision;
-using CameraScanner.Maui;
 
 namespace CameraScanner.Maui
 {
@@ -91,6 +89,14 @@ namespace CameraScanner.Maui
             this.barcodeView = new BarcodeView(this.previewLayer, this.shapeLayer);
             this.barcodeView.Layer.AddSublayer(this.previewLayer);
             this.barcodeView.AddGestureRecognizer(this.tapGestureRecognizer);
+        }
+
+        internal bool IsRunning
+        {
+            get
+            {
+                return this.captureSession is AVCaptureSession s && s.Running;
+            }
         }
 
         internal void Start()
