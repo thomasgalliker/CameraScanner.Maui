@@ -50,9 +50,12 @@ Then, you can add `CameraView` to your xaml UI.
 ```
 There are several bindable properties in `CameraView` in order to configure and control the camera preview.
 
+#### Ask for camera permission
+Before your app is allowed to access the camera stream, the user has to give runtime permission to access the camera. This library provides the interface `ICameraPermissions` to check if the permission is already given and/or to ask for permission. 
 
-- `CameraView` tbd
-- `ICameraPermissions` tbd
+Access `ICameraPermissions` via static singleton instance `CameraPermissions.Current` or inject it using dependency injection.
+
+
 - `IBarcodeScanner` tbd
 
 
