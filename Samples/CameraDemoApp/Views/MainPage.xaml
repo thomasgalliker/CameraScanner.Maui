@@ -40,7 +40,7 @@
             <controls:DividerLine />
 
             <Label
-                Style="{StaticResource Heading1LabelStyle}"
+                Style="{StaticResource Heading2LabelStyle}"
                 Text="ICameraPermissions" />
 
             <Button
@@ -61,7 +61,7 @@
             <controls:DividerLine />
 
             <Label
-                Style="{StaticResource Heading1LabelStyle}"
+                Style="{StaticResource Heading2LabelStyle}"
                 Text="Pages" />
             <Button
                 Command="{Binding NavigateToPageCommand}"
