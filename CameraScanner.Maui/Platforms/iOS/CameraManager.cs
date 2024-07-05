@@ -63,7 +63,8 @@ namespace CameraScanner.Maui
                 }
                 else
                 {
-                    // TODO: Error handling
+                    var exception = new NSErrorException(error);
+                    logger.LogError(exception, "VNDetectBarcodesRequest failed with error");
                 }
             });
 
