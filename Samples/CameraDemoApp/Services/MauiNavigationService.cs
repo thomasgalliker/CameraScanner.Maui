@@ -56,13 +56,29 @@ namespace CameraDemoApp.Services
                         $"{string.Join($"> {Environment.NewLine}", viewModelTypes.Select(t => t.FullName))}");
                 }
 
-                await Application.Current.MainPage.Navigation.PushAsync(page);
+                var navigation = GetNavigation();
+                await navigation.PushAsync(page);
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "PushAsync failed with exception");
                 throw;
             }
+        }
+
+        private static INavigation GetNavigation()
+        {
+            if (Application.Current?.MainPage is not Page page)
+            {
+                throw new PageNavigationException("Application.Current.MainPage is not set");
+            }
+
+            if (page is NavigationPage navigationPage)
+            {
+                page = navigationPage.CurrentPage;
+            }
+
+            return page.Navigation;
         }
 
         private static Type[] FindTypesWithName(string typeName)
@@ -77,7 +93,8 @@ namespace CameraDemoApp.Services
         {
             try
             {
-                await Application.Current.MainPage.Navigation.PopAsync();
+                var navigation = GetNavigation();
+                await navigation.PopAsync();
             }
             catch (Exception ex)
             {
