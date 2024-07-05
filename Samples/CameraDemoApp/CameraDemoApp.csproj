@@ -60,6 +60,10 @@
 	  <Compile Update="Views\DefaultCameraViewPage.xaml.cs">
 	    <DependentUpon>DefaultCameraViewPage.xaml</DependentUpon>
 	  </Compile>
+	  <Compile Update="Views\CameraPreviewPage.xaml.cs">
+	    <DependentUpon>CameraPreviewPage.xaml</DependentUpon>
+	    <SubType>Code</SubType>
+	  </Compile>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -73,6 +77,10 @@
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	  <MauiXaml Update="Views\QRCodeScannerPage.xaml">
+	    <Generator>MSBuild:Compile</Generator>
+	  </MauiXaml>
+	  <MauiXaml Update="Views\CameraPreviewPage.xaml">
+	    <SubType>Designer</SubType>
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>

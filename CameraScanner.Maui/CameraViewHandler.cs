@@ -21,7 +21,7 @@ namespace CameraScanner.Maui
             [nameof(CameraView.CameraEnabled)] = (handler, _) => handler.cameraManager?.UpdateCameraEnabled(),
             [nameof(CameraView.AimMode)] = (handler, _) => handler.cameraManager?.UpdateAimMode(),
             [nameof(CameraView.TapToFocusEnabled)] = (handler, _) => handler.cameraManager?.UpdateTapToFocusEnabled(),
-            [nameof(CameraView.RequestZoomFactor)] = (handler, _) => handler.cameraManager?.UpdateZoomFactor(),
+            [nameof(CameraView.RequestZoomFactor)] = (handler, _) => handler.cameraManager?.UpdateRequestZoomFactor(),
             [nameof(CameraView.BarcodeDetectionFrameRate)] = (handler, _) => handler.cameraManager?.UpdateBarcodeDetectionFrameRate()
         };
 

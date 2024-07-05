@@ -1,5 +1,4 @@
-﻿using System.Windows.Input;
-using CameraDemoApp.Services;
+﻿using CameraDemoApp.Services;
 using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,7 +8,7 @@ namespace CameraDemoApp.ViewModels
 {
     public class QRCodeScannerViewModel : ObservableObject
     {
-        private readonly ILogger<QRCodeScannerViewModel> logger;
+        private readonly ILogger logger;
         private readonly IDialogService dialogService;
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private bool isScannerPause;
@@ -32,7 +31,7 @@ namespace CameraDemoApp.ViewModels
             get => this.isScannerEnabled;
             private set => this.SetProperty(ref this.isScannerEnabled, value);
         }
-        
+
         public bool IsScannerPause
         {
             get => this.isScannerPause;

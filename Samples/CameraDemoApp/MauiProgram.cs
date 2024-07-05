@@ -41,8 +41,12 @@ namespace CameraDemoApp
             builder.Services.AddTransient<MainViewModel>();
 
             builder.Services.AddTransient<DefaultCameraViewPage>();
+
             builder.Services.AddTransient<QRCodeScannerPage>();
             builder.Services.AddTransient<QRCodeScannerViewModel>();
+
+            builder.Services.AddTransient<CameraPreviewPage>();
+            builder.Services.AddTransient<CameraPreviewViewModel>();
 
             return builder.Build();
         }

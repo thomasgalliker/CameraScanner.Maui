@@ -73,6 +73,11 @@
                 CommandParameter="QRCodeScannerPage"
                 Text="QRCodeScannerPage"
                 HorizontalOptions="Fill" />
+            <Button
+                Command="{Binding NavigateToPageCommand}"
+                CommandParameter="CameraPreviewPage"
+                Text="CameraPreviewPage"
+                HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -270,9 +270,8 @@ namespace CameraScanner.Maui
 
         public static readonly BindableProperty RequestZoomFactorProperty = BindableProperty.Create(
             nameof(RequestZoomFactor),
-            typeof(float),
-            typeof(CameraView),
-            -1f);
+            typeof(float?),
+            typeof(CameraView));
 
         /// <summary>
         /// Setting this value changes the zoom factor of the camera. Value has to be between MinZoomFactor and MaxZoomFactor.
@@ -281,77 +280,81 @@ namespace CameraScanner.Maui
         /// Android - https://developer.android.com/reference/kotlin/androidx/camera/view/CameraController#setZoomRatio(float)
         /// Only logical multi-camera is supported - https://developer.android.com/media/camera/camera2/multi-camera
         /// </summary>
-        public float RequestZoomFactor
+        public float? RequestZoomFactor
         {
-            get => (float)this.GetValue(RequestZoomFactorProperty);
+            get => (float?)this.GetValue(RequestZoomFactorProperty);
             set => this.SetValue(RequestZoomFactorProperty, value);
         }
 
         public static readonly BindableProperty CurrentZoomFactorProperty = BindableProperty.Create(
             nameof(CurrentZoomFactor),
-            typeof(float),
+            typeof(float?),
             typeof(CameraView),
-            -1f,
+            null,
             BindingMode.OneWayToSource);
 
         /// <summary>
         /// Returns current zoom factor value.
         /// </summary>
-        public float CurrentZoomFactor
+        public float? CurrentZoomFactor
         {
-            get => (float)this.GetValue(CurrentZoomFactorProperty);
+            get => (float?)this.GetValue(CurrentZoomFactorProperty);
             set => this.SetValue(CurrentZoomFactorProperty, value);
         }
 
         public static readonly BindableProperty MinZoomFactorProperty = BindableProperty.Create(
             nameof(MinZoomFactor),
-            typeof(float),
+            typeof(float?),
             typeof(CameraView),
-            -1f,
+            null,
             BindingMode.OneWayToSource);
 
         /// <summary>
         /// Returns minimum zoom factor for current camera.
         /// </summary>
-        public float MinZoomFactor
+        public float? MinZoomFactor
         {
-            get => (float)this.GetValue(MinZoomFactorProperty);
+            get => (float?)this.GetValue(MinZoomFactorProperty);
             set => this.SetValue(MinZoomFactorProperty, value);
         }
 
         public static readonly BindableProperty MaxZoomFactorProperty = BindableProperty.Create(
             nameof(MaxZoomFactor),
-            typeof(float),
+            typeof(float?),
             typeof(CameraView),
-            -1f,
+            null,
             BindingMode.OneWayToSource);
 
         /// <summary>
         /// Returns maximum zoom factor for current camera.
         /// </summary>
-        public float MaxZoomFactor
+        public float? MaxZoomFactor
         {
-            get => (float)this.GetValue(MaxZoomFactorProperty);
+            get => (float?)this.GetValue(MaxZoomFactorProperty);
             set => this.SetValue(MaxZoomFactorProperty, value);
         }
 
-        public static readonly BindableProperty DeviceSwitchZoomFactorProperty = BindableProperty.Create(
-            nameof(DeviceSwitchZoomFactor),
+        public static readonly BindableProperty DeviceSwitchZoomFactorsProperty = BindableProperty.Create(
+            nameof(DeviceSwitchZoomFactors),
             typeof(float[]),
             typeof(CameraView),
             Array.Empty<float>(),
             BindingMode.OneWayToSource);
 
         /// <summary>
-        /// Returns zoom factors that switch between camera lenses (iOS only).
+        /// Returns zoom factors that switch between camera lenses.
         /// </summary>
-        public float[] DeviceSwitchZoomFactor
+        /// <remarks>
+        /// Supported on iOS only.
+        /// </remarks>
+        public float[] DeviceSwitchZoomFactors
         {
-            get => (float[])this.GetValue(DeviceSwitchZoomFactorProperty);
-            set => this.SetValue(DeviceSwitchZoomFactorProperty, value);
+            get => (float[])this.GetValue(DeviceSwitchZoomFactorsProperty);
+            set => this.SetValue(DeviceSwitchZoomFactorsProperty, value);
         }
 
         public event EventHandler<OnDetectionFinishedEventArg> OnDetectionFinished;
+
         public event EventHandler<OnImageCapturedEventArg> OnImageCaptured;
 
         internal void DetectionFinished(HashSet<BarcodeResult> barCodeResults)
