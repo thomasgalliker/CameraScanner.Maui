@@ -7,18 +7,18 @@ assignees: ''
 
 ---
 
-### Description
+#### Description
 <!---
 A short description of the planned refactoring.
 --->
 
-### Background & Context
+#### Background & Context
 <!---
 What is the motivation for the refactoring?
 Pros & cons, solutions and decisions concerning (reasoning) the refactoring.
 --->
 
-### References
+#### References
 <!---
 Further references to e.g. other information resources like links to specification(s) etc.
 --->

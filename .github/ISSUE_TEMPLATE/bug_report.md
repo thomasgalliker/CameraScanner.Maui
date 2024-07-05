@@ -7,29 +7,29 @@ assignees: ''
 
 ---
 
-### Description
+#### Description
 
-### Steps to Reproduce
+#### Steps to Reproduce
 
 1. 
 2. 
 3. 
 
-### Expected Behavior
+#### Expected Behavior
 - 
 
-### Actual Behavior
+#### Actual Behavior
 - 
 
-### Basic Information
+#### Basic Information
 
 - Version with issue:
 - Last known good version:
 
-### Screenshots
+#### Screenshots
 
 <!-- If the issue is a visual issue, please include screenshots showing the problem if possible -->
 
-### Reproduction Link
+#### Reproduction Link
 
 <!-- If possible, please upload or provide a link to a reproduction case -->
