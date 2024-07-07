@@ -65,3 +65,5 @@ Contributors welcome! If you find a bug or you want to propose a new feature, fe
 ### Links
 - https://developers.google.com/ml-kit/vision/barcode-scanning
 - https://developer.apple.com/documentation/visionkit
+- https://orcascan.com/tools/free-barcode-generator
+- https://barcode.tec-it.com/
