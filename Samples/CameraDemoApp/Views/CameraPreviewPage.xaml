@@ -8,17 +8,6 @@
     x:Class="CameraDemoApp.Views.CameraPreviewPage"
     Title="Camera Preview"
     x:DataType="vm:CameraPreviewViewModel">
-    
-    <Page.Resources>
-        <ResourceDictionary>
-            <Style TargetType="Label" x:Key="DebugLabelStyle">
-                <Setter Property="BackgroundColor" Value="#5cffec00" />
-                <Setter Property="FontSize" Value="Micro" />
-                <Setter Property="VerticalOptions" Value="Start" />
-                <Setter Property="HorizontalOptions" Value="Start" />
-            </Style>
-        </ResourceDictionary>
-    </Page.Resources>
 
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
@@ -33,21 +22,19 @@
         <!-- Debug infos -->
         <VerticalStackLayout
             Grid.Row="0" 
-            Spacing="2" 
+            Spacing="4"
+            Margin="0,4,0,0"
             HorizontalOptions="Start" 
             VerticalOptions="Start">
             <Label
                 Style="{StaticResource DebugLabelStyle}"
                 Text="{Binding Source={x:Reference CameraView}, Path=MinZoomFactor, StringFormat='{}MinZoomFactor: {0}'}" />
-
             <Label
                 Style="{StaticResource DebugLabelStyle}"
                 Text="{Binding Source={x:Reference CameraView}, Path=MaxZoomFactor, StringFormat='{}MaxZoomFactor: {0}'}" />
-
             <Label
                 Style="{StaticResource DebugLabelStyle}"
                 Text="{Binding Source={x:Reference CameraView}, Path=CurrentZoomFactor, StringFormat='{}CurrentZoomFactor: {0}'}" />
-
             <Label
                 Style="{StaticResource DebugLabelStyle}"
                 Text="{Binding Source={x:Reference CameraView}, Path=RequestZoomFactor, StringFormat='{}RequestZoomFactor: {0}'}" />
@@ -56,8 +43,8 @@
         <!-- Zoom controls -->
         <VerticalStackLayout
             Grid.Row="0" 
-            Spacing="4"
-            Padding="4"
+            Spacing="8"
+            Padding="20"
             HorizontalOptions="End" 
             VerticalOptions="End">
             <Button
