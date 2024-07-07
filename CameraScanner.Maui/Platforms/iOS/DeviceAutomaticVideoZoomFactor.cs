@@ -6,6 +6,11 @@ internal static class DeviceAutomaticVideoZoomFactor
 {
     public static float? GetDefaultCameraZoom2(AVCaptureDevice captureDevice, float minimumCodeSize)
     {
+        if (!UIDevice.CurrentDevice.CheckSystemVersion(15, 0))
+        {
+            return (float)captureDevice.VideoZoomFactor;
+        }
+
         var deviceMinimumFocusDistance = (float)captureDevice.MinimumFocusDistance;
         if (deviceMinimumFocusDistance == -1)
         {
