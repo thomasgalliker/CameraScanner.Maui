@@ -55,7 +55,9 @@ namespace CameraScanner.Maui
             this.cameraView = cameraView;
 
             this.cameraExecutor = Executors.NewSingleThreadExecutor();
-            this.zoomStateObserver = new ZoomStateObserver(this, this.cameraView);
+            this.zoomStateObserver = new ZoomStateObserver();
+            this.zoomStateObserver.ZoomStateChanged += this.OnZoomStateChanged;
+
             this.cameraController = new LifecycleCameraController(this.context)
             {
                 TapToFocusEnabled = this.cameraView.TapToFocusEnabled,
@@ -90,6 +92,45 @@ namespace CameraScanner.Maui
             this.BarcodeView.AddView(this.relativeLayout);
 
             DeviceDisplay.Current.MainDisplayInfoChanged += this.Current_MainDisplayInfoChanged;
+        }
+
+        private void OnZoomStateChanged(object sender, ZoomStateChangedEventArgs e)
+        {
+            if (this.cameraView is not null)
+            {
+                this.UpdateCurrentZoomFactor(e.ZoomRatio);
+                this.UpdateMinMaxZoomFactor(e.MinZoomRatio, e.MaxZoomRatio);
+
+                this.UpdateRequestZoomFactor();
+            }
+        }
+
+        private void UpdateCurrentZoomFactor(float zoomRatio)
+        {
+            this.cameraView.CurrentZoomFactor = zoomRatio;
+        }
+
+        private void UpdateMinMaxZoomFactor(float minZoomRatio, float maxZoomRatio)
+        {
+            this.cameraView.MinZoomFactor = minZoomRatio;
+            this.cameraView.MaxZoomFactor = maxZoomRatio;
+        }
+
+        internal void UpdateRequestZoomFactor()
+        {
+            if (this.cameraView is not null && this.cameraController is { ZoomState.IsInitialized: true })
+            {
+                if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
+                {
+                    var zoomRatio = Math.Max(requestZoomFactor, this.zoomStateObserver.MinZoomRatio);
+                    zoomRatio = Math.Min(zoomRatio, this.zoomStateObserver.MaxZoomRatio);
+
+                    if (Math.Abs(zoomRatio - this.zoomStateObserver.ZoomRatio) > 0.001F)
+                    {
+                        this.cameraController.SetZoomRatio(zoomRatio);
+                    }
+                }
+            }
         }
 
         internal bool IsRunning { get; private set; }
@@ -292,24 +333,6 @@ namespace CameraScanner.Maui
             this.cameraController?.EnableTorch(this.cameraView.TorchOn);
         }
 
-        internal void UpdateZoomFactor()
-        {
-            if (this.cameraView is not null && (this.cameraController?.ZoomState.IsInitialized ?? false))
-            {
-                var zoomFactor = this.cameraView.RequestZoomFactor;
-                if (zoomFactor > 0)
-                {
-                    zoomFactor = Math.Max(zoomFactor, this.cameraView.MinZoomFactor);
-                    zoomFactor = Math.Min(zoomFactor, this.cameraView.MaxZoomFactor);
-
-                    if (zoomFactor != this.cameraView.CurrentZoomFactor)
-                    {
-                        this.cameraController.SetZoomRatio(zoomFactor);
-                    }
-                }
-            }
-        }
-
         internal void UpdateBarcodeDetectionFrameRate()
         {
             if (this.barcodeAnalyzer is BarcodeAnalyzer analyzer)
@@ -467,6 +490,7 @@ namespace CameraScanner.Maui
 
                 this.Stop();
 
+                this.zoomStateObserver.ZoomStateChanged -= this.OnZoomStateChanged;
                 this.cameraController?.ZoomState.RemoveObserver(this.zoomStateObserver);
                 this.BarcodeView?.RemoveAllViews();
                 this.relativeLayout?.RemoveAllViews();
