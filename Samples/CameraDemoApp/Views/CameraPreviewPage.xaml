@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -6,7 +6,7 @@
     xmlns:c="http://camerascanner.maui"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.CameraPreviewPage"
-    Title="Camera Preview"
+    Title="Camera Preview Demo"
     x:DataType="vm:CameraPreviewViewModel">
 
     <Grid RowDefinitions="*, Auto">
@@ -14,17 +14,17 @@
             x:Name="CameraView"
             Grid.Row="0"
             CameraFacing="{Binding CameraFacing}"
-            RequestZoomFactor="{Binding RequestZoomFactor}"
-            CurrentZoomFactor="{Binding CurrentZoomFactor}"
             CaptureNextFrame="False"
-            OnImageCapturedCommand="{x:Null}" />
+            CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            OnImageCapturedCommand="{x:Null}"
+            RequestZoomFactor="{Binding RequestZoomFactor}" />
 
-        <!-- Debug infos -->
+        <!--  Debug infos  -->
         <VerticalStackLayout
-            Grid.Row="0" 
-            Spacing="4"
+            Grid.Row="0"
             Margin="0,4,0,0"
-            HorizontalOptions="Start" 
+            Spacing="4"
+            HorizontalOptions="Start"
             VerticalOptions="Start">
             <Label
                 Style="{StaticResource DebugLabelStyle}"
@@ -39,30 +39,30 @@
                 Style="{StaticResource DebugLabelStyle}"
                 Text="{Binding Source={x:Reference CameraView}, Path=RequestZoomFactor, StringFormat='{}RequestZoomFactor: {0}'}" />
         </VerticalStackLayout>
-        
-        <!-- Zoom controls -->
+
+        <!--  Zoom controls  -->
         <VerticalStackLayout
-            Grid.Row="0" 
+            Grid.Row="0"
+            Padding="16"
             Spacing="8"
-            Padding="20"
-            HorizontalOptions="End" 
+            HorizontalOptions="End"
             VerticalOptions="End">
             <Button
-                Text="+"
-                FontSize="22"
+                Command="{Binding ZoomInCommand}"
                 CornerRadius="8"
-                Command="{Binding ZoomInCommand}" />
+                FontSize="22"
+                Text="+" />
             <Button
-                Text="-"
-                FontSize="22"
+                Command="{Binding ZoomOutCommand}"
                 CornerRadius="8"
-                Command="{Binding ZoomOutCommand}" />
+                FontSize="22"
+                Text="-" />
         </VerticalStackLayout>
 
         <VerticalStackLayout
             Grid.Row="1"
-            Padding="20"
-            Spacing="20"
+            Padding="16"
+            Spacing="16"
             VerticalOptions="Start">
 
             <Grid

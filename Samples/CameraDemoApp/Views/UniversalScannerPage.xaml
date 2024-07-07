@@ -4,17 +4,29 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:c="http://camerascanner.maui"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
-    x:DataType="vm:QRCodeScannerViewModel"
-    x:Class="CameraDemoApp.Views.QRCodeScannerPage"
-    Title="QR Code Scanner">
+    x:Class="CameraDemoApp.Views.UniversalScannerPage"
+    Title="Universal Barcode Scanner"
+    x:DataType="vm:UniversalScannerViewModel">
 
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
             Grid.Row="0"
-            BarcodeFormats="QRCode"
+            BarcodeFormats="{Binding BarcodeFormats}"
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}" />
+
+        <!--  Debug infos  -->
+        <VerticalStackLayout
+            Grid.Row="0"
+            Margin="0,4,0,0"
+            Spacing="4"
+            HorizontalOptions="Start"
+            VerticalOptions="Start">
+            <Label
+                Style="{StaticResource DebugLabelStyle}"
+                Text="{Binding DebugInfo}" />
+        </VerticalStackLayout>
 
         <VerticalStackLayout
             Grid.Row="1"
@@ -23,7 +35,7 @@
             VerticalOptions="Start">
 
             <Grid
-                RowDefinitions="Auto, Auto"
+                RowDefinitions="Auto, Auto, Auto"
                 RowSpacing="8"
                 VerticalOptions="Fill">
 
@@ -38,6 +50,11 @@
                     Command="{Binding StopCameraCommand}"
                     IsEnabled="{Binding IsScannerEnabled}"
                     Text="Stop Camera"
+                    HorizontalOptions="Fill" />
+                <Button
+                    Grid.Row="2"
+                    Command="{Binding ConfigureCommand}"
+                    Text="Configure"
                     HorizontalOptions="Fill" />
             </Grid>
         </VerticalStackLayout>

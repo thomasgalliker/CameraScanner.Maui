@@ -66,17 +66,22 @@
             <Button
                 Command="{Binding NavigateToPageCommand}"
                 CommandParameter="DefaultCameraViewPage"
-                Text="DefaultCameraViewPage"
+                Text="Default CameraView"
                 HorizontalOptions="Fill" />
             <Button
                 Command="{Binding NavigateToPageCommand}"
                 CommandParameter="QRCodeScannerPage"
-                Text="QRCodeScannerPage"
+                Text="QR Code Scanner"
+                HorizontalOptions="Fill" />
+            <Button
+                Command="{Binding NavigateToPageCommand}"
+                CommandParameter="UniversalScannerPage"
+                Text="Universal Barcode Scanner"
                 HorizontalOptions="Fill" />
             <Button
                 Command="{Binding NavigateToPageCommand}"
                 CommandParameter="CameraPreviewPage"
-                Text="CameraPreviewPage"
+                Text="CameraPreview Demo"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
