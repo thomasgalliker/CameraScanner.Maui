@@ -44,8 +44,21 @@ namespace CameraScanner.Maui
         //    //}
         //}
 
+        protected override void ConnectHandler(BarcodeView platformView)
+        {
+            base.ConnectHandler(platformView);
+            this.VirtualView.Unloaded += this.OnVirtualViewUnloaded;
+        }
+
+        private void OnVirtualViewUnloaded(object sender, EventArgs e)
+        {
+            this.DisconnectHandler(this.PlatformView);
+        }
+
         protected override void DisconnectHandler(BarcodeView barcodeView)
         {
+            this.VirtualView.Unloaded -= this.OnVirtualViewUnloaded;
+
             this.cameraManager.Dispose();
             base.DisconnectHandler(barcodeView);
         }
