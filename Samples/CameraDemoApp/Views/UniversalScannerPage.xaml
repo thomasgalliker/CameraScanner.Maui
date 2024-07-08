@@ -27,7 +27,8 @@
             Grid.Row="0"
             StrokeColor="Red"
             StrokeSize="4"
-            BarcodeResults="{Binding Source={x:Reference CameraView}, Path=BarcodeResults}"/>
+            BarcodeResults="{Binding Source={x:Reference CameraView}, Path=BarcodeResults}"
+            BarcodeResultTappedCommand="{Binding BarcodeResultTappedCommand}"/>
 
         <!--  Debug infos  -->
         <VerticalStackLayout

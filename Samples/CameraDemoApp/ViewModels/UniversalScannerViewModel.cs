@@ -19,6 +19,7 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand startCameraCommand;
         private IRelayCommand stopCameraCommand;
         private IAsyncRelayCommand configureCommand;
+        private IRelayCommand<BarcodeResult> barcodeResultTappedCommand;
 
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
@@ -125,6 +126,21 @@ namespace CameraDemoApp.ViewModels
         private async void StopCamera()
         {
             this.IsScannerEnabled = false;
+        }
+
+        public IRelayCommand<BarcodeResult> BarcodeResultTappedCommand
+        {
+            get => this.barcodeResultTappedCommand ??= new RelayCommand<BarcodeResult>(this.OnBarcodeResultTapped);
+        }
+
+        private async void OnBarcodeResultTapped(BarcodeResult barcodeResult)
+        {
+            await this.dialogService.DisplayAlertAsync(
+                "OnBarcodeResultTapped",
+                $"BarcodeType=\"{barcodeResult.BarcodeType}\"{Environment.NewLine}" +
+                $"BarcodeFormat=\"{barcodeResult.BarcodeFormat}\"{Environment.NewLine}" +
+                $"DisplayValue=\"{barcodeResult.DisplayValue}\"",
+                "OK");
         }
 
         public string DebugInfo

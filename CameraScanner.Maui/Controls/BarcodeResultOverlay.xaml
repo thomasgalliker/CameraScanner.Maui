@@ -9,4 +9,8 @@
     <GraphicsView.Drawable>
         <c:BarcodeDrawable x:Name="BarcodeDrawable"/>
     </GraphicsView.Drawable>
+    
+    <GraphicsView.GestureRecognizers>
+        <TapGestureRecognizer Tapped="TapGestureRecognizer_OnTapped" />
+    </GraphicsView.GestureRecognizers>
 </GraphicsView>

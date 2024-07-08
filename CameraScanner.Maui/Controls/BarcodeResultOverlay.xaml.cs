@@ -1,3 +1,4 @@
+using System.Windows.Input;
 using CameraScanner.Maui.Utils;
 
 namespace CameraScanner.Maui.Controls
@@ -89,8 +90,34 @@ namespace CameraScanner.Maui.Controls
             barcodeResultOverlay.taskDelayer.RunWithDelay(TimeSpan.FromSeconds(1), () =>
             {
                 barcodeResultOverlay.BarcodeDrawable.Reset();
-                MainThread.BeginInvokeOnMainThread(() => barcodeResultOverlay.Invalidate());
+                MainThread.BeginInvokeOnMainThread(barcodeResultOverlay.Invalidate);
             });
+        }
+
+        private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
+        {
+            var tabPosition = e.GetPosition(this);
+            if (tabPosition is Point point)
+            {
+                var barcodeResult = this.BarcodeResults?.FirstOrDefault(r => r.PreviewBoundingBox.Contains(point));
+                if (barcodeResult != null &&
+                    this.BarcodeResultTappedCommand is ICommand barcodeResultTappedCommand &&
+                    barcodeResultTappedCommand.CanExecute(barcodeResult))
+                {
+                    barcodeResultTappedCommand.Execute(barcodeResult);
+                }
+            }
+        }
+
+        public static readonly BindableProperty BarcodeResultTappedCommandProperty = BindableProperty.Create(
+            nameof(BarcodeResultTappedCommand),
+            typeof(ICommand),
+            typeof(BarcodeResultOverlay));
+
+        public ICommand BarcodeResultTappedCommand
+        {
+            get => (ICommand)this.GetValue(BarcodeResultTappedCommandProperty);
+            set => this.SetValue(BarcodeResultTappedCommandProperty, value);
         }
     }
 }
