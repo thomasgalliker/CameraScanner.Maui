@@ -30,7 +30,7 @@
                 ColumnSpacing="10">
                 <Image
                     Grid.Column="0"
-                    Source="dotnet_bot.png"
+                    Source="logo.png"
                     HeightRequest="100" />
                 <Label
                     Grid.Column="1"

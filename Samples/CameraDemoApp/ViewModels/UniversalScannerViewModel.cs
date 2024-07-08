@@ -80,23 +80,23 @@ namespace CameraDemoApp.ViewModels
             {
                 if (barcodeResults.FirstOrDefault() is BarcodeResult barcodeResult)
                 {
-                    this.IsScannerPause = true;
-
-                    var stop = await this.dialogService.DisplayAlertAsync(
-                        "Barcode found",
-                        $"BarcodeType=\"{barcodeResult.BarcodeType}\"{Environment.NewLine}" +
-                        $"BarcodeFormat=\"{barcodeResult.BarcodeFormat}\"{Environment.NewLine}" +
-                        $"DisplayValue=\"{barcodeResult.DisplayValue}\"",
-                        "Stop", "Continue");
-
-                    if (stop)
-                    {
-                        this.StopCamera();
-                    }
-                    else
-                    {
-                        this.IsScannerPause = false;
-                    }
+                    // this.IsScannerPause = true;
+                    //
+                    // var stop = await this.dialogService.DisplayAlertAsync(
+                    //     "Barcode found",
+                    //     $"BarcodeType=\"{barcodeResult.BarcodeType}\"{Environment.NewLine}" +
+                    //     $"BarcodeFormat=\"{barcodeResult.BarcodeFormat}\"{Environment.NewLine}" +
+                    //     $"DisplayValue=\"{barcodeResult.DisplayValue}\"",
+                    //     "Stop", "Continue");
+                    //
+                    // if (stop)
+                    // {
+                    //     this.StopCamera();
+                    // }
+                    // else
+                    // {
+                    //     this.IsScannerPause = false;
+                    // }
                 }
             }
             catch (Exception ex)

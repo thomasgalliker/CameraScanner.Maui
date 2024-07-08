@@ -33,6 +33,17 @@ namespace CameraScanner.Maui
             set => this.SetValue(OnDetectionFinishedCommandProperty, value);
         }
 
+        public static readonly BindableProperty BarcodeResultsProperty = BindableProperty.Create(
+            nameof(BarcodeResults),
+            typeof(BarcodeResult[]),
+            typeof(CameraView));
+
+        public BarcodeResult[] BarcodeResults
+        {
+            get => (BarcodeResult[])this.GetValue(BarcodeResultsProperty);
+            set => this.SetValue(BarcodeResultsProperty, value);
+        }
+
         public static readonly BindableProperty OnImageCapturedCommandProperty = BindableProperty.Create(
             nameof(OnImageCapturedCommand),
             typeof(ICommand),
@@ -357,9 +368,9 @@ namespace CameraScanner.Maui
 
         public event EventHandler<OnImageCapturedEventArg> OnImageCaptured;
 
-        internal void DetectionFinished(HashSet<BarcodeResult> barCodeResults)
+        internal void DetectionFinished(HashSet<BarcodeResult> barcodeResults)
         {
-            if (barCodeResults is null)
+            if (barcodeResults is null)
             {
                 return;
             }
@@ -372,7 +383,7 @@ namespace CameraScanner.Maui
                     this.poolingTimer.Start();
                 }
 
-                foreach (var result in barCodeResults)
+                foreach (var result in barcodeResults)
                 {
                     if (!this.pooledResults.Add(result))
                     {
@@ -386,7 +397,7 @@ namespace CameraScanner.Maui
             }
             else
             {
-                this.TriggerOnDetectionFinished(barCodeResults.ToArray());
+                this.TriggerOnDetectionFinished(barcodeResults.ToArray());
             }
         }
 
@@ -422,6 +433,8 @@ namespace CameraScanner.Maui
 
             MainThread.BeginInvokeOnMainThread(() =>
             {
+                this.BarcodeResults = barcodeResults;
+
                 this.OnDetectionFinished?.Invoke(this, new OnDetectionFinishedEventArg { BarcodeResults = barcodeResults });
 
                 if (this.OnDetectionFinishedCommand is ICommand c && c.CanExecute(barcodeResults))
