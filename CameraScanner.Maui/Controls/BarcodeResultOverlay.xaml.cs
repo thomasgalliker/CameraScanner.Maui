@@ -16,7 +16,6 @@ namespace CameraScanner.Maui.Controls
             nameof(BarcodeResults),
             typeof(BarcodeResult[]),
             typeof(CameraView),
-            null,
             propertyChanged: OnBarcodeResultsPropertyChanged);
 
         private static void OnBarcodeResultsPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -25,14 +24,7 @@ namespace CameraScanner.Maui.Controls
 
             if (newValue is BarcodeResult[] barcodeResults)
             {
-                barcodeResultOverlay.BarcodeDrawable.BarcodeResults = barcodeResults;
-                barcodeResultOverlay.Invalidate();
-
-                barcodeResultOverlay.taskDelayer.RunWithDelay(TimeSpan.FromSeconds(1), () =>
-                {
-                    barcodeResultOverlay.BarcodeDrawable.BarcodeResults = null;
-                    MainThread.BeginInvokeOnMainThread(() => barcodeResultOverlay.Invalidate());
-                });
+                UpdateDrawable(barcodeResultOverlay, barcodeResults, barcodeResultOverlay.StrokeSize, barcodeResultOverlay.StrokeColor);
             }
         }
 
@@ -40,6 +32,65 @@ namespace CameraScanner.Maui.Controls
         {
             get => (BarcodeResult[])this.GetValue(BarcodeResultsProperty);
             set => this.SetValue(BarcodeResultsProperty, value);
+        }
+
+        public static readonly BindableProperty StrokeSizeProperty = BindableProperty.Create(
+            nameof(StrokeSize),
+            typeof(float),
+            typeof(CameraView),
+            8f,
+            propertyChanged: OnStrokeSizePropertyChanged);
+
+        private static void OnStrokeSizePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var barcodeResultOverlay = (BarcodeResultOverlay)bindable;
+
+            if (newValue is float strokeSize)
+            {
+                UpdateDrawable(barcodeResultOverlay, barcodeResultOverlay.BarcodeResults, strokeSize, barcodeResultOverlay.StrokeColor);
+            }
+        }
+
+        public float StrokeSize
+        {
+            get => (float)this.GetValue(StrokeSizeProperty);
+            set => this.SetValue(StrokeSizeProperty, value);
+        }
+
+        public static readonly BindableProperty StrokeColorProperty = BindableProperty.Create(
+            nameof(StrokeColor),
+            typeof(Color),
+            typeof(CameraView),
+            Colors.Red,
+            propertyChanged: OnStrokeColorPropertyChanged);
+
+        private static void OnStrokeColorPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var barcodeResultOverlay = (BarcodeResultOverlay)bindable;
+
+            if (newValue is Color strokeColor)
+            {
+                UpdateDrawable(barcodeResultOverlay, barcodeResultOverlay.BarcodeResults, barcodeResultOverlay.StrokeSize, strokeColor);
+            }
+        }
+
+        public Color StrokeColor
+        {
+            get => (Color)this.GetValue(StrokeColorProperty);
+            set => this.SetValue(StrokeColorProperty, value);
+        }
+
+        private static void UpdateDrawable(BarcodeResultOverlay barcodeResultOverlay,
+            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor)
+        {
+            barcodeResultOverlay.BarcodeDrawable.Update(barcodeResults, strokeSize, strokeColor);
+            barcodeResultOverlay.Invalidate();
+
+            barcodeResultOverlay.taskDelayer.RunWithDelay(TimeSpan.FromSeconds(1), () =>
+            {
+                barcodeResultOverlay.BarcodeDrawable.Reset();
+                MainThread.BeginInvokeOnMainThread(() => barcodeResultOverlay.Invalidate());
+            });
         }
     }
 }

@@ -3,23 +3,31 @@ namespace CameraScanner.Maui.Controls
     public class BarcodeDrawable : IDrawable
     {
         private BarcodeResult[] barcodeResults;
+        private float strokeSize;
+        private Color strokeColor;
 
-        public BarcodeResult[] BarcodeResults
+        public void Update(BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor)
         {
-            private get;
-            set;
+            this.barcodeResults = barcodeResults;
+            this.strokeSize = strokeSize;
+            this.strokeColor = strokeColor;
+        }
+
+        public void Reset()
+        {
+            this.barcodeResults = null;
         }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
         {
-            if (this.BarcodeResults is { Length: > 0 } barcodeResults)
+            if (this.barcodeResults is { Length: > 0 } results)
             {
-                canvas.StrokeSize = 8;
-                canvas.StrokeColor = Colors.Red;
+                canvas.StrokeSize = this.strokeSize;
+                canvas.StrokeColor = this.strokeColor;
                 var scale = 1 / canvas.DisplayScale;
                 canvas.Scale(scale, scale);
 
-                foreach (var barcodeResult in barcodeResults)
+                foreach (var barcodeResult in results)
                 {
                     canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
                 }
