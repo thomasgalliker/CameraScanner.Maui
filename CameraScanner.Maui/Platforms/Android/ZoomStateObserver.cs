@@ -15,12 +15,12 @@ namespace CameraScanner.Maui.Platforms.Android
                 this.MinZoomRatio = zoomState.MinZoomRatio;
                 this.MaxZoomRatio = zoomState.MaxZoomRatio;
 
-                this.ZoomStateChanged?.Invoke(this, new ZoomStateChangedEventArgs(zoomState.ZoomRatio,  zoomState.MinZoomRatio,  zoomState.MaxZoomRatio));
+                this.ZoomStateChanged?.Invoke(this, new ZoomStateChangedEventArgs(zoomState.ZoomRatio, zoomState.MinZoomRatio, zoomState.MaxZoomRatio));
             }
         }
 
         public float ZoomRatio { get; private set; }
-        
+
         public float MinZoomRatio { get; private set; }
 
         public float MaxZoomRatio { get; private set; }

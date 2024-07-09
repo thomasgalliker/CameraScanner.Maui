@@ -61,7 +61,7 @@ namespace CameraDemoApp.ViewModels
 
             await popup.CloseAsync(popupResult);
         }
-        
+
 
         public class PopupResult
         {

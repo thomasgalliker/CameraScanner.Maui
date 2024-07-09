@@ -1,5 +1,4 @@
-﻿using CameraDemoApp.Services;
-using CameraDemoApp.Services.Navigation;
+﻿using CameraDemoApp.Services.Navigation;
 using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,6 +10,7 @@ namespace CameraDemoApp.ViewModels
     {
         private readonly ILogger logger;
         private readonly IDialogService dialogService;
+
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private bool isScannerPause;
         private bool isScannerEnabled;

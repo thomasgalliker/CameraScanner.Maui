@@ -1,5 +1,4 @@
 ﻿using CameraDemoApp.Extensions;
-using CameraDemoApp.Services;
 using CameraDemoApp.Services.Navigation;
 using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;

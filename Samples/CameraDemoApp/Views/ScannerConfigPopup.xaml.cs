@@ -1,6 +1,5 @@
 using CameraDemoApp.ViewModels;
 using CommunityToolkit.Maui.Views;
-using CommunityToolkit.Mvvm.Input;
 
 namespace CameraDemoApp.Views
 {

@@ -1,5 +1,4 @@
-﻿using CameraDemoApp.Services;
-using CameraDemoApp.Services.Navigation;
+﻿using CameraDemoApp.Services.Navigation;
 using CameraScanner.Maui;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;

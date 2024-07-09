@@ -378,7 +378,7 @@ namespace CameraScanner.Maui
                             // Set requested zoom
                             this.SetVideoZoomFactor(requestZoomFactor);
                         }
-                        else if(DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom and > 1F)
+                        else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom and > 1F)
                         {
                             // Set default zoom
                             this.SetVideoZoomFactor(defaultCameraZoom);
