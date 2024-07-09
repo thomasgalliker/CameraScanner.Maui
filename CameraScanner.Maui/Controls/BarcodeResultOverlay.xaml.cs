@@ -18,7 +18,7 @@ namespace CameraScanner.Maui.Controls
         public static readonly BindableProperty BarcodeResultsProperty = BindableProperty.Create(
             nameof(BarcodeResults),
             typeof(BarcodeResult[]),
-            typeof(CameraView),
+            typeof(BarcodeResultOverlay),
             propertyChanged: OnBarcodeResultsPropertyChanged);
 
         private static void OnBarcodeResultsPropertyChanged(BindableObject bindable, object oldValue, object newValue)
@@ -45,7 +45,7 @@ namespace CameraScanner.Maui.Controls
         public static readonly BindableProperty StrokeSizeProperty = BindableProperty.Create(
             nameof(StrokeSize),
             typeof(float),
-            typeof(CameraView),
+            typeof(BarcodeResultOverlay),
             8f,
             propertyChanged: OnStrokeSizePropertyChanged);
 
@@ -73,7 +73,7 @@ namespace CameraScanner.Maui.Controls
         public static readonly BindableProperty StrokeColorProperty = BindableProperty.Create(
             nameof(StrokeColor),
             typeof(Color),
-            typeof(CameraView),
+            typeof(BarcodeResultOverlay),
             Colors.Red,
             propertyChanged: OnStrokeColorPropertyChanged);
 
@@ -101,7 +101,7 @@ namespace CameraScanner.Maui.Controls
         public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
             nameof(TextColor),
             typeof(Color),
-            typeof(CameraView),
+            typeof(BarcodeResultOverlay),
             Colors.White,
             propertyChanged: OnTextColorPropertyChanged);
 
