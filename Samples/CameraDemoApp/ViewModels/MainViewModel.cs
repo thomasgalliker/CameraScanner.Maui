@@ -1,5 +1,6 @@
 ﻿using System.Windows.Input;
 using CameraDemoApp.Services;
+using CameraDemoApp.Services.Navigation;
 using CameraDemoApp.Views;
 using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;

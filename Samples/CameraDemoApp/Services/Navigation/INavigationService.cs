@@ -1,4 +1,4 @@
-﻿namespace CameraDemoApp.Services
+﻿namespace CameraDemoApp.Services.Navigation
 {
     public interface INavigationService
     {

@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.Extensions.Logging;
 
-namespace CameraDemoApp.Services
+namespace CameraDemoApp.Services.Navigation
 {
     public class MauiNavigationService : INavigationService
     {

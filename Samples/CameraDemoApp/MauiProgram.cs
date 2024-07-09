@@ -1,10 +1,10 @@
-﻿using CameraDemoApp.Services;
+﻿using CameraDemoApp.Services.Logging;
+using CameraDemoApp.Services.Navigation;
 using CameraDemoApp.ViewModels;
 using CameraDemoApp.Views;
 using CameraScanner.Maui;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
-using NLog.Extensions.Logging;
 
 namespace CameraDemoApp
 {
@@ -44,7 +44,7 @@ namespace CameraDemoApp
 
             builder.Services.AddTransient<QRCodeScannerPage>();
             builder.Services.AddTransient<QRCodeScannerViewModel>();
-            
+
             builder.Services.AddTransient<UniversalScannerPage>();
             builder.Services.AddTransient<UniversalScannerViewModel>();
 
