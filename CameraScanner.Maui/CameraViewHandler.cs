@@ -1,7 +1,6 @@
 ﻿#if (ANDROID || IOS || MACCATALYST)
 using CameraScanner.Maui;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Maui.Handlers;
 
 namespace CameraScanner.Maui
@@ -28,7 +27,7 @@ namespace CameraScanner.Maui
         public CameraViewHandler()
             : base(CameraViewMapper)
         {
-            var loggerFactory = this.MauiContext?.Services.GetService<ILoggerFactory>() ?? new NullLoggerFactory();
+            var loggerFactory = IPlatformApplication.Current.Services.GetService<ILoggerFactory>();
             this.logger = loggerFactory.CreateLogger<CameraViewHandler>();
             this.loggerFactory = loggerFactory;
         }
