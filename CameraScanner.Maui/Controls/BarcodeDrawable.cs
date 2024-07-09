@@ -1,16 +1,20 @@
+using Font = Microsoft.Maui.Graphics.Font;
+
 namespace CameraScanner.Maui.Controls
 {
-    public class BarcodeDrawable : IDrawable
+    internal class BarcodeDrawable : IDrawable
     {
         private BarcodeResult[] barcodeResults;
         private float strokeSize;
         private Color strokeColor;
+        private Color textColor;
 
-        public void Update(BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor)
+        public void Update(BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor)
         {
             this.barcodeResults = barcodeResults;
             this.strokeSize = strokeSize;
             this.strokeColor = strokeColor;
+            this.textColor = textColor;
         }
 
         public void Reset()
@@ -24,14 +28,74 @@ namespace CameraScanner.Maui.Controls
             {
                 canvas.StrokeSize = this.strokeSize;
                 canvas.StrokeColor = this.strokeColor;
+
                 var scale = 1 / canvas.DisplayScale;
                 canvas.Scale(scale, scale);
 
                 foreach (var barcodeResult in results)
                 {
+                    // Rectangle around the barcode result
                     canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
+
+                    // Display value below the barcode result
+                    var displayValueTopNLines = barcodeResult.DisplayValue.SplitToLines()
+                        .Where(l => l != null)
+                        .Take(3)
+                        .ToArray();
+
+                    if (displayValueTopNLines.Length == 3)
+                    {
+                        displayValueTopNLines[2] = "(...)";
+                    }
+
+                    var displayValue = string.Join(Environment.NewLine, displayValueTopNLines);
+                    var location = new PointF(barcodeResult.PreviewBoundingBox.Left,
+                        barcodeResult.PreviewBoundingBox.Bottom + this.strokeSize);
+                    var maxWidth = barcodeResult.PreviewBoundingBox.Width;
+                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, location, maxWidth, fontSize: 16, this.strokeColor,
+                        this.textColor);
                 }
             }
+        }
+
+        private static void DrawText(ICanvas canvas, string title, string text, PointF position, float maxWidth, float fontSize,
+            Color strokeColor, Color textColor)
+        {
+            var stringSizeTitle = canvas.GetStringSize(title, Font.Default, fontSize);
+            var stringSizeText = canvas.GetStringSize(text, Font.Default, fontSize);
+            // var stringBackgroundBounds = new RectF(
+            //     position,
+            //     new Size(Math.Max(stringSizeText.Width, stringSizeTitle.Width) + 2f, stringSizeTitle.Height + stringSizeText.Height + 2f));
+
+
+            var stringBoundsTitle = new RectF(
+                position.X + 8f,
+                position.Y + 8f,
+                stringSizeTitle.Width + 8f,
+                stringSizeTitle.Height + 2f);
+
+            var stringBoundsText = new RectF(
+                position.X + 8f,
+                stringBoundsTitle.Y + stringBoundsTitle.Height + 2f,
+                stringSizeText.Width + 8f,
+                stringSizeText.Height + 8f);
+
+            var unionBounds = new RectF(
+                position.X,
+                position.Y,
+                Math.Max(stringBoundsTitle.Width, stringBoundsText.Width) + 16f,
+                stringBoundsTitle.Height + stringBoundsText.Height + 14f);
+
+            canvas.StrokeColor = strokeColor;
+            canvas.FontColor = textColor;
+            canvas.FillColor = strokeColor;
+            canvas.FillRoundedRectangle(unionBounds, 8f);
+            canvas.FontSize = fontSize;
+            canvas.Font = Font.Default;
+
+            canvas.DrawString(title, stringBoundsTitle, HorizontalAlignment.Left, VerticalAlignment.Top);
+
+            canvas.DrawString(text, stringBoundsText, HorizontalAlignment.Left, VerticalAlignment.Top);
         }
     }
 }

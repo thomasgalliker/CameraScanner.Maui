@@ -5,6 +5,8 @@ namespace CameraScanner.Maui.Controls
 {
     public partial class BarcodeResultOverlay : GraphicsView
     {
+        private static readonly TimeSpan ClearResultOverlayDelay = TimeSpan.FromMilliseconds(500);
+
         private readonly TaskDelayer taskDelayer;
 
         public BarcodeResultOverlay()
@@ -25,7 +27,12 @@ namespace CameraScanner.Maui.Controls
 
             if (newValue is BarcodeResult[] barcodeResults)
             {
-                UpdateDrawable(barcodeResultOverlay, barcodeResults, barcodeResultOverlay.StrokeSize, barcodeResultOverlay.StrokeColor);
+                UpdateDrawable(
+                    barcodeResultOverlay,
+                    barcodeResults,
+                    barcodeResultOverlay.StrokeSize,
+                    barcodeResultOverlay.StrokeColor,
+                    barcodeResultOverlay.TextColor);
             }
         }
 
@@ -48,7 +55,12 @@ namespace CameraScanner.Maui.Controls
 
             if (newValue is float strokeSize)
             {
-                UpdateDrawable(barcodeResultOverlay, barcodeResultOverlay.BarcodeResults, strokeSize, barcodeResultOverlay.StrokeColor);
+                UpdateDrawable(
+                    barcodeResultOverlay,
+                    barcodeResultOverlay.BarcodeResults,
+                    strokeSize,
+                    barcodeResultOverlay.StrokeColor,
+                    barcodeResultOverlay.TextColor);
             }
         }
 
@@ -71,7 +83,12 @@ namespace CameraScanner.Maui.Controls
 
             if (newValue is Color strokeColor)
             {
-                UpdateDrawable(barcodeResultOverlay, barcodeResultOverlay.BarcodeResults, barcodeResultOverlay.StrokeSize, strokeColor);
+                UpdateDrawable(
+                    barcodeResultOverlay,
+                    barcodeResultOverlay.BarcodeResults,
+                    barcodeResultOverlay.StrokeSize,
+                    strokeColor,
+                    barcodeResultOverlay.TextColor);
             }
         }
 
@@ -81,13 +98,41 @@ namespace CameraScanner.Maui.Controls
             set => this.SetValue(StrokeColorProperty, value);
         }
 
-        private static void UpdateDrawable(BarcodeResultOverlay barcodeResultOverlay,
-            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor)
+        public static readonly BindableProperty TextColorProperty = BindableProperty.Create(
+            nameof(TextColor),
+            typeof(Color),
+            typeof(CameraView),
+            Colors.White,
+            propertyChanged: OnTextColorPropertyChanged);
+
+        private static void OnTextColorPropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {
-            barcodeResultOverlay.BarcodeDrawable.Update(barcodeResults, strokeSize, strokeColor);
+            var barcodeResultOverlay = (BarcodeResultOverlay)bindable;
+
+            if (newValue is Color textColor)
+            {
+                UpdateDrawable(
+                    barcodeResultOverlay,
+                    barcodeResultOverlay.BarcodeResults,
+                    barcodeResultOverlay.StrokeSize,
+                    barcodeResultOverlay.StrokeColor,
+                    textColor);
+            }
+        }
+
+        public Color TextColor
+        {
+            get => (Color)this.GetValue(TextColorProperty);
+            set => this.SetValue(TextColorProperty, value);
+        }
+
+        private static void UpdateDrawable(BarcodeResultOverlay barcodeResultOverlay,
+            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor)
+        {
+            barcodeResultOverlay.BarcodeDrawable.Update(barcodeResults, strokeSize, strokeColor, textColor);
             barcodeResultOverlay.Invalidate();
 
-            barcodeResultOverlay.taskDelayer.RunWithDelay(TimeSpan.FromSeconds(1), () =>
+            barcodeResultOverlay.taskDelayer.RunWithDelay(ClearResultOverlayDelay, () =>
             {
                 barcodeResultOverlay.BarcodeDrawable.Reset();
                 MainThread.BeginInvokeOnMainThread(barcodeResultOverlay.Invalidate);
