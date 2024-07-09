@@ -29,7 +29,7 @@ namespace CameraDemoApp
                 b.ClearProviders();
                 b.SetMinimumLevel(LogLevel.Trace);
                 b.AddDebug();
-                b.AddNLog();
+                b.AddSentry(SentryConfiguration.Configure);
             });
 
             // Register services
