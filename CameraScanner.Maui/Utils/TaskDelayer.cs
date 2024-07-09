@@ -39,7 +39,6 @@ namespace CameraScanner.Maui.Utils
                 {
                     Interlocked.Exchange(ref this.throttleCts, new CancellationTokenSource()).Cancel();
 
-                    Debug.WriteLine($"RunWithDelay {delay} starts now");
                     await Task.Delay(delay, this.throttleCts.Token)
                         .ContinueWith(async ct =>
                             {
@@ -78,7 +77,6 @@ namespace CameraScanner.Maui.Utils
             {
                 Interlocked.Exchange(ref this.throttleCts, new CancellationTokenSource()).Cancel();
 
-                Debug.WriteLine($"RunWithDelay {delay} starts now");
                 await Task.Delay(delay, this.throttleCts.Token)
                     .ContinueWith(async ct => await task().ConfigureAwait(false),
                         CancellationToken.None,
