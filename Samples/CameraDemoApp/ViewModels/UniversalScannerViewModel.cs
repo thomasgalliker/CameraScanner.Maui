@@ -12,6 +12,7 @@ namespace CameraDemoApp.ViewModels
         private readonly ILogger logger;
         private readonly IDialogService dialogService;
         private readonly IPopupService popupService;
+
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private BarcodeFormats barcodeFormats;
         private bool isScannerPause;

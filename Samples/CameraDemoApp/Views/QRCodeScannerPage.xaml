@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:c="http://camerascanner.maui"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
-    x:DataType="vm:QRCodeScannerViewModel"
     x:Class="CameraDemoApp.Views.QRCodeScannerPage"
-    Title="QR Code Scanner">
+    Title="QR Code Scanner"
+    x:DataType="vm:QRCodeScannerViewModel">
 
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
@@ -15,6 +15,11 @@
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}" />
+
+        <c:QRCodeOverlay
+            BracketColor="{StaticResource Primary}"
+            ShadeColor="Black"
+            ShadeOpacity="0.5" />
 
         <VerticalStackLayout
             Grid.Row="1"

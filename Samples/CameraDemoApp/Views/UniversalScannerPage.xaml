@@ -18,11 +18,6 @@
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}" />
 
-        <c:QRCodeOverlay
-            ShadeOpacity="0.5"
-            ShadeColor="Black"
-            BracketColor="{StaticResource Primary}"/>
-        
         <c:BarcodeResultOverlay
             Grid.Row="0"
             StrokeColor="Red"
