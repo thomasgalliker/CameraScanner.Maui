@@ -37,36 +37,40 @@ namespace CameraScanner.Maui.Controls
                     // Rectangle around the barcode result
                     canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
 
-                    // Display value below the barcode result
-                    var displayValueTopNLines = barcodeResult.DisplayValue.SplitToLines()
-                        .Where(l => l != null)
-                        .Take(3)
-                        .ToArray();
+                    // Display preview text underneath the barcode result
+                    var displayValue = GetPreviewText(barcodeResult);
 
-                    if (displayValueTopNLines.Length == 3)
-                    {
-                        displayValueTopNLines[2] = "(...)";
-                    }
+                    var position = new PointF(
+                        x: barcodeResult.PreviewBoundingBox.Left,
+                        y: barcodeResult.PreviewBoundingBox.Bottom + this.strokeSize);
 
-                    var displayValue = string.Join(Environment.NewLine, displayValueTopNLines);
-                    var location = new PointF(barcodeResult.PreviewBoundingBox.Left,
-                        barcodeResult.PreviewBoundingBox.Bottom + this.strokeSize);
-                    var maxWidth = barcodeResult.PreviewBoundingBox.Width;
-                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, location, maxWidth, fontSize: 16, this.strokeColor,
-                        this.textColor);
+                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, position, this.strokeColor, this.textColor);
                 }
             }
         }
 
-        private static void DrawText(ICanvas canvas, string title, string text, PointF position, float maxWidth, float fontSize,
-            Color strokeColor, Color textColor)
+        private static string GetPreviewText(BarcodeResult barcodeResult)
         {
+            var displayValueTopNLines = barcodeResult.DisplayValue.SplitToLines()
+                .Where(l => !string.IsNullOrWhiteSpace(l))
+                .Take(3)
+                .ToArray();
+
+            if (displayValueTopNLines.Length == 3)
+            {
+                displayValueTopNLines[2] = "(...)";
+            }
+
+            var displayValue = string.Join(Environment.NewLine, displayValueTopNLines);
+            return displayValue;
+        }
+
+        private static void DrawText(ICanvas canvas, string title, string text, PointF position, Color strokeColor, Color textColor)
+        {
+            const float fontSize = 16f;
+
             var stringSizeTitle = canvas.GetStringSize(title, Font.Default, fontSize);
             var stringSizeText = canvas.GetStringSize(text, Font.Default, fontSize);
-            // var stringBackgroundBounds = new RectF(
-            //     position,
-            //     new Size(Math.Max(stringSizeText.Width, stringSizeTitle.Width) + 2f, stringSizeTitle.Height + stringSizeText.Height + 2f));
-
 
             var stringBoundsTitle = new RectF(
                 position.X + 8f,
@@ -90,11 +94,11 @@ namespace CameraScanner.Maui.Controls
             canvas.FontColor = textColor;
             canvas.FillColor = strokeColor;
             canvas.FillRoundedRectangle(unionBounds, 8f);
+
             canvas.FontSize = fontSize;
             canvas.Font = Font.Default;
 
             canvas.DrawString(title, stringBoundsTitle, HorizontalAlignment.Left, VerticalAlignment.Top);
-
             canvas.DrawString(text, stringBoundsText, HorizontalAlignment.Left, VerticalAlignment.Top);
         }
     }
