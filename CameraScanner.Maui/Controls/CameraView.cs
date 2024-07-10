@@ -4,7 +4,7 @@ using Timer = System.Timers.Timer;
 
 namespace CameraScanner.Maui
 {
-    public partial class CameraView : View
+    public class CameraView : View
     {
         private readonly IVibration vibration;
         private readonly HashSet<BarcodeResult> pooledResults;
