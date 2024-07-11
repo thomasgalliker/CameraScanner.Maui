@@ -11,7 +11,7 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem 
-            IconImageSource="{Binding TorchOn, Converter={StaticResource TorchOnTrueFalseConverter}}"
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
             Command="{Binding ToggleTorchCommand}"  />
     </ContentPage.ToolbarItems>
 
@@ -50,24 +50,28 @@
             VerticalOptions="Start">
 
             <Grid
-                RowDefinitions="Auto, Auto, Auto"
+                RowDefinitions="Auto, Auto"
                 RowSpacing="8"
                 VerticalOptions="Fill">
 
-                <Button
+                <Grid 
                     Grid.Row="0"
-                    Command="{Binding StartCameraCommand}"
-                    IsEnabled="{Binding IsScannerEnabled, Converter={StaticResource BoolInverter}}"
-                    Text="Start Camera"
-                    HorizontalOptions="Fill" />
+                    ColumnDefinitions="*, *"
+                    ColumnSpacing="8">
+                    <Button
+                        Grid.Column="0"
+                        Command="{Binding StartStopCameraCommand}"
+                        Text="{Binding IsScannerEnabled, Converter={StaticResource BoolToStartStopConverter}}"
+                        HorizontalOptions="Fill" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding ToggleCameraPauseCommand}"
+                        Text="{Binding IsScannerPause, Converter={StaticResource BoolToPauseResumeConverter}}"
+                        HorizontalOptions="Fill" />
+                </Grid>
+
                 <Button
                     Grid.Row="1"
-                    Command="{Binding StopCameraCommand}"
-                    IsEnabled="{Binding IsScannerEnabled}"
-                    Text="Stop Camera"
-                    HorizontalOptions="Fill" />
-                <Button
-                    Grid.Row="2"
                     Command="{Binding ConfigureCommand}"
                     Text="Configure"
                     HorizontalOptions="Fill" />

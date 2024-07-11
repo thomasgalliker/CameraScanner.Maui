@@ -10,7 +10,7 @@
     
     <ContentPage.ToolbarItems>
         <ToolbarItem 
-            IconImageSource="{Binding TorchOn, Converter={StaticResource TorchOnTrueFalseConverter}}"
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
             Command="{Binding ToggleTorchCommand}"  />
     </ContentPage.ToolbarItems>
     
