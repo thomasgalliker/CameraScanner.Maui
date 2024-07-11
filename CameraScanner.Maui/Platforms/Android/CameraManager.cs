@@ -214,10 +214,14 @@ namespace CameraScanner.Maui
         //https://developer.android.com/reference/androidx/camera/mlkit/vision/MlKitAnalyzer
         internal void UpdateBarcodeFormats()
         {
-            this.barcodeScanner?.Dispose();
-            this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
-                .SetBarcodeFormats(MapBarcodeFormats(this.cameraView.BarcodeFormats))
-                .Build());
+            if (this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
+            {
+                this.barcodeScanner?.Dispose();
+                var mlKitBarcodeFormats = MapBarcodeFormats(barcodeFormats);
+                this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
+                    .SetBarcodeFormats(mlKitBarcodeFormats)
+                    .Build());
+            }
         }
 
         internal static int MapBarcodeFormats(BarcodeFormats barcodeFormats)
@@ -335,6 +339,8 @@ namespace CameraScanner.Maui
 
         internal void UpdateBarcodeDetectionFrameRate()
         {
+            this.logger.LogDebug("UpdateBarcodeDetectionFrameRate");
+
             if (this.barcodeAnalyzer is BarcodeAnalyzer analyzer)
             {
                 analyzer.BarcodeDetectionFrameRate = this.cameraView.BarcodeDetectionFrameRate;
@@ -350,6 +356,16 @@ namespace CameraScanner.Maui
             else
             {
                 this.Stop();
+            }
+        }
+
+        public void UpdatePauseScanning()
+        {
+            this.logger.LogDebug("UpdatePauseScanning");
+
+            if (this.barcodeAnalyzer is BarcodeAnalyzer b)
+            {
+                b.PauseScanning = this.cameraView.PauseScanning;
             }
         }
 
@@ -377,8 +393,11 @@ namespace CameraScanner.Maui
         {
             if (this.cameraView.PauseScanning)
             {
+                this.logger.LogDebug("PerformBarcodeDetectionAsync --> paused");
                 return;
             }
+
+            this.logger.LogDebug("PerformBarcodeDetectionAsync");
 
             this.barcodeResults.Clear();
             using var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false);
@@ -401,7 +420,7 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.AimMode)
             {
-                var previewCenter = new Point(this.previewView.Width / 2, this.previewView.Height / 2);
+                var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
 
                 foreach (var barcode in this.barcodeResults)
                 {
@@ -414,7 +433,7 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.ViewfinderMode)
             {
-                var previewRect = new RectF(0, 0, this.previewView.Width, this.previewView.Height);
+                var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
 
                 foreach (var barcode in this.barcodeResults)
                 {

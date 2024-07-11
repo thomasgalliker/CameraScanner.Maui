@@ -1,4 +1,5 @@
 ﻿using AndroidX.Camera.Core;
+using CameraScanner.Maui.Utils;
 using Microsoft.Extensions.Logging;
 using Size = Android.Util.Size;
 
@@ -27,10 +28,18 @@ namespace CameraScanner.Maui
 
         public uint? BarcodeDetectionFrameRate { get; set; }
 
+        public bool PauseScanning { get; set; }
+
         public async void Analyze(IImageProxy proxyImage)
         {
             try
             {
+                if (this.PauseScanning)
+                {
+                    this.logger.LogDebug("Analyze -> paused");
+                    return;
+                }
+
                 if (this.BarcodeDetectionFrameRate is not uint r || r is 0u or 1u || this.skippedFrames == null || ++this.skippedFrames >= r)
                 {
                     this.logger.LogDebug("Analyze");
@@ -71,7 +80,7 @@ namespace CameraScanner.Maui
                 catch (Exception ex)
                 {
                     this.logger.LogError(ex, "Analyze -> IImageProxy.Close failed with exception");
-                    MainThread.BeginInvokeOnMainThread(() => this.cameraManager.Start());
+                    // MainThread.BeginInvokeOnMainThread(() => this.cameraManager.Start());
                 }
             }
         }
