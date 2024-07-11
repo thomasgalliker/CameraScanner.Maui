@@ -34,17 +34,6 @@ namespace CameraScanner.Maui
             this.loggerFactory = loggerFactory;
         }
 
-        // TODO: Make sure camera scanner is started by default (ScannerEnabled = true)
-        //protected override void ConnectHandler(BarcodeView platformView)
-        //{
-        //    base.ConnectHandler(platformView);
-
-        //    //if (!this.cameraManager.IsRunning && this.VirtualView.CameraEnabled)
-        //    //{
-        //    //    this.cameraManager.Start();
-        //    //}
-        //}
-
         protected override void ConnectHandler(BarcodeView platformView)
         {
             this.logger.LogDebug("ConnectHandler");
@@ -58,32 +47,9 @@ namespace CameraScanner.Maui
 
         protected override void DisconnectHandler(BarcodeView barcodeView)
         {
-            try
-            {
-                this.logger.LogDebug("DisconnectHandler");
-
-                // Attempt 1: Crash!
-                this.cameraManager.Dispose();
-
-
-                //
-                // _ = Task.Run(async () =>
-                // {
-                //     await Task.Delay(1000);
-                //     await MainThread.InvokeOnMainThreadAsync(async () =>
-                //     {
-                //         await Task.Delay(500);
-                //         this.cameraManager.Dispose();
-                //     });
-                //     throw new Exception("TEST");
-                // });
-
-                base.DisconnectHandler(barcodeView);
-            }
-            catch (Exception e)
-            {
-                this.logger.LogError(e, "DisconnectHandler failed with exception");
-            }
+            this.logger.LogDebug("DisconnectHandler");
+            this.cameraManager.Dispose();
+            base.DisconnectHandler(barcodeView);
         }
     }
 }

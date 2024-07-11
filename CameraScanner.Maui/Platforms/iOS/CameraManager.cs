@@ -22,6 +22,7 @@ namespace CameraScanner.Maui
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
+        private bool started;
         private bool disposed;
         private AVCaptureDevice captureDevice;
         private AVCaptureInput captureInput;
@@ -35,7 +36,6 @@ namespace CameraScanner.Maui
         private readonly ILoggerFactory loggerFactory;
         private readonly CameraView cameraView;
         private readonly CAShapeLayer shapeLayer;
-        private readonly DispatchQueue dispatchQueue;
         private readonly NSObject subjectAreaChangedNotification;
         private readonly VNDetectBarcodesRequest detectBarcodesRequest;
         private readonly VNSequenceRequestHandler sequenceRequestHandler;
@@ -55,8 +55,6 @@ namespace CameraScanner.Maui
 
             this.captureSession = new AVCaptureSession();
             this.sequenceRequestHandler = new VNSequenceRequestHandler();
-            this.dispatchQueue = new DispatchQueue($"camerascanner.maui.{this.instance}",
-                new DispatchQueue.Attributes { QualityOfService = DispatchQualityOfService.UserInitiated });
             this.videoDataOutput = new AVCaptureVideoDataOutput { AlwaysDiscardsLateVideoFrames = true };
             this.detectBarcodesRequest = new VNDetectBarcodesRequest((request, error) =>
             {
@@ -96,30 +94,22 @@ namespace CameraScanner.Maui
             this.barcodeView.AddGestureRecognizer(this.tapGestureRecognizer);
         }
 
-        internal bool IsRunning
-        {
-            get
-            {
-                return this.captureSession is AVCaptureSession s && s.Running;
-            }
-        }
-
         internal void Start()
         {
             this.logger.LogDebug("Start");
 
             try
             {
-                if (this.IsRunning)
+                if (this.started)
                 {
-                    return;
+                    this.Stop();
                 }
 
                 if (this.captureSession is not null)
                 {
                     if (this.captureSession.Running)
                     {
-                        this.dispatchQueue.DispatchAsync(this.captureSession.StopRunning);
+                        this.captureSession.StopRunning();
                     }
 
                     if (this.captureSession.Inputs.Length == 0)
@@ -135,24 +125,19 @@ namespace CameraScanner.Maui
                     if (!this.captureSession.Outputs.Contains(this.videoDataOutput) &&
                         this.captureSession.CanAddOutput(this.videoDataOutput))
                     {
-                        this.dispatchQueue.DispatchAsync(() =>
-                        {
-                            this.captureSession.BeginConfiguration();
-                            this.captureSession.AddOutput(this.videoDataOutput);
-                            this.captureSession.CommitConfiguration();
-                        });
+                        ConfigureCaptureSession(this.captureSession, cs => cs.AddOutput(this.videoDataOutput));
                     }
 
-                    this.dispatchQueue.DispatchAsync(() =>
-                    {
-                        this.captureSession.StartRunning();
-                        this.UpdateOutput();
-                        this.UpdateBarcodeFormats();
-                        this.UpdateTorch();
-                        this.UpdateMinMaxZoomFactor();
-                        this.UpdateDeviceSwitchZoomFactors();
-                        this.UpdateBarcodeDetectionFrameRate();
-                    });
+                    this.captureSession.StartRunning();
+                    this.UpdateOutput();
+                    this.UpdateBarcodeFormats();
+                    this.UpdateTorch();
+                    this.UpdateMinMaxZoomFactor();
+                    this.UpdateDeviceSwitchZoomFactors();
+                    this.UpdateBarcodeDetectionFrameRate();
+
+                    this.started = true;
+                    this.logger.LogDebug("Start finished successfully");
                 }
             }
             catch (Exception ex)
@@ -168,12 +153,12 @@ namespace CameraScanner.Maui
 
             try
             {
-                if (this.IsRunning == false)
+                if (!this.started)
                 {
                     return;
                 }
 
-                if (this.captureSession is not null)
+                if (this.captureSession != null)
                 {
                     if (this.captureDevice is not null && this.captureDevice.TorchActive)
                     {
@@ -187,9 +172,12 @@ namespace CameraScanner.Maui
 
                     if (this.captureSession.Running)
                     {
-                        this.dispatchQueue.DispatchAsync(this.captureSession.StopRunning);
+                        this.captureSession.StopRunning();
                     }
                 }
+
+                this.started = false;
+                this.logger.LogDebug("Stop finished successfully");
             }
             catch (Exception ex)
             {
@@ -202,13 +190,16 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("UpdateCaptureQuality");
 
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.captureSession is not null)
             {
-                this.dispatchQueue.DispatchAsync(() =>
+                ConfigureCaptureSession(this.captureSession, cs =>
                 {
-                    this.captureSession.BeginConfiguration();
-                    this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                    this.captureSession.CommitConfiguration();
+                    cs.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
                 });
             }
         }
@@ -361,15 +352,36 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("UpdateCamera");
 
-            if (this.captureSession is not null)
+            if (this.captureSession != null)
             {
-                this.dispatchQueue.DispatchAsync(() =>
+                try
                 {
-                    try
-                    {
-                        this.captureSession.BeginConfiguration();
+                    const AVMediaTypes mediaType = AVMediaTypes.Video;
 
-                        if (this.captureInput is not null)
+                    var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
+
+                    using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
+                               SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
+                    {
+                        var captureDevices = captureDeviceDiscoverySession.Devices;
+                        var captureDevicesAndZoomValues = captureDevices.Select(d => (
+                                CaptureDevice: d,
+                                ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
+                            .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
+                            .ToArray();
+
+                        this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
+                                             ?? AVCaptureDevice.GetDefaultDevice(mediaType);
+                    }
+
+                    if (this.captureDevice == null)
+                    {
+                        throw new Exception("No AVCaptureDevice could be found");
+                    }
+
+                    ConfigureCaptureSession(this.captureSession, cs =>
+                    {
+                        if (this.captureInput != null)
                         {
                             if (this.captureSession.Inputs.Contains(this.captureInput))
                             {
@@ -377,31 +389,6 @@ namespace CameraScanner.Maui
                             }
 
                             this.captureInput.Dispose();
-                        }
-
-                        // _captureDevice?.Dispose();
-
-                        const AVMediaTypes mediaType = AVMediaTypes.Video;
-
-                        var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
-
-                        using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
-                                   SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
-                        {
-                            var captureDevices = captureDeviceDiscoverySession.Devices;
-                            var captureDevicesAndZoomValues = captureDevices.Select(d => (
-                                    CaptureDevice: d,
-                                    ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
-                                .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
-                                .ToArray();
-
-                            this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
-                                                 ?? AVCaptureDevice.GetDefaultDevice(mediaType);
-                        }
-
-                        if (this.captureDevice == null)
-                        {
-                            throw new Exception("No AVCaptureDevice could be found");
                         }
 
                         this.captureInput = new AVCaptureDeviceInput(this.captureDevice, out _);
@@ -412,33 +399,32 @@ namespace CameraScanner.Maui
                         }
 
                         this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                        this.captureSession.CommitConfiguration();
+                    });
 
-                        this.UpdateMinMaxZoomFactor();
-                        this.UpdateDeviceSwitchZoomFactors();
+                    this.UpdateMinMaxZoomFactor();
+                    this.UpdateDeviceSwitchZoomFactors();
 
-                        if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
-                        {
-                            // Set requested zoom
-                            this.SetVideoZoomFactor(requestZoomFactor);
-                        }
-                        else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
-                                 and > 1F)
-                        {
-                            // Set default zoom
-                            this.SetVideoZoomFactor(defaultCameraZoom);
-                        }
-
-                        this.UpdateCurrentZoomFactor();
-
-                        this.ResetFocus();
-                    }
-                    catch (Exception ex)
+                    if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
                     {
-                        this.logger.LogError(ex, "UpdateCamera failed with exception");
-                        throw;
+                        // Set requested zoom
+                        this.SetVideoZoomFactor(requestZoomFactor);
                     }
-                });
+                    else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
+                             and > 1F)
+                    {
+                        // Set default zoom
+                        this.SetVideoZoomFactor(defaultCameraZoom);
+                    }
+
+                    this.UpdateCurrentZoomFactor();
+
+                    this.ResetFocus();
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, "UpdateCamera failed with exception");
+                    throw;
+                }
             }
         }
 
@@ -803,7 +789,7 @@ namespace CameraScanner.Maui
 
         private static void CaptureDeviceLock(AVCaptureDevice captureDevice, Action action)
         {
-            DispatchQueue.MainQueue.DispatchAsync(() =>
+            // DispatchQueue.MainQueue.DispatchAsync(() =>
             {
                 if (captureDevice.LockForConfiguration(out _))
                 {
@@ -816,7 +802,24 @@ namespace CameraScanner.Maui
                         captureDevice.UnlockForConfiguration();
                     }
                 }
-            });
+            }//);
+        }
+
+        private static void ConfigureCaptureSession(AVCaptureSession captureSession, Action<AVCaptureSession> action)
+        {
+            // DispatchQueue.MainQueue.DispatchAsync(() =>
+            {
+                captureSession.BeginConfiguration();
+
+                try
+                {
+                    action(captureSession);
+                }
+                finally
+                {
+                    captureSession.CommitConfiguration();
+                }
+            }//);
         }
 
         public void Dispose()
@@ -893,9 +896,6 @@ namespace CameraScanner.Maui
 
                     this.logger.LogDebug("captureDevice.Dispose");
                     this.subjectAreaChangedNotification?.Dispose();
-
-                    this.logger.LogDebug("dispatchQueue.Dispose");
-                    this.dispatchQueue?.Dispose();
 
                     this.logger.LogDebug("Dispose finished");
                 }
