@@ -26,13 +26,10 @@ namespace CameraScanner.Maui
 
         public override void DidOutputSampleBuffer(AVCaptureOutput captureOutput, CMSampleBuffer sampleBuffer, AVCaptureConnection connection)
         {
-            // return;
-
             try
             {
                 if (this.PauseScanning)
                 {
-                    // this.logger.LogDebug("DidOutputSampleBuffer -> paused");
                     return;
                 }
 

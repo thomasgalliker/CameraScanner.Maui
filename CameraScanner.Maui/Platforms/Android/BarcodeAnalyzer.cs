@@ -36,13 +36,12 @@ namespace CameraScanner.Maui
             {
                 if (this.PauseScanning)
                 {
-                    this.logger.LogDebug("Analyze -> paused");
                     return;
                 }
 
                 if (this.BarcodeDetectionFrameRate is not uint r || r is 0u or 1u || this.skippedFrames == null || ++this.skippedFrames >= r)
                 {
-                    this.logger.LogDebug("Analyze");
+                    // this.logger.LogDebug("Analyze");
 
                     if (this.cameraManager.CaptureNextFrame)
                     {
@@ -53,7 +52,7 @@ namespace CameraScanner.Maui
                         var run = await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
                         if (run == false)
                         {
-                            this.logger.LogDebug("Analyze -> frame skipped (already in progress)");
+                            // this.logger.LogDebug("Analyze -> frame skipped (already in progress)");
                         }
                     }
 
@@ -64,7 +63,7 @@ namespace CameraScanner.Maui
                 }
                 else
                 {
-                    this.logger.LogDebug("Analyze -> frame skipped (BarcodeDetectionFrameRate)");
+                    // this.logger.LogDebug("Analyze -> frame skipped (BarcodeDetectionFrameRate)");
                 }
             }
             catch (Exception ex)

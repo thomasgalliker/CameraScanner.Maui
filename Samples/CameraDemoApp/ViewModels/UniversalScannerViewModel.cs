@@ -17,8 +17,8 @@ namespace CameraDemoApp.ViewModels
         private BarcodeFormats barcodeFormats;
         private bool isScannerPause;
         private bool isScannerEnabled;
-        private IRelayCommand startCameraCommand;
-        private IRelayCommand stopCameraCommand;
+        private IRelayCommand startStopCameraCommand;
+        private IRelayCommand toggleCameraPauseCommand;
         private IAsyncRelayCommand configureCommand;
         private IRelayCommand<BarcodeResult> barcodeResultTappedCommand;
         private bool torchOn;
@@ -110,25 +110,32 @@ namespace CameraDemoApp.ViewModels
             }
         }
 
-        public IRelayCommand StartCameraCommand
+        public IRelayCommand StartStopCameraCommand
         {
-            get => this.startCameraCommand ??= new RelayCommand(this.StartCamera);
+            get => this.startStopCameraCommand ??= new RelayCommand(this.StartStopCamera);
         }
 
-        private void StartCamera()
+        private void StartStopCamera()
         {
-            this.IsScannerEnabled = true;
-            this.IsScannerPause = false;
+            if (this.IsScannerEnabled)
+            {
+                this.IsScannerEnabled = false;
+            }
+            else
+            {
+                this.IsScannerEnabled = true;
+                this.IsScannerPause = false;
+            }
         }
 
-        public IRelayCommand StopCameraCommand
+        public IRelayCommand ToggleCameraPauseCommand
         {
-            get => this.stopCameraCommand ??= new RelayCommand(this.StopCamera);
+            get => this.toggleCameraPauseCommand ??= new RelayCommand(this.ToggleCameraPause);
         }
 
-        private void StopCamera()
+        private void ToggleCameraPause()
         {
-            this.IsScannerEnabled = false;
+            this.IsScannerPause = !this.IsScannerPause;
         }
 
         public bool TorchOn
@@ -169,6 +176,7 @@ namespace CameraDemoApp.ViewModels
                 return
                     $"IsScannerEnabled: {this.IsScannerEnabled}{Environment.NewLine}" +
                     $"IsScannerPause: {this.IsScannerPause}{Environment.NewLine}" +
+                    $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
                     $"BarcodeFormats: {this.BarcodeFormats}";
             }
         }
@@ -180,12 +188,10 @@ namespace CameraDemoApp.ViewModels
 
         private async Task ConfigureAsync()
         {
-            var navigationParameter = new ScannerConfigViewModel.NavigationParameter
-            {
-                BarcodeFormats = this.BarcodeFormats,
-            };
+            var navigationParameter = new ScannerConfigViewModel.NavigationParameter { BarcodeFormats = this.BarcodeFormats, };
 
-            var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm => vm.Initialize(navigationParameter));
+            var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm =>
+                vm.Initialize(navigationParameter));
             if (result is ScannerConfigViewModel.PopupResult popupResult)
             {
                 this.BarcodeFormats = popupResult.BarcodeFormats.SingleOrDefault();

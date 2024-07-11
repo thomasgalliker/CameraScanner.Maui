@@ -150,9 +150,9 @@ namespace CameraScanner.Maui
                 }
 
                 ILifecycleOwner lifecycleOwner = null;
-                if (this.context is ILifecycleOwner)
+                if (this.context is ILifecycleOwner owner)
                 {
-                    lifecycleOwner = this.context as ILifecycleOwner;
+                    lifecycleOwner = owner;
                 }
                 else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
                 {
