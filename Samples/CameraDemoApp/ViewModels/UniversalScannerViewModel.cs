@@ -21,6 +21,8 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand stopCameraCommand;
         private IAsyncRelayCommand configureCommand;
         private IRelayCommand<BarcodeResult> barcodeResultTappedCommand;
+        private bool torchOn;
+        private IRelayCommand toggleTorchCommand;
 
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
@@ -124,9 +126,25 @@ namespace CameraDemoApp.ViewModels
             get => this.stopCameraCommand ??= new RelayCommand(this.StopCamera);
         }
 
-        private async void StopCamera()
+        private void StopCamera()
         {
             this.IsScannerEnabled = false;
+        }
+
+        public bool TorchOn
+        {
+            get => this.torchOn;
+            set => this.SetProperty(ref this.torchOn, value);
+        }
+
+        public IRelayCommand ToggleTorchCommand
+        {
+            get => this.toggleTorchCommand ??= new RelayCommand(this.ToggleTorch);
+        }
+
+        private void ToggleTorch()
+        {
+            this.TorchOn = !this.TorchOn;
         }
 
         public IRelayCommand<BarcodeResult> BarcodeResultTappedCommand

@@ -6,5 +6,10 @@
     xmlns:c="clr-namespace:ValueConverters;assembly=ValueConverters">
 
     <c:BoolInverter x:Key="BoolInverter" />
+    
+    <c:BoolToImageSourceConverter 
+        x:Key="TorchOnTrueFalseConverter" 
+        TrueValue="flashlight_off.png"
+        FalseValue="flashlight.png" />
 
 </ResourceDictionary>

@@ -9,6 +9,12 @@
     Title="Universal Barcode Scanner"
     x:DataType="vm:UniversalScannerViewModel">
 
+    <ContentPage.ToolbarItems>
+        <ToolbarItem 
+            IconImageSource="{Binding TorchOn, Converter={StaticResource TorchOnTrueFalseConverter}}"
+            Command="{Binding ToggleTorchCommand}"  />
+    </ContentPage.ToolbarItems>
+
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
             x:Name="CameraView"
