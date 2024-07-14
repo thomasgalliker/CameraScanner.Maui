@@ -141,6 +141,8 @@ namespace CameraScanner.Maui
 
         internal void Start()
         {
+            // TODO: Check permissions before accessing camera preview
+
             if (this.cameraController is not null)
             {
                 if (this.IsRunning)
