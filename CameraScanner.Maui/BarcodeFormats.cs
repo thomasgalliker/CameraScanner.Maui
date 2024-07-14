@@ -23,6 +23,6 @@
         GS1DataBar = 65536,
         MaxiCode = 131072,
         DXFilmEdge = 262144,
-        All = 524288
+        All = Code128 | Code39 | Code93 | CodaBar | DataMatrix | Ean13 | Ean8 | Itf | QRCode | Upca | Upce | Pdf417 | Aztec | MicroQR | MicroPdf417 | I2OF5 | GS1DataBar | MaxiCode | DXFilmEdge
     }
 }
