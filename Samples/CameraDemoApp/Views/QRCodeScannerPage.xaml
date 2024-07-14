@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:c="http://camerascanner.maui"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    x:Class="CameraDemoApp.Views.QRCodeScannerPage"
+    Title="QR Code Scanner"
+    x:DataType="vm:QRCodeScannerViewModel">
+    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem 
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
+            Command="{Binding ToggleTorchCommand}"  />
+    </ContentPage.ToolbarItems>
+    
+    <Grid RowDefinitions="*, Auto">
+        <c:CameraView
+            Grid.Row="0"
+            BarcodeFormats="QR"
+            CameraEnabled="{Binding IsScannerEnabled}"
+            OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
+            PauseScanning="{Binding IsScannerPause}"
+            TorchOn="{Binding TorchOn}"/>
+
+        <c:QRCodeOverlay
+            BracketColor="{StaticResource Primary}"
+            ShadeColor="Black"
+            ShadeOpacity="0.5" />
+
+        <VerticalStackLayout
+            Grid.Row="1"
+            Padding="16"
+            Spacing="16"
+            VerticalOptions="Start">
+
+            <Grid
+                RowDefinitions="Auto, Auto"
+                RowSpacing="8"
+                VerticalOptions="Fill">
+
+                <Button
+                    Grid.Row="0"
+                    Command="{Binding StartCameraCommand}"
+                    IsEnabled="{Binding IsScannerEnabled, Converter={StaticResource BoolInverter}}"
+                    Text="Start Camera"
+                    HorizontalOptions="Fill" />
+                <Button
+                    Grid.Row="1"
+                    Command="{Binding StopCameraCommand}"
+                    IsEnabled="{Binding IsScannerEnabled}"
+                    Text="Stop Camera"
+                    HorizontalOptions="Fill" />
+            </Grid>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>

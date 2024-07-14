@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Grid
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    HorizontalOptions="Fill"
+    VerticalOptions="Fill"
+    x:Class="CameraScanner.Maui.Controls.QRCodeOverlay"
+    x:Name="Control">
+
+    <Grid.Resources>
+        <ResourceDictionary>
+            <Style TargetType="BoxView" x:Key="CameraShadeBoxViewStyle">
+                <Setter Property="VerticalOptions" Value="Fill" />
+                <Setter Property="HorizontalOptions" Value="Fill" />
+                <Setter Property="Color" Value="{Binding Source={x:Reference Control}, Path=ShadeColor}" />
+                <Setter Property="Opacity" Value="{Binding Source={x:Reference Control}, Path=ShadeOpacity}" />
+                <Setter Property="Margin" Value="0" />
+            </Style>
+        </ResourceDictionary>
+    </Grid.Resources>
+
+    <Grid.RowDefinitions>
+        <RowDefinition Height="*" x:Name="Row0" />
+        <RowDefinition Height="*" x:Name="Row1" />
+        <RowDefinition Height="*" x:Name="Row2" />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" x:Name="Column0" />
+        <ColumnDefinition Width="*" x:Name="Column1" />
+        <ColumnDefinition Width="*" x:Name="Column2" />
+    </Grid.ColumnDefinitions>
+
+    <BoxView
+        Grid.Column="0"
+        Grid.ColumnSpan="3"
+        Grid.Row="0"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <BoxView
+        Grid.Column="0"
+        Grid.Row="1"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <BoxView
+        Grid.Column="2"
+        Grid.Row="1"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <BoxView
+        Grid.Column="0"
+        Grid.ColumnSpan="3"
+        Grid.Row="2"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <Grid Grid.Column="1" Grid.Row="1">
+        <Path
+            Aspect="Uniform"
+            Data="M0 0H60V10H10V60H0V0M240 240h-60v-10H230V180H240V240M0 240V180H10V230H60V240H0m240-240V59H230V10h-50V0H240Z"
+            Fill="{Binding BracketColor, Source={x:Reference Control}}"
+            HorizontalOptions="Fill"
+            Margin="-8"
+            VerticalOptions="Fill" />
+    </Grid>
+
+</Grid>

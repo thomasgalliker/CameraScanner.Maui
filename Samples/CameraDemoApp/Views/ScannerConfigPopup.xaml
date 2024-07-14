@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<mct:Popup
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:mct="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    x:Class="CameraDemoApp.Views.ScannerConfigPopup"
+    x:Name="Page"
+    x:DataType="vm:ScannerConfigViewModel"
+    CanBeDismissedByTappingOutsideOfPopup="False"
+    Color="Transparent"
+    HorizontalOptions="Fill"
+    VerticalOptions="End">
+
+    <Border
+        Padding="0"
+        BackgroundColor="#FFEAE7EC"
+        Stroke="Transparent">
+        <Border.StrokeShape>
+            <RoundRectangle CornerRadius="20,20,0,0" />
+        </Border.StrokeShape>
+
+        <Grid
+            Padding="16"
+            HorizontalOptions="FillAndExpand">
+            <VerticalStackLayout Spacing="8">
+                <ScrollView HeightRequest="400">
+                    <VerticalStackLayout Spacing="8">
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Formats" />
+
+                        <VerticalStackLayout>
+                            <Grid ColumnDefinitions="Auto, *">
+                                <CheckBox
+                                    Grid.Column="0"
+                                    IsChecked="{Binding AllBarcodeFormatsChecked}" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="All"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding BarcodeFormats}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <CheckBox
+                                                Grid.Column="0"
+                                                IsChecked="{Binding IsSelected}" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding Value}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                        
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Capture Quality" />
+                        <StackLayout
+                            Orientation="Vertical"
+                            BindableLayout.ItemsSource="{Binding CaptureQualities}"
+                            RadioButtonGroup.GroupName="captureQualities">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Type vm:CaptureQualityViewModel}">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <RadioButton
+                                            Grid.Column="0"
+                                            Value="{Binding Value}"
+                                            IsChecked="{Binding IsSelected}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding Value}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Detection Frame Rate" />
+                        <Entry
+                            Text="{Binding BarcodeDetectionFrameRate}"
+                            Keyboard="Numeric" />
+                    </VerticalStackLayout>
+                </ScrollView>
+
+                <Grid
+                    ColumnDefinitions="*,*"
+                    ColumnSpacing="8">
+                    <Button
+                        Grid.Column="0"
+                        Command="{Binding CancelCommand}"
+                        CommandParameter="{Binding Source={x:Reference Page}}"
+                        Text="Cancel" />
+                    <Button
+                        Grid.Column="1"
+                        Command="{Binding ConfirmCommand}"
+                        CommandParameter="{Binding Source={x:Reference Page}}"
+                        Text="OK" />
+                </Grid>
+
+            </VerticalStackLayout>
+        </Grid>
+    </Border>
+
+</mct:Popup>
