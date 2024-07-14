@@ -14,6 +14,8 @@ namespace CameraScanner.Maui
         {
             this.previewLayer = previewLayer;
             this.shapeLayer = shapeLayer;
+
+            this.BackgroundColor = UIColor.Black;
         }
 
         public override void LayoutSubviews()

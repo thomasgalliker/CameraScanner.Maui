@@ -249,6 +249,12 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("UpdateCamera");
 
+            if (DeviceInfo.Current.DeviceType == DeviceType.Virtual)
+            {
+                this.logger.LogDebug("No camera available on iOS simulator.");
+                return;
+            }
+
             if (this.captureSession != null)
             {
                 try
@@ -406,6 +412,11 @@ namespace CameraScanner.Maui
             this.logger.LogDebug("UpdateRequestZoomFactor");
 
             if (this.disposed)
+            {
+                return;
+            }
+
+            if (this.cameraView is null || this.captureDevice is null)
             {
                 return;
             }
