@@ -74,20 +74,13 @@ The following barcode formats are supported on the underlying platforms:
 | QR                   | :white_check_mark:     | :white_check_mark:       |
 | UPC_A                | :white_check_mark:     | :white_check_mark:       |
 | UPC_E                | :white_check_mark:     | :white_check_mark:       |
-| Codabar              | :white_check_mark:     | :white_check_mark:       |
-| GS1DataBar           | :white_check_mark:     | :white_large_square:     |
-| GS1DataBarExpanded   | :white_check_mark:     | :white_large_square:     |
-| GS1DataBarLimited    | :white_check_mark:     | :white_large_square:     |
+| Codabar              | :white_check_mark: *1) | :white_check_mark:       |
+| GS1DataBar           | :white_check_mark: *1) | :white_large_square:     |
+| GS1DataBarExpanded   | :white_check_mark: *1) | :white_large_square:     |
+| GS1DataBarLimited    | :white_check_mark: *1) | :white_large_square:     |
 | I2of5                | :white_check_mark:     | :white_large_square:     |
-| MicroQR              | :white_check_mark:     | :white_large_square:     |
-| MicroPdf417          | :white_check_mark:     | :white_large_square:     |
-| Code39Mod43          | :white_large_square:   | :white_check_mark:       |
-| MSI                  | :white_large_square:   | :white_check_mark:       |
-| Plessey              | :white_large_square:   | :white_check_mark:       |
-| RSS14                | :white_large_square:   | :white_check_mark:       |
-| RSSExpanded          | :white_large_square:   | :white_check_mark:       |
-| UPCEAN               | :white_large_square:   | :white_check_mark:       |
-
+| MicroQR              | :white_check_mark: *1) | :white_large_square:     |
+| MicroPdf417          | :white_check_mark: *1) | :white_large_square:     |
 
 ### Contribution
 Contributors welcome! If you find a bug or you want to propose a new feature, feel free to do so by opening a new issue on github.com.
