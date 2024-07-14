@@ -3,7 +3,6 @@
 
 This library offers camera preview and barcode scanning functionality for .NET MAUI apps using native platform APIs with **Google ML Kit** and **Apple Vision framework**.
 
-
 ### Download and Install CameraScanner.Maui
 This library is available on NuGet: https://www.nuget.org/packages/CameraScanner.Maui
 Use the following command to install Plugin.FirebasePushNotifications using NuGet package manager console:
@@ -58,6 +57,30 @@ Access `ICameraPermissions` via static singleton instance `CameraPermissions.Cur
 
 - `IBarcodeScanner` tbd
 
+### Supported Barcode Formats
+The following barcode formats are supported on the underlying platforms:
+
+| Barcode Format       | Supported on iOS       | Supported on Android     |
+|----------------------|------------------------|--------------------------|
+| Aztec                | :white_check_mark:     | :white_check_mark:       |
+| Code128              | :white_check_mark:     | :white_check_mark:       |
+| Code39               | :white_check_mark:     | :white_check_mark:       |
+| Code93               | :white_check_mark:     | :white_check_mark:       |
+| DataMatrix           | :white_check_mark:     | :white_check_mark:       |
+| Ean13                | :white_check_mark:     | :white_check_mark:       |
+| Ean8                 | :white_check_mark:     | :white_check_mark:       |
+| ITF                  | :white_check_mark:     | :white_check_mark:       |
+| Pdf417               | :white_check_mark:     | :white_check_mark:       |
+| QR                   | :white_check_mark:     | :white_check_mark:       |
+| UPC_A                | :white_check_mark:     | :white_check_mark:       |
+| UPC_E                | :white_check_mark:     | :white_check_mark:       |
+| Codabar              | :white_check_mark: *1) | :white_check_mark:       |
+| GS1DataBar           | :white_check_mark: *1) | :white_large_square:     |
+| GS1DataBarExpanded   | :white_check_mark: *1) | :white_large_square:     |
+| GS1DataBarLimited    | :white_check_mark: *1) | :white_large_square:     |
+| I2of5                | :white_check_mark:     | :white_large_square:     |
+| MicroQR              | :white_check_mark: *1) | :white_large_square:     |
+| MicroPdf417          | :white_check_mark: *1) | :white_large_square:     |
 
 ### Contribution
 Contributors welcome! If you find a bug or you want to propose a new feature, feel free to do so by opening a new issue on github.com.

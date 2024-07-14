@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <mct:Popup
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -24,13 +25,71 @@
             Padding="16"
             HorizontalOptions="FillAndExpand">
             <VerticalStackLayout Spacing="8">
-                <Label
-                    Style="{StaticResource Heading2LabelStyle}"
-                    Text="Configure" />
-                <Picker
-                    Title="BarcodeFormats"
-                    ItemsSource="{Binding BarcodeFormats}"
-                    SelectedItem="{Binding BarcodeFormat}" />
+                <ScrollView HeightRequest="400">
+                    <VerticalStackLayout Spacing="8">
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Formats" />
+
+                        <VerticalStackLayout>
+                            <Grid ColumnDefinitions="Auto, *">
+                                <CheckBox
+                                    Grid.Column="0"
+                                    IsChecked="{Binding AllBarcodeFormatsChecked}" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="All"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding BarcodeFormats}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <CheckBox
+                                                Grid.Column="0"
+                                                IsChecked="{Binding IsSelected}" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding Value}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
+                        </VerticalStackLayout>
+                        
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Capture Quality" />
+                        <StackLayout
+                            Orientation="Vertical"
+                            BindableLayout.ItemsSource="{Binding CaptureQualities}"
+                            RadioButtonGroup.GroupName="captureQualities">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Type vm:CaptureQualityViewModel}">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <RadioButton
+                                            Grid.Column="0"
+                                            Value="{Binding Value}"
+                                            IsChecked="{Binding IsSelected}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding Value}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
+
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Detection Frame Rate" />
+                        <Entry
+                            Text="{Binding BarcodeDetectionFrameRate}"
+                            Keyboard="Numeric" />
+                    </VerticalStackLayout>
+                </ScrollView>
 
                 <Grid
                     ColumnDefinitions="*,*"

@@ -7,14 +7,21 @@
     x:Class="CameraDemoApp.Views.QRCodeScannerPage"
     Title="QR Code Scanner"
     x:DataType="vm:QRCodeScannerViewModel">
-
+    
+    <ContentPage.ToolbarItems>
+        <ToolbarItem 
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
+            Command="{Binding ToggleTorchCommand}"  />
+    </ContentPage.ToolbarItems>
+    
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
             Grid.Row="0"
-            BarcodeFormats="QRCode"
+            BarcodeFormats="QR"
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
-            PauseScanning="{Binding IsScannerPause}" />
+            PauseScanning="{Binding IsScannerPause}"
+            TorchOn="{Binding TorchOn}"/>
 
         <c:QRCodeOverlay
             BracketColor="{StaticResource Primary}"

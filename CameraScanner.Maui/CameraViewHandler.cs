@@ -1,5 +1,6 @@
 ﻿#if (ANDROID || IOS || MACCATALYST)
 using CameraScanner.Maui;
+using CameraScanner.Maui.Utils;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Handlers;
 
@@ -18,6 +19,7 @@ namespace CameraScanner.Maui
             [nameof(CameraView.BarcodeFormats)] = (handler, _) => handler.cameraManager?.UpdateBarcodeFormats(),
             [nameof(CameraView.TorchOn)] = (handler, _) => handler.cameraManager?.UpdateTorch(),
             [nameof(CameraView.CameraEnabled)] = (handler, _) => handler.cameraManager?.UpdateCameraEnabled(),
+            [nameof(CameraView.PauseScanning)] = (handler, _) => handler.cameraManager?.UpdatePauseScanning(),
             [nameof(CameraView.AimMode)] = (handler, _) => handler.cameraManager?.UpdateAimMode(),
             [nameof(CameraView.TapToFocusEnabled)] = (handler, _) => handler.cameraManager?.UpdateTapToFocusEnabled(),
             [nameof(CameraView.RequestZoomFactor)] = (handler, _) => handler.cameraManager?.UpdateRequestZoomFactor(),
@@ -32,32 +34,20 @@ namespace CameraScanner.Maui
             this.loggerFactory = loggerFactory;
         }
 
-        // TODO: Make sure camera scanner is started by default (ScannerEnabled = true)
-        //protected override void ConnectHandler(BarcodeView platformView)
-        //{
-        //    base.ConnectHandler(platformView);
-
-        //    //if (!this.cameraManager.IsRunning && this.VirtualView.CameraEnabled)
-        //    //{
-        //    //    this.cameraManager.Start();
-        //    //}
-        //}
-
         protected override void ConnectHandler(BarcodeView platformView)
         {
+            this.logger.LogDebug("ConnectHandler");
             base.ConnectHandler(platformView);
-            this.VirtualView.Unloaded += this.OnVirtualViewUnloaded;
-        }
 
-        private void OnVirtualViewUnloaded(object sender, EventArgs e)
-        {
-            this.DisconnectHandler(this.PlatformView);
+            if (this.VirtualView.AutoDisconnectHandler)
+            {
+                this.VirtualView.AddCleanUpEvent();
+            }
         }
 
         protected override void DisconnectHandler(BarcodeView barcodeView)
         {
-            this.VirtualView.Unloaded -= this.OnVirtualViewUnloaded;
-
+            this.logger.LogDebug("DisconnectHandler");
             this.cameraManager.Dispose();
             base.DisconnectHandler(barcodeView);
         }

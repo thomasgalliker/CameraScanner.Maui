@@ -5,6 +5,7 @@ using CameraDemoApp.Views;
 using CameraScanner.Maui;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
+using NLog.Extensions.Logging;
 
 namespace CameraDemoApp
 {
@@ -28,7 +29,7 @@ namespace CameraDemoApp
             {
                 b.ClearProviders();
                 b.SetMinimumLevel(LogLevel.Trace);
-                b.AddDebug();
+                b.AddNLog(NLogLoggerConfiguration.GetLoggingConfiguration());
                 b.AddSentry(SentryConfiguration.Configure);
             });
 

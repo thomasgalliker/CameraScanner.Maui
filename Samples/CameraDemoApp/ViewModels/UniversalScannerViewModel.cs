@@ -15,12 +15,16 @@ namespace CameraDemoApp.ViewModels
 
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private BarcodeFormats barcodeFormats;
+        private CaptureQuality captureQuality;
         private bool isScannerPause;
         private bool isScannerEnabled;
-        private IRelayCommand startCameraCommand;
-        private IRelayCommand stopCameraCommand;
+        private IRelayCommand startStopCameraCommand;
+        private IRelayCommand toggleCameraPauseCommand;
         private IAsyncRelayCommand configureCommand;
         private IRelayCommand<BarcodeResult> barcodeResultTappedCommand;
+        private bool torchOn;
+        private IRelayCommand toggleTorchCommand;
+        private uint? barcodeDetectionFrameRate;
 
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
@@ -32,6 +36,7 @@ namespace CameraDemoApp.ViewModels
             this.popupService = popupService;
 
             this.BarcodeFormats = BarcodeFormats.All;
+            this.CaptureQuality = CaptureQuality.Medium;
             this.IsScannerEnabled = true;
         }
 
@@ -65,6 +70,18 @@ namespace CameraDemoApp.ViewModels
             private set
             {
                 if (this.SetProperty(ref this.barcodeFormats, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public CaptureQuality CaptureQuality
+        {
+            get => this.captureQuality;
+            private set
+            {
+                if (this.SetProperty(ref this.captureQuality, value))
                 {
                     this.OnPropertyChanged(nameof(this.DebugInfo));
                 }
@@ -108,25 +125,66 @@ namespace CameraDemoApp.ViewModels
             }
         }
 
-        public IRelayCommand StartCameraCommand
+        public IRelayCommand StartStopCameraCommand
         {
-            get => this.startCameraCommand ??= new RelayCommand(this.StartCamera);
+            get => this.startStopCameraCommand ??= new RelayCommand(this.StartStopCamera);
         }
 
-        private void StartCamera()
+        private void StartStopCamera()
         {
-            this.IsScannerEnabled = true;
-            this.IsScannerPause = false;
+            if (this.IsScannerEnabled)
+            {
+                this.IsScannerEnabled = false;
+            }
+            else
+            {
+                this.IsScannerEnabled = true;
+                this.IsScannerPause = false;
+            }
         }
 
-        public IRelayCommand StopCameraCommand
+        public IRelayCommand ToggleCameraPauseCommand
         {
-            get => this.stopCameraCommand ??= new RelayCommand(this.StopCamera);
+            get => this.toggleCameraPauseCommand ??= new RelayCommand(this.ToggleCameraPause);
         }
 
-        private async void StopCamera()
+        private void ToggleCameraPause()
         {
-            this.IsScannerEnabled = false;
+            this.IsScannerPause = !this.IsScannerPause;
+        }
+
+        public bool TorchOn
+        {
+            get => this.torchOn;
+            set
+            {
+                if (this.SetProperty(ref this.torchOn, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public IRelayCommand ToggleTorchCommand
+        {
+            get => this.toggleTorchCommand ??= new RelayCommand(this.ToggleTorch);
+        }
+
+        private void ToggleTorch()
+        {
+            this.TorchOn = !this.TorchOn;
+        }
+
+        public uint? BarcodeDetectionFrameRate
+        {
+            get => this.barcodeDetectionFrameRate;
+            private set
+            {
+                if (this.SetProperty(ref this.barcodeDetectionFrameRate, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public IRelayCommand<BarcodeResult> BarcodeResultTappedCommand
@@ -151,7 +209,10 @@ namespace CameraDemoApp.ViewModels
                 return
                     $"IsScannerEnabled: {this.IsScannerEnabled}{Environment.NewLine}" +
                     $"IsScannerPause: {this.IsScannerPause}{Environment.NewLine}" +
-                    $"BarcodeFormats: {this.BarcodeFormats}";
+                    $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
+                    $"CaptureQuality: {this.CaptureQuality}{Environment.NewLine}" +
+                    $"BarcodeFormats: {this.BarcodeFormats}{Environment.NewLine}" +
+                    $"BarcodeDetectionFrameRate: {this.BarcodeDetectionFrameRate?.ToString() ?? "null"}";
             }
         }
 
@@ -164,13 +225,18 @@ namespace CameraDemoApp.ViewModels
         {
             var navigationParameter = new ScannerConfigViewModel.NavigationParameter
             {
-                BarcodeFormats = this.BarcodeFormats,
+                BarcodeFormat = this.BarcodeFormats,
+                CaptureQuality = this.CaptureQuality,
+                BarcodeDetectionFrameRate = this.BarcodeDetectionFrameRate,
             };
 
-            var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm => vm.Initialize(navigationParameter));
+            var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm =>
+                vm.Initialize(navigationParameter));
             if (result is ScannerConfigViewModel.PopupResult popupResult)
             {
-                this.BarcodeFormats = popupResult.BarcodeFormats.SingleOrDefault();
+                this.BarcodeFormats = popupResult.BarcodeFormats;
+                this.CaptureQuality = popupResult.CaptureQuality;
+                this.BarcodeDetectionFrameRate = popupResult.BarcodeDetectionFrameRate;
             }
         }
     }

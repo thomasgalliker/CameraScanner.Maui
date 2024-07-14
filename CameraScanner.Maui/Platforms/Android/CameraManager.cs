@@ -141,6 +141,8 @@ namespace CameraScanner.Maui
 
         internal void Start()
         {
+            // TODO: Check permissions before accessing camera preview
+
             if (this.cameraController is not null)
             {
                 if (this.IsRunning)
@@ -150,9 +152,9 @@ namespace CameraScanner.Maui
                 }
 
                 ILifecycleOwner lifecycleOwner = null;
-                if (this.context is ILifecycleOwner)
+                if (this.context is ILifecycleOwner owner)
                 {
-                    lifecycleOwner = this.context as ILifecycleOwner;
+                    lifecycleOwner = owner;
                 }
                 else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
                 {
@@ -214,87 +216,14 @@ namespace CameraScanner.Maui
         //https://developer.android.com/reference/androidx/camera/mlkit/vision/MlKitAnalyzer
         internal void UpdateBarcodeFormats()
         {
-            this.barcodeScanner?.Dispose();
-            this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
-                .SetBarcodeFormats(MapBarcodeFormats(this.cameraView.BarcodeFormats))
-                .Build());
-        }
-
-        internal static int MapBarcodeFormats(BarcodeFormats barcodeFormats)
-        {
-            var formats = Barcode.FormatAllFormats;
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code128))
+            if (this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
             {
-                formats |= Barcode.FormatCode128;
+                this.barcodeScanner?.Dispose();
+                var mlKitBarcodeFormats = barcodeFormats.ToPlatform();
+                this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
+                    .SetBarcodeFormats(mlKitBarcodeFormats)
+                    .Build());
             }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code39))
-            {
-                formats |= Barcode.FormatCode39;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code93))
-            {
-                formats |= Barcode.FormatCode93;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.CodaBar))
-            {
-                formats |= Barcode.FormatCodabar;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.DataMatrix))
-            {
-                formats |= Barcode.FormatDataMatrix;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean13))
-            {
-                formats |= Barcode.FormatEan13;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean8))
-            {
-                formats |= Barcode.FormatEan8;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Itf))
-            {
-                formats |= Barcode.FormatItf;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.QRCode))
-            {
-                formats |= Barcode.FormatQrCode;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upca))
-            {
-                formats |= Barcode.FormatUpcA;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upce))
-            {
-                formats |= Barcode.FormatUpcE;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Pdf417))
-            {
-                formats |= Barcode.FormatPdf417;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Aztec))
-            {
-                formats |= Barcode.FormatAztec;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.All))
-            {
-                formats = Barcode.FormatAllFormats;
-            }
-
-            return formats;
         }
 
         internal void UpdateCamera()
@@ -335,6 +264,8 @@ namespace CameraScanner.Maui
 
         internal void UpdateBarcodeDetectionFrameRate()
         {
+            this.logger.LogDebug("UpdateBarcodeDetectionFrameRate");
+
             if (this.barcodeAnalyzer is BarcodeAnalyzer analyzer)
             {
                 analyzer.BarcodeDetectionFrameRate = this.cameraView.BarcodeDetectionFrameRate;
@@ -350,6 +281,16 @@ namespace CameraScanner.Maui
             else
             {
                 this.Stop();
+            }
+        }
+
+        public void UpdatePauseScanning()
+        {
+            this.logger.LogDebug("UpdatePauseScanning");
+
+            if (this.barcodeAnalyzer is BarcodeAnalyzer b)
+            {
+                b.PauseScanning = this.cameraView.PauseScanning;
             }
         }
 
@@ -377,8 +318,11 @@ namespace CameraScanner.Maui
         {
             if (this.cameraView.PauseScanning)
             {
+                this.logger.LogDebug("PerformBarcodeDetectionAsync --> paused");
                 return;
             }
+
+            this.logger.LogDebug("PerformBarcodeDetectionAsync");
 
             this.barcodeResults.Clear();
             using var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false);
@@ -401,7 +345,7 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.AimMode)
             {
-                var previewCenter = new Point(this.previewView.Width / 2, this.previewView.Height / 2);
+                var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
 
                 foreach (var barcode in this.barcodeResults)
                 {
@@ -414,7 +358,7 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.ViewfinderMode)
             {
-                var previewRect = new RectF(0, 0, this.previewView.Width, this.previewView.Height);
+                var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
 
                 foreach (var barcode in this.barcodeResults)
                 {

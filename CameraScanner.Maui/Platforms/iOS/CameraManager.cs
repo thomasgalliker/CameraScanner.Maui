@@ -15,12 +15,15 @@ namespace CameraScanner.Maui
 {
     internal class CameraManager : IDisposable
     {
+        private readonly string instance = new Guid().ToString().Substring(0, 5).ToUpperInvariant();
         private static readonly AVCaptureDeviceType[] SupportedCaptureDeviceTypes = InitializeCaptureDevices();
 
         internal BarcodeView BarcodeView => this.barcodeView;
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
+        private bool started;
+        private bool disposed;
         private AVCaptureDevice captureDevice;
         private AVCaptureInput captureInput;
         private BarcodeAnalyzer barcodeAnalyzer;
@@ -33,7 +36,6 @@ namespace CameraScanner.Maui
         private readonly ILoggerFactory loggerFactory;
         private readonly CameraView cameraView;
         private readonly CAShapeLayer shapeLayer;
-        private readonly DispatchQueue dispatchQueue;
         private readonly NSObject subjectAreaChangedNotification;
         private readonly VNDetectBarcodesRequest detectBarcodesRequest;
         private readonly VNSequenceRequestHandler sequenceRequestHandler;
@@ -53,8 +55,6 @@ namespace CameraScanner.Maui
 
             this.captureSession = new AVCaptureSession();
             this.sequenceRequestHandler = new VNSequenceRequestHandler();
-            this.dispatchQueue = new DispatchQueue("com.barcodescanning.maui.sessionQueue",
-                new DispatchQueue.Attributes { QualityOfService = DispatchQualityOfService.UserInitiated });
             this.videoDataOutput = new AVCaptureVideoDataOutput { AlwaysDiscardsLateVideoFrames = true };
             this.detectBarcodesRequest = new VNDetectBarcodesRequest((request, error) =>
             {
@@ -94,46 +94,40 @@ namespace CameraScanner.Maui
             this.barcodeView.AddGestureRecognizer(this.tapGestureRecognizer);
         }
 
-        internal bool IsRunning
-        {
-            get
-            {
-                return this.captureSession is AVCaptureSession s && s.Running;
-            }
-        }
-
         internal void Start()
         {
-            if (this.captureSession is not null)
+            this.logger.LogDebug("Start");
+
+            try
             {
-                if (this.captureSession.Running)
+                if (this.started)
                 {
-                    this.dispatchQueue.DispatchAsync(this.captureSession.StopRunning);
+                    this.Stop();
                 }
 
-                if (this.captureSession.Inputs.Length == 0)
+                if (this.captureSession is not null)
                 {
-                    this.UpdateCamera();
-                }
-
-                if (this.captureSession.SessionPreset is null)
-                {
-                    this.UpdateCaptureQuality();
-                }
-
-                if (!this.captureSession.Outputs.Contains(this.videoDataOutput) &&
-                    this.captureSession.CanAddOutput(this.videoDataOutput))
-                {
-                    this.dispatchQueue.DispatchAsync(() =>
+                    if (this.captureSession.Running)
                     {
-                        this.captureSession.BeginConfiguration();
-                        this.captureSession.AddOutput(this.videoDataOutput);
-                        this.captureSession.CommitConfiguration();
-                    });
-                }
+                        this.captureSession.StopRunning();
+                    }
 
-                this.dispatchQueue.DispatchAsync(() =>
-                {
+                    if (this.captureSession.Inputs.Length == 0)
+                    {
+                        this.UpdateCamera();
+                    }
+
+                    if (this.captureSession.SessionPreset is null)
+                    {
+                        this.UpdateCaptureQuality();
+                    }
+
+                    if (!this.captureSession.Outputs.Contains(this.videoDataOutput) &&
+                        this.captureSession.CanAddOutput(this.videoDataOutput))
+                    {
+                        ConfigureCaptureSession(this.captureSession, cs => cs.AddOutput(this.videoDataOutput));
+                    }
+
                     this.captureSession.StartRunning();
                     this.UpdateOutput();
                     this.UpdateBarcodeFormats();
@@ -141,40 +135,71 @@ namespace CameraScanner.Maui
                     this.UpdateMinMaxZoomFactor();
                     this.UpdateDeviceSwitchZoomFactors();
                     this.UpdateBarcodeDetectionFrameRate();
-                });
+
+                    this.started = true;
+                    this.logger.LogDebug("Start finished successfully");
+                }
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Start failed with exception");
+                throw;
             }
         }
 
         internal void Stop()
         {
-            if (this.captureSession is not null)
-            {
-                if (this.captureDevice is not null && this.captureDevice.TorchActive)
-                {
-                    CaptureDeviceLock(this.captureDevice, () => this.captureDevice.TorchMode = AVCaptureTorchMode.Off);
+            this.logger.LogDebug("Stop");
 
-                    if (this.cameraView is not null)
+            try
+            {
+                if (!this.started)
+                {
+                    return;
+                }
+
+                if (this.captureSession != null)
+                {
+                    if (this.captureDevice is not null && this.captureDevice.TorchActive)
                     {
-                        this.cameraView.TorchOn = false;
+                        CaptureDeviceLock(this.captureDevice, () => this.captureDevice.TorchMode = AVCaptureTorchMode.Off);
+
+                        if (this.cameraView is not null)
+                        {
+                            this.cameraView.TorchOn = false;
+                        }
+                    }
+
+                    if (this.captureSession.Running)
+                    {
+                        this.captureSession.StopRunning();
                     }
                 }
 
-                if (this.captureSession.Running)
-                {
-                    this.dispatchQueue.DispatchAsync(this.captureSession.StopRunning);
-                }
+                this.started = false;
+                this.logger.LogDebug("Stop finished successfully");
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "Stop failed with exception");
+                throw;
             }
         }
 
         internal void UpdateCaptureQuality()
         {
+            this.logger.LogDebug("UpdateCaptureQuality");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.captureSession is not null)
             {
-                this.dispatchQueue.DispatchAsync(() =>
+                ConfigureCaptureSession(this.captureSession, cs =>
                 {
-                    this.captureSession.BeginConfiguration();
-                    this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                    this.captureSession.CommitConfiguration();
+                    cs.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
                 });
             }
         }
@@ -205,127 +230,55 @@ namespace CameraScanner.Maui
 
         internal void UpdateBarcodeFormats()
         {
-            if (this.detectBarcodesRequest is not null)
+            this.logger.LogDebug("UpdateBarcodeFormats");
+
+            if (this.disposed)
             {
-                this.detectBarcodesRequest.Symbologies = MapBarcodeFormats(this.cameraView.BarcodeFormats);
+                return;
+            }
+
+            if (this.detectBarcodesRequest is not null && this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
+            {
+                var vnBarcodeSymbologies = barcodeFormats.ToPlatform();
+                this.detectBarcodesRequest.Symbologies = vnBarcodeSymbologies;
             }
         }
 
-        internal static VNBarcodeSymbology[] MapBarcodeFormats(BarcodeFormats barcodeFormats)
-        {
-            if (barcodeFormats.HasFlag(BarcodeFormats.All))
-            {
-                return [];
-            }
-
-            var symbologiesList = new List<VNBarcodeSymbology>();
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code128))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code128);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code39))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code39);
-                symbologiesList.Add(VNBarcodeSymbology.Code39Checksum);
-                symbologiesList.Add(VNBarcodeSymbology.Code39FullAscii);
-                symbologiesList.Add(VNBarcodeSymbology.Code39FullAsciiChecksum);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code93))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code93);
-                symbologiesList.Add(VNBarcodeSymbology.Code93i);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.CodaBar))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Codabar);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.DataMatrix))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.DataMatrix);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean13))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean13);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean8))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean8);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Itf))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Itf14);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.QRCode))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.QR);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upca))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean13);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upce))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Upce);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Pdf417))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Pdf417);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Aztec))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Aztec);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.MicroQR))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.MicroQR);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.MicroPdf417))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.MicroPdf417);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.I2OF5))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5);
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5Checksum);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.GS1DataBar))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBar);
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBarLimited);
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBarExpanded);
-            }
-
-            return symbologiesList.ToArray();
-        }
 
         internal void UpdateCamera()
         {
-            if (this.captureSession is not null)
-            {
-                this.dispatchQueue.DispatchAsync(() =>
-                {
-                    try
-                    {
-                        this.captureSession.BeginConfiguration();
+            this.logger.LogDebug("UpdateCamera");
 
-                        if (this.captureInput is not null)
+            if (this.captureSession != null)
+            {
+                try
+                {
+                    const AVMediaTypes mediaType = AVMediaTypes.Video;
+
+                    var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
+
+                    using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
+                               SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
+                    {
+                        var captureDevices = captureDeviceDiscoverySession.Devices;
+                        var captureDevicesAndZoomValues = captureDevices.Select(d => (
+                                CaptureDevice: d,
+                                ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
+                            .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
+                            .ToArray();
+
+                        this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
+                                             ?? AVCaptureDevice.GetDefaultDevice(mediaType);
+                    }
+
+                    if (this.captureDevice == null)
+                    {
+                        throw new Exception("No AVCaptureDevice could be found");
+                    }
+
+                    ConfigureCaptureSession(this.captureSession, cs =>
+                    {
+                        if (this.captureInput != null)
                         {
                             if (this.captureSession.Inputs.Contains(this.captureInput))
                             {
@@ -333,31 +286,6 @@ namespace CameraScanner.Maui
                             }
 
                             this.captureInput.Dispose();
-                        }
-
-                        // _captureDevice?.Dispose();
-
-                        const AVMediaTypes mediaType = AVMediaTypes.Video;
-
-                        var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
-
-                        using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
-                                   SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
-                        {
-                            var captureDevices = captureDeviceDiscoverySession.Devices;
-                            var captureDevicesAndZoomValues = captureDevices.Select(d => (
-                                    CaptureDevice: d,
-                                    ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
-                                .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
-                                .ToArray();
-
-                            this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
-                                                 ?? AVCaptureDevice.GetDefaultDevice(mediaType);
-                        }
-
-                        if (this.captureDevice == null)
-                        {
-                            throw new Exception("No AVCaptureDevice could be found");
                         }
 
                         this.captureInput = new AVCaptureDeviceInput(this.captureDevice, out _);
@@ -368,32 +296,32 @@ namespace CameraScanner.Maui
                         }
 
                         this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                        this.captureSession.CommitConfiguration();
+                    });
 
-                        this.UpdateMinMaxZoomFactor();
-                        this.UpdateDeviceSwitchZoomFactors();
+                    this.UpdateMinMaxZoomFactor();
+                    this.UpdateDeviceSwitchZoomFactors();
 
-                        if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
-                        {
-                            // Set requested zoom
-                            this.SetVideoZoomFactor(requestZoomFactor);
-                        }
-                        else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom and > 1F)
-                        {
-                            // Set default zoom
-                            this.SetVideoZoomFactor(defaultCameraZoom);
-                        }
-
-                        this.UpdateCurrentZoomFactor();
-
-                        this.ResetFocus();
-                    }
-                    catch (Exception ex)
+                    if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
                     {
-                        this.logger.LogError(ex, "UpdateCamera failed with exception");
-                        throw;
+                        // Set requested zoom
+                        this.SetVideoZoomFactor(requestZoomFactor);
                     }
-                });
+                    else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
+                             and > 1F)
+                    {
+                        // Set default zoom
+                        this.SetVideoZoomFactor(defaultCameraZoom);
+                    }
+
+                    this.UpdateCurrentZoomFactor();
+
+                    this.ResetFocus();
+                }
+                catch (Exception ex)
+                {
+                    this.logger.LogError(ex, "UpdateCamera failed with exception");
+                    throw;
+                }
             }
         }
 
@@ -441,6 +369,13 @@ namespace CameraScanner.Maui
 
         internal void UpdateTorch()
         {
+            this.logger.LogDebug("UpdateTorch");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.captureDevice is not null && this.captureDevice.HasTorch && this.captureDevice.TorchAvailable)
             {
                 if (this.cameraView.TorchOn)
@@ -468,6 +403,13 @@ namespace CameraScanner.Maui
 
         private void UpdateDeviceSwitchZoomFactors()
         {
+            this.logger.LogDebug("UpdateRequestZoomFactor");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
             {
                 this.cameraView.DeviceSwitchZoomFactors = this.captureDevice.VirtualDeviceSwitchOverVideoZoomFactors
@@ -478,6 +420,13 @@ namespace CameraScanner.Maui
 
         internal void UpdateRequestZoomFactor()
         {
+            this.logger.LogDebug("UpdateRequestZoomFactor");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.cameraView is null || this.captureDevice is null)
             {
                 return;
@@ -491,6 +440,11 @@ namespace CameraScanner.Maui
 
         private void SetVideoZoomFactor(float requestZoomFactor)
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             var videoZoomFactor = Math.Max(requestZoomFactor, (float)this.captureDevice.MinAvailableVideoZoomFactor);
             videoZoomFactor = Math.Min(videoZoomFactor, (float)this.captureDevice.MaxAvailableVideoZoomFactor);
 
@@ -503,11 +457,21 @@ namespace CameraScanner.Maui
 
         private void UpdateCurrentZoomFactor()
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             this.cameraView.CurrentZoomFactor = (float)this.captureDevice.VideoZoomFactor;
         }
 
         private void UpdateMinMaxZoomFactor()
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.cameraView is not null && this.captureDevice is not null)
             {
                 this.cameraView.MinZoomFactor = (float)this.captureDevice.MinAvailableVideoZoomFactor;
@@ -517,6 +481,13 @@ namespace CameraScanner.Maui
 
         internal void UpdateBarcodeDetectionFrameRate()
         {
+            this.logger.LogDebug("UpdateBarcodeDetectionFrameRate");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.barcodeAnalyzer is BarcodeAnalyzer b)
             {
                 b.BarcodeDetectionFrameRate = this.cameraView.BarcodeDetectionFrameRate;
@@ -525,6 +496,13 @@ namespace CameraScanner.Maui
 
         internal void UpdateCameraEnabled()
         {
+            this.logger.LogDebug("UpdateCameraEnabled");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.cameraView.CameraEnabled)
             {
                 this.Start();
@@ -535,8 +513,30 @@ namespace CameraScanner.Maui
             }
         }
 
+        public void UpdatePauseScanning()
+        {
+            this.logger.LogDebug("UpdatePauseScanning");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
+            if (this.barcodeAnalyzer is BarcodeAnalyzer b)
+            {
+                b.PauseScanning = this.cameraView.PauseScanning;
+            }
+        }
+
         internal void UpdateAimMode()
         {
+            this.logger.LogDebug("UpdateAimMode");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.cameraView.AimMode)
             {
                 this.barcodeView?.Layer?.AddSublayer(this.shapeLayer);
@@ -547,46 +547,63 @@ namespace CameraScanner.Maui
             }
         }
 
-        internal void UpdateTapToFocusEnabled() { }
+        internal void UpdateTapToFocusEnabled()
+        {
+            this.logger.LogDebug("UpdateTapToFocusEnabled");
+        }
 
         internal void PerformBarcodeDetection(CVPixelBuffer cvPixelBuffer)
         {
-            if (this.cameraView.PauseScanning)
+            // this.logger.LogDebug("PerformBarcodeDetection");
+
+            try
             {
-                return;
-            }
-
-            this.barcodeResults.Clear();
-
-            this.sequenceRequestHandler?.Perform([this.detectBarcodesRequest], cvPixelBuffer, out _);
-
-            if (this.cameraView.AimMode)
-            {
-                var previewCenter = new Point(this.previewLayer.Bounds.Width / 2, this.previewLayer.Bounds.Height / 2);
-
-                foreach (var barcode in this.barcodeResults)
+                if (this.disposed)
                 {
-                    if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                    return;
+                }
+
+                if (this.cameraView.PauseScanning)
+                {
+                    return;
+                }
+
+                this.barcodeResults.Clear();
+
+                this.sequenceRequestHandler?.Perform([this.detectBarcodesRequest], cvPixelBuffer, out _);
+
+                if (this.cameraView.AimMode)
+                {
+                    var previewCenter = new Point(this.previewLayer.Bounds.Width / 2, this.previewLayer.Bounds.Height / 2);
+
+                    foreach (var barcode in this.barcodeResults)
                     {
-                        this.barcodeResults.Remove(barcode);
+                        if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                        {
+                            this.barcodeResults.Remove(barcode);
+                        }
                     }
                 }
-            }
 
-            if (this.cameraView.ViewfinderMode)
-            {
-                var previewRect = new RectF(0, 0, (float)this.previewLayer.Bounds.Width, (float)this.previewLayer.Bounds.Height);
-
-                foreach (var barcode in this.barcodeResults)
+                if (this.cameraView.ViewfinderMode)
                 {
-                    if (!previewRect.Contains(barcode.PreviewBoundingBox))
+                    var previewRect = new RectF(0, 0, (float)this.previewLayer.Bounds.Width, (float)this.previewLayer.Bounds.Height);
+
+                    foreach (var barcode in this.barcodeResults)
                     {
-                        this.barcodeResults.Remove(barcode);
+                        if (!previewRect.Contains(barcode.PreviewBoundingBox))
+                        {
+                            this.barcodeResults.Remove(barcode);
+                        }
                     }
                 }
-            }
 
-            this.cameraView.DetectionFinished(this.barcodeResults);
+                this.cameraView.DetectionFinished(this.barcodeResults);
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "PerformBarcodeDetection failed with exception");
+            }
         }
 
         internal void CaptureImage(CMSampleBuffer sampleBuffer)
@@ -602,12 +619,17 @@ namespace CameraScanner.Maui
 
         private void FocusOnTap()
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.cameraView.TapToFocusEnabled && this.captureDevice is { FocusPointOfInterestSupported: true } c)
             {
                 CaptureDeviceLock(this.captureDevice, () =>
                 {
-                    c.FocusPointOfInterest =
-                        this.previewLayer.CaptureDevicePointOfInterestForPoint(this.tapGestureRecognizer.LocationInView(this.barcodeView));
+                    var locationInView = this.tapGestureRecognizer.LocationInView(this.barcodeView);
+                    c.FocusPointOfInterest = this.previewLayer.CaptureDevicePointOfInterestForPoint(locationInView);
                     c.FocusMode = AVCaptureFocusMode.AutoFocus;
                     c.SubjectAreaChangeMonitoringEnabled = true;
                 });
@@ -616,6 +638,11 @@ namespace CameraScanner.Maui
 
         private void ResetFocus()
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.captureDevice is not null)
             {
                 CaptureDeviceLock(this.captureDevice, () =>
@@ -636,6 +663,13 @@ namespace CameraScanner.Maui
 
         private void UpdateOutput()
         {
+            this.logger.LogDebug("UpdateOutput");
+
+            if (this.disposed)
+            {
+                return;
+            }
+
             if (this.videoDataOutput is not null)
             {
                 this.videoDataOutput.SetSampleBufferDelegate(null, null);
@@ -652,7 +686,7 @@ namespace CameraScanner.Maui
 
         private static void CaptureDeviceLock(AVCaptureDevice captureDevice, Action action)
         {
-            DispatchQueue.MainQueue.DispatchAsync(() =>
+            // DispatchQueue.MainQueue.DispatchAsync(() =>
             {
                 if (captureDevice.LockForConfiguration(out _))
                 {
@@ -665,7 +699,24 @@ namespace CameraScanner.Maui
                         captureDevice.UnlockForConfiguration();
                     }
                 }
-            });
+            }//);
+        }
+
+        private static void ConfigureCaptureSession(AVCaptureSession captureSession, Action<AVCaptureSession> action)
+        {
+            // DispatchQueue.MainQueue.DispatchAsync(() =>
+            {
+                captureSession.BeginConfiguration();
+
+                try
+                {
+                    action(captureSession);
+                }
+                finally
+                {
+                    captureSession.CommitConfiguration();
+                }
+            }//);
         }
 
         public void Dispose()
@@ -674,42 +725,81 @@ namespace CameraScanner.Maui
             GC.SuppressFinalize(this);
         }
 
-        protected virtual void Dispose(bool disposing)
+        protected virtual async void Dispose(bool disposing)
         {
+            if (this.disposed)
+            {
+                return;
+            }
+
+            this.disposed = true;
+
             if (disposing)
             {
-                this.Stop();
-
-                if (this.subjectAreaChangedNotification is not null)
+                try
                 {
+                    this.logger.LogDebug("Dispose");
+
+                    this.Stop();
+
+                    await Task.Delay(200);
+
+                    this.logger.LogDebug("RemoveObserver");
                     NSNotificationCenter.DefaultCenter.RemoveObserver(this.subjectAreaChangedNotification);
-                }
 
-                if (this.tapGestureRecognizer is not null)
+                    if (this.tapGestureRecognizer is not null)
+                    {
+                        this.logger.LogDebug("RemoveGestureRecognizer");
+                        this.barcodeView?.RemoveGestureRecognizer(this.tapGestureRecognizer);
+                    }
+
+                    this.logger.LogDebug("SetSampleBufferDelegate");
+                    this.videoDataOutput?.SetSampleBufferDelegate(null, null);
+
+                    this.logger.LogDebug("barcodeAnalyzer.Dispose");
+                    this.barcodeAnalyzer?.Dispose();
+                    this.barcodeAnalyzer = null;
+
+                    this.logger.LogDebug("RemoveFromSuperLayer1");
+                    this.previewLayer?.RemoveFromSuperLayer();
+                    this.logger.LogDebug("RemoveFromSuperLayer2");
+                    this.shapeLayer?.RemoveFromSuperLayer();
+
+                    this.logger.LogDebug("barcodeView.Dispose");
+                    this.barcodeView?.Dispose();
+                    this.logger.LogDebug("previewLayer.Dispose");
+                    this.previewLayer?.Dispose();
+                    this.logger.LogDebug("shapeLayer.Dispose");
+                    this.shapeLayer?.Dispose();
+
+                    this.logger.LogDebug("captureSession.Dispose");
+                    this.captureSession?.Dispose();
+                    this.logger.LogDebug("videoDataOutput.Dispose");
+                    this.videoDataOutput?.Dispose();
+                    this.logger.LogDebug("captureInput.Dispose");
+                    this.captureInput?.Dispose();
+
+                    this.logger.LogDebug("captureDevice.Dispose");
+                    this.captureDevice?.Dispose();
+
+                    this.logger.LogDebug("sequenceRequestHandler.Dispose");
+                    this.sequenceRequestHandler?.Dispose();
+
+                    this.logger.LogDebug("detectBarcodesRequest.Dispose");
+                    this.detectBarcodesRequest?.Dispose();
+
+                    this.logger.LogDebug("tapGestureRecognizer.Dispose");
+                    this.tapGestureRecognizer?.Dispose();
+
+                    this.logger.LogDebug("captureDevice.Dispose");
+                    this.subjectAreaChangedNotification?.Dispose();
+
+                    this.logger.LogDebug("Dispose finished");
+                }
+                catch (Exception ex)
                 {
-                    this.barcodeView?.RemoveGestureRecognizer(this.tapGestureRecognizer);
+                    this.logger.LogError(ex, "Dispose failed with exception");
                 }
-
-                this.videoDataOutput?.SetSampleBufferDelegate(null, null);
-
-                this.previewLayer?.RemoveFromSuperLayer();
-                this.shapeLayer?.RemoveFromSuperLayer();
-
-                this.barcodeView?.Dispose();
-                this.previewLayer?.Dispose();
-                this.shapeLayer?.Dispose();
-
-                this.captureSession?.Dispose();
-                this.videoDataOutput?.Dispose();
-                this.captureInput?.Dispose();
-
-                this.barcodeAnalyzer?.Dispose();
-                this.captureDevice?.Dispose();
-                this.sequenceRequestHandler?.Dispose();
-                this.detectBarcodesRequest?.Dispose();
-                this.tapGestureRecognizer?.Dispose();
-                this.subjectAreaChangedNotification?.Dispose();
-                this.dispatchQueue?.Dispose();
             }
         }
     }

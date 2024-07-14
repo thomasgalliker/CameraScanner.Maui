@@ -16,6 +16,8 @@ namespace CameraDemoApp.ViewModels
         private bool isScannerEnabled;
         private IRelayCommand startCameraCommand;
         private IRelayCommand stopCameraCommand;
+        private IRelayCommand toggleTorchCommand;
+        private bool torchOn;
 
         public QRCodeScannerViewModel(
             ILogger<QRCodeScannerViewModel> logger,
@@ -95,6 +97,22 @@ namespace CameraDemoApp.ViewModels
         private void StopCamera()
         {
             this.IsScannerEnabled = false;
+        }
+
+        public bool TorchOn
+        {
+            get => this.torchOn;
+            set => this.SetProperty(ref this.torchOn, value);
+        }
+
+        public IRelayCommand ToggleTorchCommand
+        {
+            get => this.toggleTorchCommand ??= new RelayCommand(this.ToggleTorch);
+        }
+
+        private void ToggleTorch()
+        {
+            this.TorchOn = !this.TorchOn;
         }
     }
 }

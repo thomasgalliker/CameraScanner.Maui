@@ -22,6 +22,13 @@ namespace CameraScanner.Maui
             this.vibration = vibration;
         }
 
+        /// <summary>
+        /// Defines if the platform handler is automatically disconnected
+        /// or if <c>Handler.DisconnectHandler();</c> is called manually.
+        /// Default: <c>true</c> (automatically disconnected)
+        /// </summary>
+        public bool AutoDisconnectHandler { get; set; } = true;
+
         public static readonly BindableProperty OnDetectionFinishedCommandProperty = BindableProperty.Create(
             nameof(OnDetectionFinishedCommand),
             typeof(ICommand),

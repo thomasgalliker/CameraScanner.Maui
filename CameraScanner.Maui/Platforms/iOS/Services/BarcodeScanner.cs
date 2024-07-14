@@ -68,7 +68,7 @@ namespace CameraScanner.Maui.Platforms.Services
                     outputResults.Add(new BarcodeResult
                     {
                         BarcodeType = BarcodeTypes.Unknown, // TODO: Implement mapping
-                        BarcodeFormat = ConvertFromIOSFormats(barcode.Symbology),
+                        BarcodeFormat = barcode.Symbology.ToBarcodeFormats(),
                         DisplayValue = barcode.PayloadStringValue,
                         RawValue = barcode.PayloadStringValue,
                         RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
@@ -77,37 +77,6 @@ namespace CameraScanner.Maui.Platforms.Services
                     });
                 }
             }
-        }
-
-        private static BarcodeFormats ConvertFromIOSFormats(VNBarcodeSymbology symbology)
-        {
-            return symbology switch
-            {
-                VNBarcodeSymbology.Aztec => BarcodeFormats.Aztec,
-                VNBarcodeSymbology.Code39 => BarcodeFormats.Code39,
-                VNBarcodeSymbology.Code39Checksum => BarcodeFormats.Code39,
-                VNBarcodeSymbology.Code39FullAscii => BarcodeFormats.Code39,
-                VNBarcodeSymbology.Code39FullAsciiChecksum => BarcodeFormats.Code39,
-                VNBarcodeSymbology.Code93 => BarcodeFormats.Code93,
-                VNBarcodeSymbology.Code93i => BarcodeFormats.Code93,
-                VNBarcodeSymbology.Code128 => BarcodeFormats.Code128,
-                VNBarcodeSymbology.DataMatrix => BarcodeFormats.DataMatrix,
-                VNBarcodeSymbology.Ean8 => BarcodeFormats.Ean8,
-                VNBarcodeSymbology.Ean13 => BarcodeFormats.Ean13,
-                VNBarcodeSymbology.I2OF5 => BarcodeFormats.I2OF5,
-                VNBarcodeSymbology.I2OF5Checksum => BarcodeFormats.I2OF5,
-                VNBarcodeSymbology.Itf14 => BarcodeFormats.Itf,
-                VNBarcodeSymbology.Pdf417 => BarcodeFormats.Pdf417,
-                VNBarcodeSymbology.QR => BarcodeFormats.QRCode,
-                VNBarcodeSymbology.Upce => BarcodeFormats.Upce,
-                VNBarcodeSymbology.Codabar => BarcodeFormats.CodaBar,
-                VNBarcodeSymbology.GS1DataBar => BarcodeFormats.GS1DataBar,
-                VNBarcodeSymbology.GS1DataBarExpanded => BarcodeFormats.GS1DataBar,
-                VNBarcodeSymbology.GS1DataBarLimited => BarcodeFormats.GS1DataBar,
-                VNBarcodeSymbology.MicroPdf417 => BarcodeFormats.MicroPdf417,
-                VNBarcodeSymbology.MicroQR => BarcodeFormats.MicroQR,
-                _ => BarcodeFormats.None
-            };
         }
 
         private static CGRect InvertY(CGRect rect)
