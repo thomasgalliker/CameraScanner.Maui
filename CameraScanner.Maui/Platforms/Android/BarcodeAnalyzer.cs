@@ -12,6 +12,7 @@ namespace CameraScanner.Maui
 
         private uint? skippedFrames;
         private readonly SyncHelper syncHelper;
+        private uint? barcodeDetectionFrameRate;
 
         internal BarcodeAnalyzer(
             ILogger<BarcodeAnalyzer> logger,
@@ -26,7 +27,15 @@ namespace CameraScanner.Maui
 
         public int TargetCoordinateSystem => ImageAnalysis.CoordinateSystemOriginal;
 
-        public uint? BarcodeDetectionFrameRate { get; set; }
+        public uint? BarcodeDetectionFrameRate
+        {
+            get => this.barcodeDetectionFrameRate;
+            set
+            {
+                this.barcodeDetectionFrameRate = value;
+                this.skippedFrames = null;
+            }
+        }
 
         public bool PauseScanning { get; set; }
 
