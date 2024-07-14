@@ -28,7 +28,7 @@ namespace CameraDemoApp.ViewModels
                 .Select(b => new BarcodeFormatViewModel(b, isSelected: selectedBarcodeFormats.Contains(b)))
                 .ToArray();
 
-            this.CaptureQualities =  Enum.GetValues(typeof(CaptureQuality))
+            this.CaptureQualities = Enum.GetValues(typeof(CaptureQuality))
                 .Cast<CaptureQuality>()
                 .Select(q => new CaptureQualityViewModel(q, isSelected: navigationParameter.CaptureQuality == q))
                 .ToArray();
@@ -36,10 +36,31 @@ namespace CameraDemoApp.ViewModels
             this.BarcodeDetectionFrameRate = navigationParameter.BarcodeDetectionFrameRate?.ToString();
         }
 
+        public bool AllBarcodeFormatsChecked
+        {
+            get => this.BarcodeFormats is IEnumerable<BarcodeFormatViewModel> viewModels && viewModels.All(b => b.IsSelected);
+            set
+            {
+                if (this.BarcodeFormats is IEnumerable<BarcodeFormatViewModel> viewModels)
+                {
+                    foreach (var barcodeFormatViewModel in viewModels)
+                    {
+                        barcodeFormatViewModel.IsSelected = value;
+                    }
+                }
+            }
+        }
+
         public BarcodeFormatViewModel[] BarcodeFormats
         {
             get => this.barcodeFormats;
-            private set => this.SetProperty(ref this.barcodeFormats, value);
+            private set
+            {
+                if (this.SetProperty(ref this.barcodeFormats, value))
+                {
+                    this.OnPropertyChanged(nameof(this.AllBarcodeFormatsChecked));
+                }
+            }
         }
 
         public CaptureQualityViewModel[] CaptureQualities
@@ -77,7 +98,6 @@ namespace CameraDemoApp.ViewModels
                     .Where(b => b.IsSelected)
                     .Select(b => b.Value)
                     .ToEnum(),
-
                 CaptureQuality = this.CaptureQualities.SingleOrDefault(q => q.IsSelected)?.Value ?? CaptureQuality.Medium
             };
 

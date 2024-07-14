@@ -30,35 +30,39 @@
                         <Label
                             Style="{StaticResource Heading2LabelStyle}"
                             Text="Barcode Formats" />
-   
-                        <VerticalStackLayout
-                            BindableLayout.ItemsSource="{Binding BarcodeFormats}">
-                            <BindableLayout.ItemTemplate>
-                                <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
-                                    <Grid ColumnDefinitions="Auto, *">
-                                        <CheckBox
-                                            Grid.Column="0"
-                                            IsChecked="{Binding IsSelected}" />
-                                        <Label
-                                            Grid.Column="1"
-                                            Text="{Binding Value}"
-                                            VerticalOptions="Center" />
-                                    </Grid>
-                                </DataTemplate>
-                            </BindableLayout.ItemTemplate>
+
+                        <VerticalStackLayout>
+                            <Grid ColumnDefinitions="Auto, *">
+                                <CheckBox
+                                    Grid.Column="0"
+                                    IsChecked="{Binding AllBarcodeFormatsChecked}" />
+                                <Label
+                                    Grid.Column="1"
+                                    Text="All"
+                                    VerticalOptions="Center" />
+                            </Grid>
+                            <VerticalStackLayout
+                                BindableLayout.ItemsSource="{Binding BarcodeFormats}">
+                                <BindableLayout.ItemTemplate>
+                                    <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
+                                        <Grid ColumnDefinitions="Auto, *">
+                                            <CheckBox
+                                                Grid.Column="0"
+                                                IsChecked="{Binding IsSelected}" />
+                                            <Label
+                                                Grid.Column="1"
+                                                Text="{Binding Value}"
+                                                VerticalOptions="Center" />
+                                        </Grid>
+                                    </DataTemplate>
+                                </BindableLayout.ItemTemplate>
+                            </VerticalStackLayout>
                         </VerticalStackLayout>
                         
                         <Label
                             Style="{StaticResource Heading2LabelStyle}"
-                            Text="Barcode Detection Frame Rate" />
-                        <Entry
-                            Text="{Binding BarcodeDetectionFrameRate}" 
-                            Keyboard="Numeric"/>
-                        
-                        <Label
-                            Style="{StaticResource Heading2LabelStyle}"
-                            Text="Caputure Quality" />
-                        <StackLayout 
+                            Text="Capture Quality" />
+                        <StackLayout
                             Orientation="Vertical"
                             BindableLayout.ItemsSource="{Binding CaptureQualities}"
                             RadioButtonGroup.GroupName="captureQualities">
@@ -67,6 +71,7 @@
                                     <Grid ColumnDefinitions="Auto, *">
                                         <RadioButton
                                             Grid.Column="0"
+                                            Value="{Binding Value}"
                                             IsChecked="{Binding IsSelected}" />
                                         <Label
                                             Grid.Column="1"
@@ -77,9 +82,15 @@
                             </BindableLayout.ItemTemplate>
                         </StackLayout>
 
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Detection Frame Rate" />
+                        <Entry
+                            Text="{Binding BarcodeDetectionFrameRate}"
+                            Keyboard="Numeric" />
                     </VerticalStackLayout>
                 </ScrollView>
-                
+
                 <Grid
                     ColumnDefinitions="*,*"
                     ColumnSpacing="8">
