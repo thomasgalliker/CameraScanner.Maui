@@ -29,7 +29,7 @@ namespace CameraScanner.Maui.Tests.Extensions
             var barcodeFormatsArray = barcodeFormats.ToArray();
 
             // Assert
-            barcodeFormatsArray.Should().HaveCount(19);
+            barcodeFormatsArray.Should().HaveCount(17);
             barcodeFormatsArray.Should().NotContain(BarcodeFormats.None);
             barcodeFormatsArray.Should().NotContain(BarcodeFormats.All);
         }

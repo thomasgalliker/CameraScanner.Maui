@@ -26,16 +26,7 @@
         MicroQR     = 1 << 15, // 32768
         MicroPdf417 = 1 << 16, // 65536
 
-        // Android only
-        Code39Mod43 = 1 << 17, // 131072
-        MSI         = 1 << 18, // 262144
-        Plessey     = 1 << 19, // 524288
-        RSS14       = 1 << 20, // 1048576
-        RSSExpanded = 1 << 21, // 2097152
-        UPCEAN      = 1 << 22, // 4194304
-
         All = Aztec | Code128 | Code39 | Code93 | DataMatrix | Ean13 | Ean8 | ITF | Pdf417 | QR |
-              UPC_A | UPC_E | Codabar | GS1DataBar | I2OF5 | MicroQR | MicroPdf417 |
-              Code39Mod43 | MSI | Plessey | RSS14 | RSSExpanded | UPCEAN
+              UPC_A | UPC_E | Codabar | GS1DataBar | I2OF5 | MicroQR | MicroPdf417
     }
 }
