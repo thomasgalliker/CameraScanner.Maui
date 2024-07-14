@@ -24,7 +24,8 @@
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"
             TorchOn="{Binding TorchOn}"
-            BarcodeDetectionFrameRate="{Binding BarcodeDetectionFrameRate}"/>
+            BarcodeDetectionFrameRate="{Binding BarcodeDetectionFrameRate}"
+            CaptureQuality="{Binding CaptureQuality}"/>
 
         <c:BarcodeResultOverlay
             Grid.Row="0"

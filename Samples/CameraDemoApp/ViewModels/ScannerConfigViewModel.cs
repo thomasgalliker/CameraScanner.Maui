@@ -11,6 +11,7 @@ namespace CameraDemoApp.ViewModels
         private IAsyncRelayCommand<Popup> cancelCommand;
         private IAsyncRelayCommand<Popup> confirmCommand;
         private BarcodeFormatViewModel[] barcodeFormats;
+        private CaptureQualityViewModel[] captureQualities;
         private string barcodeDetectionFrameRate;
 
         public ScannerConfigViewModel()
@@ -27,6 +28,11 @@ namespace CameraDemoApp.ViewModels
                 .Select(b => new BarcodeFormatViewModel(b, isSelected: selectedBarcodeFormats.Contains(b)))
                 .ToArray();
 
+            this.CaptureQualities =  Enum.GetValues(typeof(CaptureQuality))
+                .Cast<CaptureQuality>()
+                .Select(q => new CaptureQualityViewModel(q, isSelected: navigationParameter.CaptureQuality == q))
+                .ToArray();
+
             this.BarcodeDetectionFrameRate = navigationParameter.BarcodeDetectionFrameRate?.ToString();
         }
 
@@ -34,6 +40,12 @@ namespace CameraDemoApp.ViewModels
         {
             get => this.barcodeFormats;
             private set => this.SetProperty(ref this.barcodeFormats, value);
+        }
+
+        public CaptureQualityViewModel[] CaptureQualities
+        {
+            get => this.captureQualities;
+            private set => this.SetProperty(ref this.captureQualities, value);
         }
 
         public string BarcodeDetectionFrameRate
@@ -65,6 +77,8 @@ namespace CameraDemoApp.ViewModels
                     .Where(b => b.IsSelected)
                     .Select(b => b.Value)
                     .ToEnum(),
+
+                CaptureQuality = this.CaptureQualities.SingleOrDefault(q => q.IsSelected)?.Value ?? CaptureQuality.Medium
             };
 
             if (uint.TryParse(this.BarcodeDetectionFrameRate, out var frameRate))
@@ -75,10 +89,11 @@ namespace CameraDemoApp.ViewModels
             await popup.CloseAsync(popupResult);
         }
 
-
         public class PopupResult
         {
             public BarcodeFormats BarcodeFormats { get; set; }
+
+            public CaptureQuality CaptureQuality { get; set; }
 
             public uint? BarcodeDetectionFrameRate { get; set; }
         }
@@ -86,6 +101,8 @@ namespace CameraDemoApp.ViewModels
         public class NavigationParameter
         {
             public BarcodeFormats BarcodeFormat { get; set; }
+
+            public CaptureQuality CaptureQuality { get; set; }
 
             public uint? BarcodeDetectionFrameRate { get; set; }
         }

@@ -54,20 +54,28 @@
                         <Entry
                             Text="{Binding BarcodeDetectionFrameRate}" 
                             Keyboard="Numeric"/>
-                        <!-- -->
-                        <!-- <StackLayout Orientation="Horizontal" RadioButtonGroup.GroupName="modes"> -->
-                        <!--     <BindableLayout.ItemsSource> -->
-                        <!--         <x:Array Type="{x:Type x:String}"> -->
-                        <!--             <x:String>Add</x:String> -->
-                        <!--             <x:String>Subtract</x:String> -->
-                        <!--         </x:Array> -->
-                        <!--     </BindableLayout.ItemsSource> -->
-                        <!--     <BindableLayout.ItemTemplate> -->
-                        <!--         <DataTemplate x:DataType="{x:Type x:String}"> -->
-                        <!--             <RadioButton Content="{Binding}" Value="{Binding}" /> -->
-                        <!--         </DataTemplate> -->
-                        <!--     </BindableLayout.ItemTemplate> -->
-                        <!-- </StackLayout> -->
+                        
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Caputure Quality" />
+                        <StackLayout 
+                            Orientation="Vertical"
+                            BindableLayout.ItemsSource="{Binding CaptureQualities}"
+                            RadioButtonGroup.GroupName="captureQualities">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Type vm:CaptureQualityViewModel}">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <RadioButton
+                                            Grid.Column="0"
+                                            IsChecked="{Binding IsSelected}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding Value}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </StackLayout>
 
                     </VerticalStackLayout>
                 </ScrollView>

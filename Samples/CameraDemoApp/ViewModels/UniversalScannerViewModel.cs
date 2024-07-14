@@ -15,6 +15,7 @@ namespace CameraDemoApp.ViewModels
 
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private BarcodeFormats barcodeFormats;
+        private CaptureQuality captureQuality;
         private bool isScannerPause;
         private bool isScannerEnabled;
         private IRelayCommand startStopCameraCommand;
@@ -35,6 +36,7 @@ namespace CameraDemoApp.ViewModels
             this.popupService = popupService;
 
             this.BarcodeFormats = BarcodeFormats.All;
+            this.CaptureQuality = CaptureQuality.Medium;
             this.IsScannerEnabled = true;
         }
 
@@ -68,6 +70,18 @@ namespace CameraDemoApp.ViewModels
             private set
             {
                 if (this.SetProperty(ref this.barcodeFormats, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public CaptureQuality CaptureQuality
+        {
+            get => this.captureQuality;
+            private set
+            {
+                if (this.SetProperty(ref this.captureQuality, value))
                 {
                     this.OnPropertyChanged(nameof(this.DebugInfo));
                 }
@@ -196,8 +210,9 @@ namespace CameraDemoApp.ViewModels
                     $"IsScannerEnabled: {this.IsScannerEnabled}{Environment.NewLine}" +
                     $"IsScannerPause: {this.IsScannerPause}{Environment.NewLine}" +
                     $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
-                    $"BarcodeDetectionFrameRate: {this.BarcodeDetectionFrameRate?.ToString() ?? "null"}{Environment.NewLine}" +
-                    $"BarcodeFormats: {this.BarcodeFormats}";
+                    $"CaptureQuality: {this.CaptureQuality}{Environment.NewLine}" +
+                    $"BarcodeFormats: {this.BarcodeFormats}{Environment.NewLine}" +
+                    $"BarcodeDetectionFrameRate: {this.BarcodeDetectionFrameRate?.ToString() ?? "null"}";
             }
         }
 
@@ -211,6 +226,7 @@ namespace CameraDemoApp.ViewModels
             var navigationParameter = new ScannerConfigViewModel.NavigationParameter
             {
                 BarcodeFormat = this.BarcodeFormats,
+                CaptureQuality = this.CaptureQuality,
                 BarcodeDetectionFrameRate = this.BarcodeDetectionFrameRate,
             };
 
@@ -219,6 +235,7 @@ namespace CameraDemoApp.ViewModels
             if (result is ScannerConfigViewModel.PopupResult popupResult)
             {
                 this.BarcodeFormats = popupResult.BarcodeFormats;
+                this.CaptureQuality = popupResult.CaptureQuality;
                 this.BarcodeDetectionFrameRate = popupResult.BarcodeDetectionFrameRate;
             }
         }
