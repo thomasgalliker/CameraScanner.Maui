@@ -219,88 +219,11 @@ namespace CameraScanner.Maui
             if (this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
             {
                 this.barcodeScanner?.Dispose();
-                var mlKitBarcodeFormats = MapBarcodeFormats(barcodeFormats);
+                var mlKitBarcodeFormats = barcodeFormats.ToPlatform();
                 this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
                     .SetBarcodeFormats(mlKitBarcodeFormats)
                     .Build());
             }
-        }
-
-        internal static int MapBarcodeFormats(BarcodeFormats barcodeFormats)
-        {
-            var formats = Barcode.FormatAllFormats;
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code128))
-            {
-                formats |= Barcode.FormatCode128;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code39))
-            {
-                formats |= Barcode.FormatCode39;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code93))
-            {
-                formats |= Barcode.FormatCode93;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.CodaBar))
-            {
-                formats |= Barcode.FormatCodabar;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.DataMatrix))
-            {
-                formats |= Barcode.FormatDataMatrix;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean13))
-            {
-                formats |= Barcode.FormatEan13;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean8))
-            {
-                formats |= Barcode.FormatEan8;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Itf))
-            {
-                formats |= Barcode.FormatItf;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.QRCode))
-            {
-                formats |= Barcode.FormatQrCode;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upca))
-            {
-                formats |= Barcode.FormatUpcA;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upce))
-            {
-                formats |= Barcode.FormatUpcE;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Pdf417))
-            {
-                formats |= Barcode.FormatPdf417;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Aztec))
-            {
-                formats |= Barcode.FormatAztec;
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.All))
-            {
-                formats = Barcode.FormatAllFormats;
-            }
-
-            return formats;
         }
 
         internal void UpdateCamera()

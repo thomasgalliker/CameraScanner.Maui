@@ -239,114 +239,11 @@ namespace CameraScanner.Maui
 
             if (this.detectBarcodesRequest is not null && this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
             {
-                var vnBarcodeSymbologies = MapBarcodeFormats(barcodeFormats);
+                var vnBarcodeSymbologies = barcodeFormats.ToPlatform();
                 this.detectBarcodesRequest.Symbologies = vnBarcodeSymbologies;
             }
         }
 
-        internal static VNBarcodeSymbology[] MapBarcodeFormats(BarcodeFormats barcodeFormats)
-        {
-            if (barcodeFormats.HasFlag(BarcodeFormats.All))
-            {
-                return [];
-            }
-
-            var symbologiesList = new List<VNBarcodeSymbology>();
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code128))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code128);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code39))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code39);
-                symbologiesList.Add(VNBarcodeSymbology.Code39Checksum);
-                symbologiesList.Add(VNBarcodeSymbology.Code39FullAscii);
-                symbologiesList.Add(VNBarcodeSymbology.Code39FullAsciiChecksum);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Code93))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Code93);
-                symbologiesList.Add(VNBarcodeSymbology.Code93i);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.CodaBar))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Codabar);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.DataMatrix))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.DataMatrix);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean13))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean13);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Ean8))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean8);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Itf))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Itf14);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.QRCode))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.QR);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upca))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Ean13);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Upce))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Upce);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Pdf417))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Pdf417);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.Aztec))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.Aztec);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.MicroQR))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.MicroQR);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.MicroPdf417))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.MicroPdf417);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.I2OF5))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5);
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5Checksum);
-            }
-
-            if (barcodeFormats.HasFlag(BarcodeFormats.GS1DataBar))
-            {
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBar);
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBarLimited);
-                symbologiesList.Add(VNBarcodeSymbology.GS1DataBarExpanded);
-            }
-
-            return symbologiesList.ToArray();
-        }
 
         internal void UpdateCamera()
         {

@@ -17,7 +17,7 @@
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
             Grid.Row="0"
-            BarcodeFormats="QRCode"
+            BarcodeFormats="QR"
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"

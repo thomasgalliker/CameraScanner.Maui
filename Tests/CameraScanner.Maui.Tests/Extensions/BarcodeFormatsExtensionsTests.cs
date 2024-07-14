@@ -38,7 +38,7 @@ namespace CameraScanner.Maui.Tests.Extensions
         public void ShouldConvertFlagsToArray_SomeValues()
         {
             // Arrange
-            var barcodeFormats = BarcodeFormats.Aztec | BarcodeFormats.QRCode | BarcodeFormats.Ean13;
+            var barcodeFormats = BarcodeFormats.Aztec | BarcodeFormats.QR | BarcodeFormats.Ean13;
 
             // Act
             var barcodeFormatsArray = barcodeFormats.ToArray();
@@ -54,7 +54,7 @@ namespace CameraScanner.Maui.Tests.Extensions
             var barcodeFormatsArray = new[]
             {
                 BarcodeFormats.Aztec,
-                BarcodeFormats.QRCode,
+                BarcodeFormats.QR,
                 BarcodeFormats.Ean13
             };
 
@@ -62,7 +62,7 @@ namespace CameraScanner.Maui.Tests.Extensions
             var barcodeFormats = barcodeFormatsArray.ToEnum();
 
             // Assert
-            barcodeFormats.Should().Be(BarcodeFormats.Aztec | BarcodeFormats.QRCode | BarcodeFormats.Ean13);
+            barcodeFormats.Should().Be(BarcodeFormats.Aztec | BarcodeFormats.QR | BarcodeFormats.Ean13);
         }
 
         [Fact]
