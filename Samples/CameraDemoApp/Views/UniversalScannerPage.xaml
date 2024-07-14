@@ -22,7 +22,9 @@
             BarcodeFormats="{Binding BarcodeFormats}"
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
-            PauseScanning="{Binding IsScannerPause}" />
+            PauseScanning="{Binding IsScannerPause}"
+            TorchOn="{Binding TorchOn}"
+            BarcodeDetectionFrameRate="{Binding BarcodeDetectionFrameRate}"/>
 
         <c:BarcodeResultOverlay
             Grid.Row="0"

@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <mct:Popup
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
@@ -24,14 +25,53 @@
             Padding="16"
             HorizontalOptions="FillAndExpand">
             <VerticalStackLayout Spacing="8">
-                <Label
-                    Style="{StaticResource Heading2LabelStyle}"
-                    Text="Configure" />
-                <Picker
-                    Title="BarcodeFormats"
-                    ItemsSource="{Binding BarcodeFormats}"
-                    SelectedItem="{Binding BarcodeFormat}" />
+                <ScrollView HeightRequest="400">
+                    <VerticalStackLayout Spacing="8">
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Formats" />
+   
+                        <VerticalStackLayout
+                            BindableLayout.ItemsSource="{Binding BarcodeFormats}">
+                            <BindableLayout.ItemTemplate>
+                                <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
+                                    <Grid ColumnDefinitions="Auto, *">
+                                        <CheckBox
+                                            Grid.Column="0"
+                                            IsChecked="{Binding IsSelected}" />
+                                        <Label
+                                            Grid.Column="1"
+                                            Text="{Binding Value}"
+                                            VerticalOptions="Center" />
+                                    </Grid>
+                                </DataTemplate>
+                            </BindableLayout.ItemTemplate>
+                        </VerticalStackLayout>
+                        
+                        <Label
+                            Style="{StaticResource Heading2LabelStyle}"
+                            Text="Barcode Detection Frame Rate" />
+                        <Entry
+                            Text="{Binding BarcodeDetectionFrameRate}" 
+                            Keyboard="Numeric"/>
+                        <!-- -->
+                        <!-- <StackLayout Orientation="Horizontal" RadioButtonGroup.GroupName="modes"> -->
+                        <!--     <BindableLayout.ItemsSource> -->
+                        <!--         <x:Array Type="{x:Type x:String}"> -->
+                        <!--             <x:String>Add</x:String> -->
+                        <!--             <x:String>Subtract</x:String> -->
+                        <!--         </x:Array> -->
+                        <!--     </BindableLayout.ItemsSource> -->
+                        <!--     <BindableLayout.ItemTemplate> -->
+                        <!--         <DataTemplate x:DataType="{x:Type x:String}"> -->
+                        <!--             <RadioButton Content="{Binding}" Value="{Binding}" /> -->
+                        <!--         </DataTemplate> -->
+                        <!--     </BindableLayout.ItemTemplate> -->
+                        <!-- </StackLayout> -->
 
+                    </VerticalStackLayout>
+                </ScrollView>
+                
                 <Grid
                     ColumnDefinitions="*,*"
                     ColumnSpacing="8">

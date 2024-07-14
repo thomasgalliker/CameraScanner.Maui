@@ -23,6 +23,7 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand<BarcodeResult> barcodeResultTappedCommand;
         private bool torchOn;
         private IRelayCommand toggleTorchCommand;
+        private uint? barcodeDetectionFrameRate;
 
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
@@ -141,7 +142,13 @@ namespace CameraDemoApp.ViewModels
         public bool TorchOn
         {
             get => this.torchOn;
-            set => this.SetProperty(ref this.torchOn, value);
+            set
+            {
+                if (this.SetProperty(ref this.torchOn, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public IRelayCommand ToggleTorchCommand
@@ -152,6 +159,18 @@ namespace CameraDemoApp.ViewModels
         private void ToggleTorch()
         {
             this.TorchOn = !this.TorchOn;
+        }
+
+        public uint? BarcodeDetectionFrameRate
+        {
+            get => this.barcodeDetectionFrameRate;
+            private set
+            {
+                if (this.SetProperty(ref this.barcodeDetectionFrameRate, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public IRelayCommand<BarcodeResult> BarcodeResultTappedCommand
@@ -177,6 +196,7 @@ namespace CameraDemoApp.ViewModels
                     $"IsScannerEnabled: {this.IsScannerEnabled}{Environment.NewLine}" +
                     $"IsScannerPause: {this.IsScannerPause}{Environment.NewLine}" +
                     $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
+                    $"BarcodeDetectionFrameRate: {this.BarcodeDetectionFrameRate?.ToString() ?? "null"}{Environment.NewLine}" +
                     $"BarcodeFormats: {this.BarcodeFormats}";
             }
         }
@@ -188,13 +208,18 @@ namespace CameraDemoApp.ViewModels
 
         private async Task ConfigureAsync()
         {
-            var navigationParameter = new ScannerConfigViewModel.NavigationParameter { BarcodeFormats = this.BarcodeFormats, };
+            var navigationParameter = new ScannerConfigViewModel.NavigationParameter
+            {
+                BarcodeFormat = this.BarcodeFormats,
+                BarcodeDetectionFrameRate = this.BarcodeDetectionFrameRate,
+            };
 
             var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm =>
                 vm.Initialize(navigationParameter));
             if (result is ScannerConfigViewModel.PopupResult popupResult)
             {
-                this.BarcodeFormats = popupResult.BarcodeFormats.SingleOrDefault();
+                this.BarcodeFormats = popupResult.BarcodeFormats;
+                this.BarcodeDetectionFrameRate = popupResult.BarcodeDetectionFrameRate;
             }
         }
     }
