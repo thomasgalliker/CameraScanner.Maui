@@ -49,6 +49,31 @@ Then, you can add `CameraView` to your xaml UI.
 ```
 There are several bindable properties in `CameraView` in order to configure and control the camera preview.
 
+#### Configure CameraView
+
+| Property                    | Description                                                                                                                                                                                                                                  |
+|-----------------------------|------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| `AutoDisconnectHandler`     | Defines if the platform handler is automatically disconnected or if `Handler.DisconnectHandler();` is called manually. Default: `true` (automatically disconnected)                                                                        |
+| `VibrationOnDetected`       | Enables or disables vibration on successful barcode detection. Default: `false`                                                                                                                                                          |
+| `CameraEnabled`             | Enables or disables the camera preview. Default: `true`                                                                                                                                                                                   |
+| `PauseScanning`             | Pauses barcode scanning.                                                                                                                                                                                                                  |
+| `ForceInverted`             | Forces scanning of inverted barcodes. Reduces performance significantly. Android only.                                                                                                                                                    |
+| `PoolingInterval`           | Enables pooling of detections for better detection of multiple barcodes at once. Value in milliseconds. Default: 0 (disabled).                                                                                                            |
+| `TorchOn`                   | Enables or disables the torch.                                                                                                                                                                                                            |
+| `TapToFocusEnabled`         | Disables or enables tap-to-focus.                                                                                                                                                                                                         |
+| `CameraFacing`              | Select front or back facing camera. Default: `CameraFacing.Back`                                                                                                                                                                           |
+| `CaptureQuality`            | Set the capture quality for the image analysis. Recommended and default value is Medium. Use the highest values for more precision or lower for fast scanning.                                                                             |
+| `BarcodeFormats`            | Set the enabled barcode formats. Default: `BarcodeFormats.All`.                                                                                                                                                                            |
+| `AimMode`                   | Disables or enables aim mode. When enabled only barcode that is in the center of the preview will be detected.                                                                                                                             |
+| `ViewfinderMode`            | Disables or enables viewfinder mode. When enabled only barcode that is visible in the preview will be detected.                                                                                                                            |
+| `CaptureNextFrame`          | Captures the next frame from the camera feed.                                                                                                                                                                                              |
+| `BarcodeDetectionFrameRate` | Specifies the frequency at which frames are processed for barcode detection. Default: null (no frame skipping) Example: If the value is null, 0 or 1, every frame from the camera preview is analyzed. If the value is 2, every 2nd frame from the camera preview is analyzed. If the value is 3, every 3rd frame from the camera preview is analyzed. |
+| `RequestZoomFactor`         | Setting this value changes the zoom factor of the camera. Value has to be between MinZoomFactor and MaxZoomFactor. More info: iOS/macOS - https://developer.apple.com/documentation/avfoundation/avcapturedevice/zoom Android - https://developer.android.com/reference/kotlin/androidx/camera/view/CameraController#setZoomRatio(float) Only logical multi-camera is supported - https://developer.android.com/media/camera/camera2/multi-camera  |
+| `CurrentZoomFactor`         | Returns current zoom factor value.                                                                                                                                                                                                        |
+| `MinZoomFactor`             | Returns minimum zoom factor for current camera.                                                                                                                                                                                            |
+| `MaxZoomFactor`             | Returns maximum zoom factor for current camera.                                                                                                                                                                                            |
+| `DeviceSwitchZoomFactors`   | Returns zoom factors that switch between camera lenses. Supported on iOS only.                                                                                                                                                             |
+
 #### Ask for camera permission
 Before your app is allowed to access the camera stream, the user has to give runtime permission to access the camera. This library provides the interface `ICameraPermissions` to check if the permission is already given and/or to ask for permission. 
 
@@ -81,6 +106,8 @@ The following barcode formats are supported on the underlying platforms:
 | I2of5                | :white_check_mark:     | :white_large_square:     |
 | MicroQR              | :white_check_mark: *1) | :white_large_square:     |
 | MicroPdf417          | :white_check_mark: *1) | :white_large_square:     |
+
+_*1) Supported on iOS 15 and later._
 
 ### Contribution
 Contributors welcome! If you find a bug or you want to propose a new feature, feel free to do so by opening a new issue on github.com.
