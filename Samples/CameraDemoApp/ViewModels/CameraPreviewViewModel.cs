@@ -18,6 +18,8 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand zoomInCommand;
         private IRelayCommand zoomOutCommand;
         private float? currentZoomFactor;
+        private bool torchOn;
+        private IRelayCommand toggleTorchCommand;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
@@ -32,7 +34,13 @@ namespace CameraDemoApp.ViewModels
         public CameraFacing CameraFacing
         {
             get => this.cameraFacing;
-            private set => this.SetProperty(ref this.cameraFacing, value);
+            private set
+            {
+                if (this.SetProperty(ref this.cameraFacing, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public IRelayCommand ToggleCameraFacingCommand
@@ -48,13 +56,25 @@ namespace CameraDemoApp.ViewModels
         public float? RequestZoomFactor
         {
             get => this.requestZoomFactor;
-            private set => this.SetProperty(ref this.requestZoomFactor, value);
+            private set
+            {
+                if (this.SetProperty(ref this.requestZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public float? CurrentZoomFactor
         {
             get => this.currentZoomFactor;
-            set => this.SetProperty(ref this.currentZoomFactor, value);
+            set
+            {
+                if (this.SetProperty(ref this.currentZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
         }
 
         public IRelayCommand ZoomInCommand
@@ -75,6 +95,42 @@ namespace CameraDemoApp.ViewModels
         private void ZoomOut()
         {
             this.RequestZoomFactor = this.CurrentZoomFactor - 0.1F;
+        }
+
+
+        public bool TorchOn
+        {
+            get => this.torchOn;
+            set
+            {
+                if (this.SetProperty(ref this.torchOn, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public IRelayCommand ToggleTorchCommand
+        {
+            get => this.toggleTorchCommand ??= new RelayCommand(this.ToggleTorch);
+        }
+
+        private void ToggleTorch()
+        {
+            this.TorchOn = !this.TorchOn;
+        }
+
+
+        public string DebugInfo
+        {
+            get
+            {
+                return
+                    $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
+                    $"RequestZoomFactor: {this.RequestZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
+                    $"CurrentZoomFactor: {this.CurrentZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
+                    $"CameraFacing: {this.CameraFacing}";
+            }
         }
     }
 }
