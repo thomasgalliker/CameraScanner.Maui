@@ -131,17 +131,17 @@ namespace CameraScanner.Maui
 
         internal void UpdateRequestZoomFactor()
         {
-            if (this.cameraView is not null && this.cameraController is { ZoomState.IsInitialized: true })
+            if (this.cameraController is { ZoomState.IsInitialized: true } &&
+                this.zoomStateObserver.LastValue is IZoomState zoomState &&
+                this.cameraView is not null &&
+                this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
             {
-                if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
-                {
-                    var zoomRatio = Math.Max(requestZoomFactor, this.zoomStateObserver.MinZoomRatio);
-                    zoomRatio = Math.Min(zoomRatio, this.zoomStateObserver.MaxZoomRatio);
+                var zoomRatio = Math.Max(requestZoomFactor, zoomState.MinZoomRatio);
+                zoomRatio = Math.Min(zoomRatio, zoomState.MaxZoomRatio);
 
-                    if (Math.Abs(zoomRatio - this.zoomStateObserver.ZoomRatio) > 0.001F)
-                    {
-                        this.cameraController.SetZoomRatio(zoomRatio);
-                    }
+                if (Math.Abs(zoomRatio - zoomState.ZoomRatio) > 0.001F)
+                {
+                    this.cameraController.SetZoomRatio(zoomRatio);
                 }
             }
         }
