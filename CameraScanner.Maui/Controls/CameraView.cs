@@ -254,7 +254,8 @@ namespace CameraScanner.Maui
             nameof(CaptureNextFrame),
             typeof(bool),
             typeof(CameraView),
-            false);
+            false,
+            BindingMode.TwoWay);
 
         /// <summary>
         /// Captures the next frame from the camera feed.

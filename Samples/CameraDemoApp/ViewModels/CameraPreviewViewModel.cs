@@ -4,6 +4,7 @@ using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Microsoft.Maui.Graphics.Platform;
 
 namespace CameraDemoApp.ViewModels
 {
@@ -20,6 +21,9 @@ namespace CameraDemoApp.ViewModels
         private float? currentZoomFactor;
         private bool torchOn;
         private IRelayCommand toggleTorchCommand;
+        private IRelayCommand shutterCommand;
+        private IRelayCommand imageCapturedCommand;
+        private bool captureNextFrame;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
@@ -97,6 +101,34 @@ namespace CameraDemoApp.ViewModels
             this.RequestZoomFactor = this.CurrentZoomFactor - 0.1F;
         }
 
+        public IRelayCommand ShutterCommand
+        {
+            get => this.shutterCommand ??= new RelayCommand(this.Shutter);
+        }
+
+        private void Shutter()
+        {
+            this.CaptureNextFrame = true;
+        }
+
+        public bool CaptureNextFrame
+        {
+            get => this.captureNextFrame;
+            set => this.SetProperty(ref this.captureNextFrame, value);
+        }
+
+        public IRelayCommand ImageCapturedCommand
+        {
+            get => this.imageCapturedCommand ??= new RelayCommand<PlatformImage>(this.ImageCaptured);
+        }
+
+        private void ImageCaptured(PlatformImage image)
+        {
+            _ = this.dialogService.DisplayAlertAsync(
+                "ImageCaptured",
+                "Successfully returned PlatformImage",
+                "OK");
+        }
 
         public bool TorchOn
         {
@@ -119,7 +151,6 @@ namespace CameraDemoApp.ViewModels
         {
             this.TorchOn = !this.TorchOn;
         }
-
 
         public string DebugInfo
         {
