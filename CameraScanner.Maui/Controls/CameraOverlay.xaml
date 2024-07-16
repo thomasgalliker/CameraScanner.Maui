@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<Grid
+    x:Class="CameraScanner.Maui.Controls.CameraOverlay"
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    x:Name="Control"
+    HorizontalOptions="Fill"
+    VerticalOptions="Fill">
+
+    <Grid.Resources>
+        <ResourceDictionary>
+            <Style x:Key="CameraShadeBoxViewStyle" TargetType="BoxView">
+                <Setter Property="VerticalOptions" Value="Fill" />
+                <Setter Property="HorizontalOptions" Value="Fill" />
+                <Setter Property="Color" Value="{Binding Source={x:Reference Control}, Path=ShadeColor}" />
+                <Setter Property="Opacity" Value="{Binding Source={x:Reference Control}, Path=ShadeOpacity}" />
+                <Setter Property="Margin" Value="0" />
+            </Style>
+        </ResourceDictionary>
+    </Grid.Resources>
+
+    <Grid.RowDefinitions>
+        <RowDefinition x:Name="Row0" Height="*" />
+        <RowDefinition x:Name="Row1" Height="*" />
+        <RowDefinition x:Name="Row2" Height="*" />
+    </Grid.RowDefinitions>
+    <Grid.ColumnDefinitions>
+        <ColumnDefinition Width="*" />
+    </Grid.ColumnDefinitions>
+
+    <BoxView
+        Grid.Row="0"
+        Grid.Column="0"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <BoxView
+        Grid.Row="2"
+        Grid.Column="0"
+        Style="{StaticResource CameraShadeBoxViewStyle}" />
+
+    <Grid Grid.Row="2">
+        <Ellipse
+            Fill="{Binding ButtonColor, Source={x:Reference Control}}"
+            HeightRequest="50"
+            HorizontalOptions="Center"
+            Stroke="Red"
+            StrokeThickness="4"
+            VerticalOptions="Center"
+            WidthRequest="50">
+            <Ellipse.GestureRecognizers>
+                <TapGestureRecognizer Command="{Binding ShutterCommand, Source={x:Reference Control}}" />
+            </Ellipse.GestureRecognizers>
+        </Ellipse>
+    </Grid>
+
+</Grid>

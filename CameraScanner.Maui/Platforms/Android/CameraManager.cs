@@ -38,6 +38,7 @@ namespace CameraScanner.Maui
         private readonly PreviewView previewView;
         private readonly RelativeLayout relativeLayout;
         private readonly ZoomStateObserver zoomStateObserver;
+        private readonly TorchStateObserver torchStateObserver;
         private readonly HashSet<BarcodeResult> barcodeResults = [];
 
         private BarcodeAnalyzer barcodeAnalyzer;
@@ -56,7 +57,7 @@ namespace CameraScanner.Maui
 
             this.cameraExecutor = Executors.NewSingleThreadExecutor();
             this.zoomStateObserver = new ZoomStateObserver();
-            this.zoomStateObserver.ZoomStateChanged += this.OnZoomStateChanged;
+            this.zoomStateObserver.ValueChanged += this.OnZoomStateChanged;
 
             this.cameraController = new LifecycleCameraController(this.context)
             {
@@ -65,6 +66,10 @@ namespace CameraScanner.Maui
             };
             this.cameraController.SetEnabledUseCases(CameraController.ImageAnalysis);
             this.cameraController.ZoomState.ObserveForever(this.zoomStateObserver);
+
+            this.torchStateObserver = new TorchStateObserver();
+            this.torchStateObserver.ValueChanged += this.OnTorchStateChanged;
+            this.cameraController.TorchState.ObserveForever(this.torchStateObserver);
 
             this.previewView = new PreviewView(this.context)
             {
@@ -94,6 +99,14 @@ namespace CameraScanner.Maui
             DeviceDisplay.Current.MainDisplayInfoChanged += this.Current_MainDisplayInfoChanged;
         }
 
+        private void OnTorchStateChanged(object sender, TorchStateEventArgs e)
+        {
+            if (this.cameraView is not null)
+            {
+                this.cameraView.TorchOn = e.TorchOn;
+            }
+        }
+
         private void OnZoomStateChanged(object sender, ZoomStateChangedEventArgs e)
         {
             if (this.cameraView is not null)
@@ -118,17 +131,17 @@ namespace CameraScanner.Maui
 
         internal void UpdateRequestZoomFactor()
         {
-            if (this.cameraView is not null && this.cameraController is { ZoomState.IsInitialized: true })
+            if (this.cameraController is { ZoomState.IsInitialized: true } &&
+                this.zoomStateObserver.LastValue is IZoomState zoomState &&
+                this.cameraView is not null &&
+                this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
             {
-                if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
-                {
-                    var zoomRatio = Math.Max(requestZoomFactor, this.zoomStateObserver.MinZoomRatio);
-                    zoomRatio = Math.Min(zoomRatio, this.zoomStateObserver.MaxZoomRatio);
+                var zoomRatio = Math.Max(requestZoomFactor, zoomState.MinZoomRatio);
+                zoomRatio = Math.Min(zoomRatio, zoomState.MaxZoomRatio);
 
-                    if (Math.Abs(zoomRatio - this.zoomStateObserver.ZoomRatio) > 0.001F)
-                    {
-                        this.cameraController.SetZoomRatio(zoomRatio);
-                    }
+                if (Math.Abs(zoomRatio - zoomState.ZoomRatio) > 0.001F)
+                {
+                    this.cameraController.SetZoomRatio(zoomRatio);
                 }
             }
         }
@@ -238,6 +251,16 @@ namespace CameraScanner.Maui
                 {
                     this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
                 }
+
+                // If camera facing is switched, the torch may be turned off
+                //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
+                //{
+                //    this.cameraView.TorchOn = true;
+                //}
+                //if ((int)this.cameraController.TorchState.Value == TorchState.Off && this.cameraView.TorchOn == true)
+                //{
+                //    this.cameraView.TorchOn = false;
+                //}
             }
         }
 
@@ -259,7 +282,19 @@ namespace CameraScanner.Maui
 
         internal void UpdateTorch()
         {
-            this.cameraController?.EnableTorch(this.cameraView.TorchOn);
+            if (this.cameraController != null)
+            {
+                var hasFlashUnit = this.cameraController.CameraInfo?.HasFlashUnit;
+                if (hasFlashUnit == false)
+                {
+                    this.cameraView.TorchOn = false;
+                }
+                else
+                {
+                    var requestedTorchOn = this.cameraView.TorchOn;
+                    this.cameraController.EnableTorch(requestedTorchOn);
+                }
+            }
         }
 
         internal void UpdateBarcodeDetectionFrameRate()
@@ -318,11 +353,11 @@ namespace CameraScanner.Maui
         {
             if (this.cameraView.PauseScanning)
             {
-                this.logger.LogDebug("PerformBarcodeDetectionAsync --> paused");
+                //this.logger.LogDebug("PerformBarcodeDetectionAsync --> paused");
                 return;
             }
 
-            this.logger.LogDebug("PerformBarcodeDetectionAsync");
+            //this.logger.LogDebug("PerformBarcodeDetectionAsync");
 
             this.barcodeResults.Clear();
             using var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false);
@@ -434,8 +469,14 @@ namespace CameraScanner.Maui
 
                 this.Stop();
 
-                this.zoomStateObserver.ZoomStateChanged -= this.OnZoomStateChanged;
+                this.zoomStateObserver.ValueChanged -= this.OnZoomStateChanged;
                 this.cameraController?.ZoomState.RemoveObserver(this.zoomStateObserver);
+                this.zoomStateObserver?.Dispose();
+
+                this.torchStateObserver.ValueChanged -= this.OnTorchStateChanged;
+                this.cameraController?.TorchState.RemoveObserver(this.torchStateObserver);
+                this.torchStateObserver?.Dispose();
+
                 this.BarcodeView?.RemoveAllViews();
                 this.relativeLayout?.RemoveAllViews();
 
@@ -444,7 +485,6 @@ namespace CameraScanner.Maui
                 this.imageView?.Dispose();
                 this.previewView?.Dispose();
                 this.cameraController?.Dispose();
-                this.zoomStateObserver?.Dispose();
                 this.barcodeAnalyzer?.Dispose();
                 this.barcodeScanner?.Dispose();
                 this.cameraExecutor?.Dispose();

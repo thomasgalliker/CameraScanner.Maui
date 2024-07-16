@@ -9,15 +9,26 @@
     Title="Camera Preview Demo"
     x:DataType="vm:CameraPreviewViewModel">
 
-    <Grid RowDefinitions="*, Auto">
+    <ContentPage.ToolbarItems>
+        <ToolbarItem
+            Command="{Binding ToggleTorchCommand}"
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}" />
+    </ContentPage.ToolbarItems>
+
+    <Grid RowDefinitions="*">
         <c:CameraView
             x:Name="CameraView"
             Grid.Row="0"
             CameraFacing="{Binding CameraFacing}"
-            CaptureNextFrame="False"
+            CaptureNextFrame="{Binding CaptureNextFrame}"
             CurrentZoomFactor="{Binding CurrentZoomFactor}"
-            OnImageCapturedCommand="{x:Null}"
-            RequestZoomFactor="{Binding RequestZoomFactor}" />
+            OnImageCapturedCommand="{Binding ImageCapturedCommand}"
+            RequestZoomFactor="{Binding RequestZoomFactor}"
+            TorchOn="{Binding TorchOn}" />
+
+        <c:CameraOverlay
+            Grid.Row="0"
+            ShutterCommand="{Binding ShutterCommand}" />
 
         <!--  Debug infos  -->
         <VerticalStackLayout
@@ -28,16 +39,7 @@
             VerticalOptions="Start">
             <Label
                 Style="{StaticResource DebugLabelStyle}"
-                Text="{Binding Source={x:Reference CameraView}, Path=MinZoomFactor, StringFormat='{}MinZoomFactor: {0}'}" />
-            <Label
-                Style="{StaticResource DebugLabelStyle}"
-                Text="{Binding Source={x:Reference CameraView}, Path=MaxZoomFactor, StringFormat='{}MaxZoomFactor: {0}'}" />
-            <Label
-                Style="{StaticResource DebugLabelStyle}"
-                Text="{Binding Source={x:Reference CameraView}, Path=CurrentZoomFactor, StringFormat='{}CurrentZoomFactor: {0}'}" />
-            <Label
-                Style="{StaticResource DebugLabelStyle}"
-                Text="{Binding Source={x:Reference CameraView}, Path=RequestZoomFactor, StringFormat='{}RequestZoomFactor: {0}'}" />
+                Text="{Binding DebugInfo}" />
         </VerticalStackLayout>
 
         <!--  Zoom controls  -->
@@ -57,25 +59,11 @@
                 CornerRadius="8"
                 FontSize="22"
                 Text="-" />
-        </VerticalStackLayout>
-
-        <VerticalStackLayout
-            Grid.Row="1"
-            Padding="16"
-            Spacing="16"
-            VerticalOptions="Start">
-
-            <Grid
-                RowDefinitions="Auto, Auto"
-                RowSpacing="8"
-                VerticalOptions="Fill">
-
-                <Button
-                    Grid.Row="0"
-                    Command="{Binding ToggleCameraFacingCommand}"
-                    Text="Toggle Camera"
-                    HorizontalOptions="Fill" />
-            </Grid>
+            <Button
+                Grid.Row="0"
+                Command="{Binding ToggleCameraFacingCommand}"
+                Text="Toggle"
+                HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </Grid>
 </ContentPage>
