@@ -34,8 +34,22 @@ namespace CameraScanner.Maui.Controls
 
                 foreach (var barcodeResult in results)
                 {
-                    // Rectangle around the barcode result
+                    // Draw rectangle around the barcode result
                     canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
+
+                    // Draw path around corner points
+                    if (barcodeResult.CornerPoints is Point[] cornerPoints && cornerPoints.Length != 0)
+                    {
+                        var cornerToCornerPath = new PathF();
+                        cornerToCornerPath.MoveTo(cornerPoints.Last());
+
+                        foreach (var cornerPoint in cornerPoints)
+                        {
+                            cornerToCornerPath.LineTo(cornerPoint);
+                        }
+
+                        canvas.DrawPath(cornerToCornerPath);
+                    }
 
                     // Display preview text underneath the barcode result
                     var displayValue = GetPreviewText(barcodeResult);
