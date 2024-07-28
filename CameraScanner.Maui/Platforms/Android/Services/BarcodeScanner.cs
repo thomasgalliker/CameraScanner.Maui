@@ -83,21 +83,21 @@ namespace CameraScanner.Maui.Platforms.Services
                 return;
             }
 
-            using var javaList = inputResults.JavaCast<ArrayList>();
-            if (javaList?.IsEmpty ?? true)
+            using var inputResultsArrayList = inputResults.JavaCast<ArrayList>();
+            if (inputResultsArrayList?.IsEmpty ?? true)
             {
                 return;
             }
 
-            foreach (var barcode in javaList.ToArray())
+            foreach (var inputResult in inputResultsArrayList.ToArray())
             {
-                using var mapped = barcode.JavaCast<Barcode>();
-                if (mapped is null)
+                using var barcode = inputResult.JavaCast<Barcode>();
+                if (barcode is null)
                 {
                     continue;
                 }
 
-                using var rectF = mapped.BoundingBox.AsRectF();
+                using var rectF = barcode.BoundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
 
                 transform?.MapRect(rectF);
@@ -105,11 +105,11 @@ namespace CameraScanner.Maui.Platforms.Services
 
                 outputResults.Add(new BarcodeResult
                 {
-                    BarcodeType = ConvertBarcodeResultTypes(mapped.ValueType),
-                    BarcodeFormat = (BarcodeFormats)mapped.Format,
-                    DisplayValue = mapped.DisplayValue,
-                    RawValue = mapped.RawValue,
-                    RawBytes = mapped.GetRawBytes(),
+                    BarcodeType = ConvertBarcodeResultTypes(barcode.ValueType),
+                    BarcodeFormat = (BarcodeFormats)barcode.Format,
+                    DisplayValue = barcode.DisplayValue,
+                    RawValue = barcode.RawValue,
+                    RawBytes = barcode.GetRawBytes(),
                     PreviewBoundingBox = previewRect,
                     ImageBoundingBox = imageRect
                 });
