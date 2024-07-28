@@ -1,5 +1,6 @@
 ﻿using System.Text;
 using AVFoundation;
+using CameraScanner.Maui.Platforms.Extensions;
 using CoreGraphics;
 using CoreImage;
 using Foundation;
@@ -65,6 +66,9 @@ namespace CameraScanner.Maui.Platforms.Services
             {
                 foreach (var barcode in inputResults)
                 {
+                    var previewBoundingBox = previewLayer?.MapToLayerCoordinates(barcode.BoundingBox.InvertY()).AsRectangleF() ?? RectF.Zero;
+                    var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
+
                     outputResults.Add(new BarcodeResult
                     {
                         BarcodeType = BarcodeTypes.Unknown, // TODO: Implement mapping
@@ -72,16 +76,11 @@ namespace CameraScanner.Maui.Platforms.Services
                         DisplayValue = barcode.PayloadStringValue,
                         RawValue = barcode.PayloadStringValue,
                         RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
-                        PreviewBoundingBox = previewLayer?.MapToLayerCoordinates(InvertY(barcode.BoundingBox)).AsRectangleF() ?? RectF.Zero,
-                        ImageBoundingBox = barcode.BoundingBox.AsRectangleF()
+                        PreviewBoundingBox = previewBoundingBox,
+                        ImageBoundingBox = imageBoundingBox,
                     });
                 }
             }
-        }
-
-        private static CGRect InvertY(CGRect rect)
-        {
-            return new CGRect(rect.X, 1 - rect.Y - rect.Height, rect.Width, rect.Height);
         }
 
         private static byte[] GetRawBytes(VNBarcodeObservation barcodeObservation)

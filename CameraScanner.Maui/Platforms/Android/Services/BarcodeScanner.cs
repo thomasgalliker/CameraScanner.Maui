@@ -97,11 +97,22 @@ namespace CameraScanner.Maui.Platforms.Services
                     continue;
                 }
 
-                using var rectF = barcode.BoundingBox.AsRectF();
+                var boundingBox = barcode.BoundingBox;
+                using var rectF = boundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
 
-                transform?.MapRect(rectF);
-                var previewRect = transform is not null ? rectF.AsRectangleF() : RectF.Zero;
+                RectF previewRect;
+
+                if (transform != null)
+                {
+                    transform.MapRect(rectF);
+                    previewRect = rectF.AsRectangleF();
+                }
+                else
+                {
+                    previewRect = RectF.Zero;
+                }
+      
 
                 outputResults.Add(new BarcodeResult
                 {
