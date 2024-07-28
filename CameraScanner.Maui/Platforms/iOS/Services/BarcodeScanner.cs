@@ -13,6 +13,8 @@ namespace CameraScanner.Maui.Platforms.Services
 {
     public class BarcodeScanner : IBarcodeScanner
     {
+        private static readonly CGSize OneByOneSize = new CGSize(1f, 1f);
+
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(byte[] imageArray)
         {
             return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromArray(imageArray)));
@@ -113,7 +115,7 @@ namespace CameraScanner.Maui.Platforms.Services
 
         private static Point GetPoint(AVCaptureVideoPreviewLayer previewLayer, CGPoint cornerPoint)
         {
-            var rectF = previewLayer.MapToLayerCoordinates(new CGRect(cornerPoint, new CGSize(1f, 1f)).InvertY()).AsRectangleF();
+            var rectF = previewLayer.MapToLayerCoordinates(new CGRect(cornerPoint, OneByOneSize).InvertY());
             return new Point(rectF.X, rectF.Y);
         }
 
