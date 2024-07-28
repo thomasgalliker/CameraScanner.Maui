@@ -22,6 +22,8 @@
 
         public RectF ImageBoundingBox { get; set; }
 
+        public Point[] CornerPoints { get; set; }
+
         public bool Equals(BarcodeResult other)
         {
             if (other is null)
