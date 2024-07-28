@@ -10,7 +10,9 @@ using Xamarin.Google.MLKit.Vision.BarCode;
 using Xamarin.Google.MLKit.Vision.Common;
 using Image = Android.Media.Image;
 using Paint = Android.Graphics.Paint;
+using Point = Microsoft.Maui.Graphics.Point;
 using RectF = Microsoft.Maui.Graphics.RectF;
+using System.Linq;
 
 namespace CameraScanner.Maui.Platforms.Services
 {
@@ -97,6 +99,16 @@ namespace CameraScanner.Maui.Platforms.Services
                     continue;
                 }
 
+                var cornerPoints = barcode.GetCornerPoints()
+                    .Select(p =>
+                    {
+                        var pointF = new global::Android.Graphics.PointF(p);
+                        transform.MapPoint(pointF);
+                        return pointF;
+                    })
+                    .Select(p => new Point(p.X, p.Y))
+                    .ToArray();
+
                 var boundingBox = barcode.BoundingBox;
                 using var rectF = boundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
@@ -122,7 +134,8 @@ namespace CameraScanner.Maui.Platforms.Services
                     RawValue = barcode.RawValue,
                     RawBytes = barcode.GetRawBytes(),
                     PreviewBoundingBox = previewRect,
-                    ImageBoundingBox = imageRect
+                    ImageBoundingBox = imageRect,
+                    CornerPoints = cornerPoints,
                 });
             }
         }
