@@ -10,9 +10,9 @@
     x:DataType="vm:UniversalScannerViewModel">
 
     <ContentPage.ToolbarItems>
-        <ToolbarItem 
+        <ToolbarItem
             IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
-            Command="{Binding ToggleTorchCommand}"  />
+            Command="{Binding ToggleTorchCommand}" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="*, Auto">
@@ -25,14 +25,18 @@
             PauseScanning="{Binding IsScannerPause}"
             TorchOn="{Binding TorchOn}"
             BarcodeDetectionFrameRate="{Binding BarcodeDetectionFrameRate}"
-            CaptureQuality="{Binding CaptureQuality}"/>
+            CaptureQuality="{Binding CaptureQuality}" />
 
         <c:BarcodeResultOverlay
             Grid.Row="0"
             StrokeColor="Red"
             StrokeSize="4"
             BarcodeResults="{Binding Source={x:Reference CameraView}, Path=BarcodeResults}"
-            BarcodeResultTappedCommand="{Binding BarcodeResultTappedCommand}"/>
+            BarcodeResultTappedCommand="{Binding BarcodeResultTappedCommand}">
+            <c:BarcodeResultOverlay.BarcodeDrawable>
+                <c:CornerPointBarcodeDrawable />
+            </c:BarcodeResultOverlay.BarcodeDrawable>
+        </c:BarcodeResultOverlay>
 
         <!--  Debug infos  -->
         <VerticalStackLayout
@@ -57,7 +61,7 @@
                 RowSpacing="8"
                 VerticalOptions="Fill">
 
-                <Grid 
+                <Grid
                     Grid.Row="0"
                     ColumnDefinitions="*, *"
                     ColumnSpacing="8">

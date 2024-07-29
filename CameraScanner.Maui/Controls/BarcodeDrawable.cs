@@ -2,7 +2,7 @@ using Font = Microsoft.Maui.Graphics.Font;
 
 namespace CameraScanner.Maui.Controls
 {
-    internal class BarcodeDrawable : IDrawable
+    public abstract class BarcodeDrawable : IBarcodeDrawable
     {
         private BarcodeResult[] barcodeResults;
         private float strokeSize;
@@ -34,34 +34,21 @@ namespace CameraScanner.Maui.Controls
 
                 foreach (var barcodeResult in results)
                 {
-                    // Draw rectangle around the barcode result
-                    canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
-
-                    // Draw path around corner points
-                    if (barcodeResult.CornerPoints is Point[] cornerPoints && cornerPoints.Length != 0)
-                    {
-                        var cornerToCornerPath = new PathF();
-                        cornerToCornerPath.MoveTo(cornerPoints.Last());
-
-                        foreach (var cornerPoint in cornerPoints)
-                        {
-                            cornerToCornerPath.LineTo(cornerPoint);
-                        }
-
-                        canvas.DrawPath(cornerToCornerPath);
-                    }
+                    this.DrawResult(canvas, barcodeResult);
 
                     // Display preview text underneath the barcode result
                     var displayValue = GetPreviewText(barcodeResult);
 
-                    var position = new PointF(
-                        x: barcodeResult.PreviewBoundingBox.Left,
-                        y: barcodeResult.PreviewBoundingBox.Bottom + this.strokeSize);
+                    var textPosition = this.GetTextPosition(barcodeResult);
 
-                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, position, this.strokeColor, this.textColor);
+                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, this.strokeColor, this.textColor);
                 }
             }
         }
+
+        protected abstract void DrawResult(ICanvas canvas, BarcodeResult barcodeResult);
+
+        protected abstract PointF GetTextPosition(BarcodeResult barcodeResult);
 
         private static string GetPreviewText(BarcodeResult barcodeResult)
         {
