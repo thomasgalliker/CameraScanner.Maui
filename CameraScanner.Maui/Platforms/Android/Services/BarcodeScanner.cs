@@ -99,30 +99,32 @@ namespace CameraScanner.Maui.Platforms.Services
                     continue;
                 }
 
-                var cornerPoints = barcode.GetCornerPoints()
-                    .Select(p =>
-                    {
-                        var pointF = new global::Android.Graphics.PointF(p);
-                        transform.MapPoint(pointF);
-                        return pointF;
-                    })
-                    .Select(p => new Point(p.X, p.Y))
-                    .ToArray();
-
                 var boundingBox = barcode.BoundingBox;
                 using var rectF = boundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
 
                 RectF previewRect;
+                Point[] cornerPoints;
 
                 if (transform != null)
                 {
                     transform.MapRect(rectF);
                     previewRect = rectF.AsRectangleF();
+
+                    cornerPoints = barcode.GetCornerPoints()
+                        .Select(p =>
+                        {
+                            var pointF = new global::Android.Graphics.PointF(p);
+                            transform.MapPoint(pointF);
+                            return pointF;
+                        })
+                        .Select(p => new Point(p.X, p.Y))
+                        .ToArray();
                 }
                 else
                 {
                     previewRect = RectF.Zero;
+                    cornerPoints = [];
                 }
       
 

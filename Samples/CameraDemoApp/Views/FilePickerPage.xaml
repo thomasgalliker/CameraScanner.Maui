@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8" ?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:c="http://camerascanner.maui"
+    xmlns:itemTemplates="clr-namespace:CameraDemoApp.Views.ItemTemplates"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    x:Class="CameraDemoApp.Views.FilePickerPage"
+    Title="Universal Barcode Scanner"
+    x:DataType="vm:FilePickerViewModel">
+
+    <ContentPage.Resources>
+        <ResourceDictionary>
+            <DataTemplate x:Key="BarcodeResultItemTemplate">
+                <itemTemplates:BarcodeResultItemTemplate />
+            </DataTemplate>
+        </ResourceDictionary>
+    </ContentPage.Resources>
+
+    <Grid
+        Padding="16"
+        RowDefinitions="*, Auto, Auto"
+        RowSpacing="16">
+
+        <Image
+            Grid.Row="0"
+            Source="{Binding Image}" />
+
+        <VerticalStackLayout
+            Grid.Row="1"
+            BindableLayout.ItemTemplate="{StaticResource BarcodeResultItemTemplate}"
+            BindableLayout.ItemsSource="{Binding BarcodeResults}" />
+
+        <VerticalStackLayout
+            Grid.Row="2"
+            VerticalOptions="Start">
+
+            <Grid
+                RowDefinitions="Auto"
+                RowSpacing="8"
+                VerticalOptions="Fill">
+
+                <Button
+                    Grid.Row="0"
+                    Command="{Binding PickPhotoCommand}"
+                    Text="Pick Photo"
+                    HorizontalOptions="Fill" />
+            </Grid>
+        </VerticalStackLayout>
+    </Grid>
+</ContentPage>
