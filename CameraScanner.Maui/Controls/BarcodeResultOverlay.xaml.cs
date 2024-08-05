@@ -13,6 +13,35 @@ namespace CameraScanner.Maui.Controls
         {
             this.InitializeComponent();
             this.taskDelayer = new TaskDelayer();
+            this.Drawable = this.BarcodeDrawable;
+        }
+
+        public static readonly BindableProperty BarcodeDrawableProperty = BindableProperty.Create(
+            nameof(BarcodeDrawable),
+            typeof(IBarcodeDrawable),
+            typeof(BarcodeResultOverlay),
+            new BoundingBoxBarcodeDrawable(),
+            propertyChanged: OnBarcodeDrawablePropertyChanged);
+
+        private static void OnBarcodeDrawablePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var barcodeResultOverlay = (BarcodeResultOverlay)bindable;
+
+            if (oldValue is IBarcodeDrawable oldBarcodeDrawable)
+            {
+                oldBarcodeDrawable.Reset();
+            }
+
+            if (newValue is IBarcodeDrawable newBarcodeDrawable)
+            {
+                barcodeResultOverlay.Drawable = newBarcodeDrawable;
+            }
+        }
+
+        public IBarcodeDrawable BarcodeDrawable
+        {
+            get => (IBarcodeDrawable)this.GetValue(BarcodeDrawableProperty);
+            set => this.SetValue(BarcodeDrawableProperty, value);
         }
 
         public static readonly BindableProperty BarcodeResultsProperty = BindableProperty.Create(

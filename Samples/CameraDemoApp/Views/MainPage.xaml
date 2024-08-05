@@ -83,6 +83,11 @@
                 CommandParameter="CameraPreviewPage"
                 Text="CameraPreview Demo"
                 HorizontalOptions="Fill" />
+            <Button
+                Command="{Binding NavigateToPageCommand}"
+                CommandParameter="FilePickerPage"
+                Text="File Picker Demo"
+                HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

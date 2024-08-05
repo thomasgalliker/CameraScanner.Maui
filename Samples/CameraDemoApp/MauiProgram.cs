@@ -51,6 +51,9 @@ namespace CameraDemoApp
 
             builder.Services.AddTransient<CameraPreviewPage>();
             builder.Services.AddTransient<CameraPreviewViewModel>();
+            
+            builder.Services.AddTransient<FilePickerPage>();
+            builder.Services.AddTransient<FilePickerViewModel>();
 
             builder.Services.AddTransientPopup<ScannerConfigPopup, ScannerConfigViewModel>();
 

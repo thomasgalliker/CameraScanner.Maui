@@ -2,7 +2,7 @@ using Font = Microsoft.Maui.Graphics.Font;
 
 namespace CameraScanner.Maui.Controls
 {
-    internal class BarcodeDrawable : IDrawable
+    public abstract class BarcodeDrawable : IBarcodeDrawable
     {
         private BarcodeResult[] barcodeResults;
         private float strokeSize;
@@ -34,20 +34,21 @@ namespace CameraScanner.Maui.Controls
 
                 foreach (var barcodeResult in results)
                 {
-                    // Rectangle around the barcode result
-                    canvas.DrawRectangle(barcodeResult.PreviewBoundingBox);
+                    this.DrawResult(canvas, barcodeResult);
 
                     // Display preview text underneath the barcode result
                     var displayValue = GetPreviewText(barcodeResult);
 
-                    var position = new PointF(
-                        x: barcodeResult.PreviewBoundingBox.Left,
-                        y: barcodeResult.PreviewBoundingBox.Bottom + this.strokeSize);
+                    var textPosition = this.GetTextPosition(barcodeResult);
 
-                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, position, this.strokeColor, this.textColor);
+                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, this.strokeColor, this.textColor);
                 }
             }
         }
+
+        protected abstract void DrawResult(ICanvas canvas, BarcodeResult barcodeResult);
+
+        protected abstract PointF GetTextPosition(BarcodeResult barcodeResult);
 
         private static string GetPreviewText(BarcodeResult barcodeResult)
         {

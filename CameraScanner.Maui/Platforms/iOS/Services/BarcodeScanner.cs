@@ -5,6 +5,7 @@ using CoreGraphics;
 using CoreImage;
 using Foundation;
 using Microsoft.Maui.Graphics.Platform;
+using Microsoft.Maui.Platform;
 using UIKit;
 using Vision;
 
@@ -12,6 +13,8 @@ namespace CameraScanner.Maui.Platforms.Services
 {
     public class BarcodeScanner : IBarcodeScanner
     {
+        private static readonly CGSize OneByOneSize = new CGSize(1f, 1f);
+
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(byte[] imageArray)
         {
             return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromArray(imageArray)));
@@ -66,7 +69,33 @@ namespace CameraScanner.Maui.Platforms.Services
             {
                 foreach (var barcode in inputResults)
                 {
-                    var previewBoundingBox = previewLayer?.MapToLayerCoordinates(barcode.BoundingBox.InvertY()).AsRectangleF() ?? RectF.Zero;
+                    RectF previewBoundingBox;
+                    Point[] cornerPoints;
+
+                    if (previewLayer != null)
+                    {
+                        var boundingBoxInvertedY = barcode.BoundingBox.InvertY();
+                        previewBoundingBox = previewLayer.MapToLayerCoordinates(boundingBoxInvertedY).AsRectangleF();
+
+                        var topLeft = GetPoint(previewLayer, barcode.TopLeft);
+                        var topRight = GetPoint(previewLayer, barcode.TopRight);
+                        var bottomLeft = GetPoint(previewLayer, barcode.BottomLeft);
+                        var bottomRight = GetPoint(previewLayer, barcode.BottomRight);
+
+                        cornerPoints = new[]
+                        {
+                            topLeft,
+                            bottomLeft,
+                            bottomRight,
+                            topRight,
+                        };
+                    }
+                    else
+                    {
+                        previewBoundingBox = RectF.Zero;
+                        cornerPoints = Array.Empty<Point>();
+                    }
+
                     var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
 
                     outputResults.Add(new BarcodeResult
@@ -78,9 +107,16 @@ namespace CameraScanner.Maui.Platforms.Services
                         RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
                         PreviewBoundingBox = previewBoundingBox,
                         ImageBoundingBox = imageBoundingBox,
+                        CornerPoints = cornerPoints,
                     });
                 }
             }
+        }
+
+        private static Point GetPoint(AVCaptureVideoPreviewLayer previewLayer, CGPoint cornerPoint)
+        {
+            var rectF = previewLayer.MapToLayerCoordinates(new CGRect(cornerPoint, OneByOneSize).InvertY());
+            return new Point(rectF.X, rectF.Y);
         }
 
         private static byte[] GetRawBytes(VNBarcodeObservation barcodeObservation)
@@ -96,6 +132,5 @@ namespace CameraScanner.Maui.Platforms.Services
                 _ => null
             };
         }
-
     }
 }
