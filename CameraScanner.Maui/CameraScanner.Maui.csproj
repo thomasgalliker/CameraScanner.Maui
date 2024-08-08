@@ -4,6 +4,7 @@
     <TargetFrameworks>net8.0;net8.0-android;net8.0-ios</TargetFrameworks>
     <OutputType>Library</OutputType>
     <UseMaui>true</UseMaui>
+    <MauiVersion>8.0.3</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -30,6 +31,7 @@
     <PackageId>CameraScanner.Maui</PackageId>
     <PackageTags>camera;preview;barcode;scanner;maui</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
+    <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/thomasgalliker/CameraScanner.Maui</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/thomasgalliker/CameraScanner.Maui</RepositoryUrl>
@@ -45,6 +47,7 @@
 
   <ItemGroup>
     <None Include="..\README.md" Pack="True" PackagePath="\" />
+    <None Include="..\LICENSE" Pack="True" PackagePath="\" />
     <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
   </ItemGroup>
 

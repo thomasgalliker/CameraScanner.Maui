@@ -10,7 +10,9 @@ using Xamarin.Google.MLKit.Vision.BarCode;
 using Xamarin.Google.MLKit.Vision.Common;
 using Image = Android.Media.Image;
 using Paint = Android.Graphics.Paint;
+using Point = Microsoft.Maui.Graphics.Point;
 using RectF = Microsoft.Maui.Graphics.RectF;
+using System.Linq;
 
 namespace CameraScanner.Maui.Platforms.Services
 {
@@ -83,35 +85,59 @@ namespace CameraScanner.Maui.Platforms.Services
                 return;
             }
 
-            using var javaList = inputResults.JavaCast<ArrayList>();
-            if (javaList?.IsEmpty ?? true)
+            using var inputResultsArrayList = inputResults.JavaCast<ArrayList>();
+            if (inputResultsArrayList?.IsEmpty ?? true)
             {
                 return;
             }
 
-            foreach (var barcode in javaList.ToArray())
+            foreach (var inputResult in inputResultsArrayList.ToArray())
             {
-                using var mapped = barcode.JavaCast<Barcode>();
-                if (mapped is null)
+                using var barcode = inputResult.JavaCast<Barcode>();
+                if (barcode is null)
                 {
                     continue;
                 }
 
-                using var rectF = mapped.BoundingBox.AsRectF();
+                var boundingBox = barcode.BoundingBox;
+                using var rectF = boundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
 
-                transform?.MapRect(rectF);
-                var previewRect = transform is not null ? rectF.AsRectangleF() : RectF.Zero;
+                RectF previewRect;
+                Point[] cornerPoints;
+
+                if (transform != null)
+                {
+                    transform.MapRect(rectF);
+                    previewRect = rectF.AsRectangleF();
+
+                    cornerPoints = barcode.GetCornerPoints()
+                        .Select(p =>
+                        {
+                            var pointF = new global::Android.Graphics.PointF(p);
+                            transform.MapPoint(pointF);
+                            return pointF;
+                        })
+                        .Select(p => new Point(p.X, p.Y))
+                        .ToArray();
+                }
+                else
+                {
+                    previewRect = RectF.Zero;
+                    cornerPoints = [];
+                }
+      
 
                 outputResults.Add(new BarcodeResult
                 {
-                    BarcodeType = ConvertBarcodeResultTypes(mapped.ValueType),
-                    BarcodeFormat = (BarcodeFormats)mapped.Format,
-                    DisplayValue = mapped.DisplayValue,
-                    RawValue = mapped.RawValue,
-                    RawBytes = mapped.GetRawBytes(),
+                    BarcodeType = ConvertBarcodeResultTypes(barcode.ValueType),
+                    BarcodeFormat = (BarcodeFormats)barcode.Format,
+                    DisplayValue = barcode.DisplayValue,
+                    RawValue = barcode.RawValue,
+                    RawBytes = barcode.GetRawBytes(),
                     PreviewBoundingBox = previewRect,
-                    ImageBoundingBox = imageRect
+                    ImageBoundingBox = imageRect,
+                    CornerPoints = cornerPoints,
                 });
             }
         }
