@@ -4,6 +4,7 @@
     <TargetFrameworks>net8.0;net8.0-android;net8.0-ios</TargetFrameworks>
     <OutputType>Library</OutputType>
     <UseMaui>true</UseMaui>
+    <MauiVersion>8.0.3</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
