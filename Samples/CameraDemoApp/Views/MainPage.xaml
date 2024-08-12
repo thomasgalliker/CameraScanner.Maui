@@ -9,10 +9,6 @@
     Title="Camera Scanner .NET MAUI"
     x:DataType="vm:MainViewModel">
 
-    <ContentPage.Resources>
-        <ResourceDictionary />
-    </ContentPage.Resources>
-
     <ContentPage.Behaviors>
         <mct:EventToCommandBehavior
             Command="{Binding AppearingCommand}"
