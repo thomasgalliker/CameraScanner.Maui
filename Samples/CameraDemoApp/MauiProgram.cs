@@ -36,6 +36,7 @@ namespace CameraDemoApp
             // Register services
             builder.Services.AddSingleton<INavigationService, MauiNavigationService>();
             builder.Services.AddSingleton<IDialogService, DialogService>();
+            builder.Services.AddSingleton<ILauncher>(_ => Launcher.Default);
 
             // Register pages and view models
             builder.Services.AddTransient<MainPage>();
@@ -51,7 +52,7 @@ namespace CameraDemoApp
 
             builder.Services.AddTransient<CameraPreviewPage>();
             builder.Services.AddTransient<CameraPreviewViewModel>();
-            
+
             builder.Services.AddTransient<FilePickerPage>();
             builder.Services.AddTransient<FilePickerViewModel>();
 
