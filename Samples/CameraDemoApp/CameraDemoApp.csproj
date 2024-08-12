@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <MauiVersion>8.0.71</MauiVersion>
+    <MauiVersion>8.0.80</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
@@ -26,7 +26,20 @@
 
   <ItemGroup>
     <!-- App Icon -->
-    <MauiIcon Include="Resources\AppIcon\appicon.png" IsAppIcon="true" ForegroundScale="0.65" Resize="True" Color="#FFFFFF" />
+    <MauiIcon
+      IsAppIcon="true"
+      Include="Resources\AppIcon\appicon.png"
+      Condition="$(TargetFramework.Contains('-android'))"
+      ForegroundScale="0.65"
+      Resize="True"
+      Color="#FFFFFF" />
+    <MauiIcon
+      IsAppIcon="true"
+      Include="Resources\AppIcon\appicon.png"
+      Condition="$(TargetFramework.Contains('-ios'))"
+      ForegroundScale="1"
+      Resize="True"
+      Color="#FFFFFF" />
     
     <!-- Splash Screen -->
     <MauiSplashScreen Include="Resources\Splash\splash.png" BaseSize="512,512" Resize="True" Color="#FFFFFF" />
