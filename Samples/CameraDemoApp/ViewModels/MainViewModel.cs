@@ -13,26 +13,27 @@ namespace CameraDemoApp.ViewModels
         private readonly INavigationService navigationService;
         private readonly IDialogService dialogService;
         private readonly ICameraPermissions cameraPermissions;
-        private readonly IBarcodeScanner barcodeScanner;
-        private IAsyncRelayCommand appearingCommand;
+        private readonly ILauncher launcher;
 
+        private IAsyncRelayCommand appearingCommand;
         private bool isInitialized;
         private bool authorizationStatus;
         private IAsyncRelayCommand requestCameraPermissionsCommand;
         private IAsyncRelayCommand<string> navigateToPageCommand;
+        private IAsyncRelayCommand<string> openUrlCommand;
 
         public MainViewModel(
             ILogger<MainViewModel> logger,
             INavigationService navigationService,
             IDialogService dialogService,
             ICameraPermissions cameraPermissions,
-            IBarcodeScanner barcodeScanner)
+            ILauncher launcher)
         {
             this.logger = logger;
             this.navigationService = navigationService;
             this.dialogService = dialogService;
             this.cameraPermissions = cameraPermissions;
-            this.barcodeScanner = barcodeScanner;
+            this.launcher = launcher;
         }
 
 
@@ -104,5 +105,21 @@ namespace CameraDemoApp.ViewModels
             await this.navigationService.PushAsync(page);
         }
 
+        public IAsyncRelayCommand<string> OpenUrlCommand
+        {
+            get => this.openUrlCommand ??= new AsyncRelayCommand<string>(this.OpenUrlAsync);
+        }
+
+        private async Task OpenUrlAsync(string url)
+        {
+            try
+            {
+                await this.launcher.TryOpenAsync(url);
+            }
+            catch
+            {
+                // Ignore exceptions
+            }
+        }
     }
 }
