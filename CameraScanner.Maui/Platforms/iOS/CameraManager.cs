@@ -172,7 +172,7 @@ namespace CameraScanner.Maui
                 {
                     if (this.captureDevice is not null && this.captureDevice.TorchActive)
                     {
-                        CaptureDeviceLock(this.captureDevice, () => this.captureDevice.TorchMode = AVCaptureTorchMode.Off);
+                        this.SetTorchModeOn(AVCaptureTorchMode.Off);
 
                         if (this.cameraView is not null)
                         {
@@ -410,25 +410,24 @@ namespace CameraScanner.Maui
             {
                 if (this.cameraView.TorchOn)
                 {
-                    CaptureDeviceLock(this.captureDevice, () =>
-                    {
-                        if (this.captureDevice.IsTorchModeSupported(AVCaptureTorchMode.On))
-                        {
-                            this.captureDevice.TorchMode = AVCaptureTorchMode.On;
-                        }
-                    });
+                    this.SetTorchModeOn(AVCaptureTorchMode.On);
                 }
                 else
                 {
-                    CaptureDeviceLock(this.captureDevice, () =>
-                    {
-                        if (this.captureDevice.IsTorchModeSupported(AVCaptureTorchMode.Off))
-                        {
-                            this.captureDevice.TorchMode = AVCaptureTorchMode.Off;
-                        }
-                    });
+                    this.SetTorchModeOn(AVCaptureTorchMode.Off);
                 }
             }
+        }
+
+        private void SetTorchModeOn(AVCaptureTorchMode torchMode)
+        {
+            CaptureDeviceLock(this.captureDevice, () =>
+            {
+                if (this.captureDevice.IsTorchModeSupported(torchMode))
+                {
+                    this.captureDevice.TorchMode = torchMode;
+                }
+            });
         }
 
         private void UpdateDeviceSwitchZoomFactors()
