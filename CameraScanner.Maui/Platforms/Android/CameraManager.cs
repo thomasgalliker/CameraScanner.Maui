@@ -102,7 +102,7 @@ namespace CameraScanner.Maui
             this.BarcodeView = new BarcodeView(this.context);
             this.BarcodeView.AddView(this.relativeLayout);
 
-            DeviceDisplay.Current.MainDisplayInfoChanged += this.Current_MainDisplayInfoChanged;
+            this.deviceDisplay.MainDisplayInfoChanged += this.OnMainDisplayInfoChanged;
         }
 
         private void OnTorchStateChanged(object sender, TorchStateEventArgs e)
@@ -461,7 +461,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        private void Current_MainDisplayInfoChanged(object sender, DisplayInfoChangedEventArgs e)
+        private void OnMainDisplayInfoChanged(object sender, DisplayInfoChangedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
@@ -475,9 +475,9 @@ namespace CameraScanner.Maui
                             this.UpdateCaptureQuality();
                         }
                     }
-                    catch (Exception)
+                    catch
                     {
-                        DeviceDisplay.Current.MainDisplayInfoChanged -= this.Current_MainDisplayInfoChanged;
+                        // Ignore
                     }
                 });
             });
@@ -493,13 +493,7 @@ namespace CameraScanner.Maui
         {
             if (disposing)
             {
-                try
-                {
-                    DeviceDisplay.Current.MainDisplayInfoChanged -= this.Current_MainDisplayInfoChanged;
-                }
-                catch (Exception)
-                {
-                }
+                this.deviceDisplay.MainDisplayInfoChanged -= this.OnMainDisplayInfoChanged;
 
                 this.Stop();
 
@@ -529,7 +523,7 @@ namespace CameraScanner.Maui
         {
             CaptureQuality? captureQuality = this.cameraView.CaptureQuality;
 
-            if (DeviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait)
+            if (this.deviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait)
             {
                 return captureQuality switch
                 {
