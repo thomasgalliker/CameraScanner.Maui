@@ -42,7 +42,18 @@
       Color="#FFFFFF" />
     
     <!-- Splash Screen -->
-    <MauiSplashScreen Include="Resources\Splash\splash.png" BaseSize="512,512" Resize="True" Color="#FFFFFF" />
+    <MauiSplashScreen 
+      Include="Resources\Splash\splash.png"
+      Condition="$(TargetFramework.Contains('-android'))"
+      BaseSize="512,512"
+      Resize="True"
+      Color="#FFFFFF" />
+    <MauiSplashScreen 
+      Include="Resources\Splash\splash.png"
+      Condition="$(TargetFramework.Contains('-ios'))"
+      BaseSize="128,128"
+      Resize="True"
+      Color="#FFFFFF" />
 
     <!-- Images -->
     <MauiImage Include="Resources\Images\*" />
