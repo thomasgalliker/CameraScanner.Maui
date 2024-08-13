@@ -292,17 +292,25 @@ namespace CameraScanner.Maui
 
         //TODO Implement setImageAnalysisResolutionSelector
         //https://developer.android.com/reference/androidx/camera/view/CameraController#setImageAnalysisResolutionSelector(androidx.camera.core.resolutionselector.ResolutionSelector)
-        internal void UpdateCaptureQuality()
+        internal async void UpdateCaptureQuality()
         {
             if (this.cameraController is LifecycleCameraController lifecycleCameraController)
             {
                 var resolution = this.GetTargetResolution();
-                lifecycleCameraController.ImageAnalysisTargetSize = new CameraController.OutputSize(resolution);
-            }
 
-            if (this.IsRunning)
-            {
-                this.Start();
+                if (!resolution.Equals(lifecycleCameraController.ImageAnalysisTargetSize?.Resolution))
+                {
+                    lifecycleCameraController.ImageAnalysisTargetSize = new CameraController.OutputSize(resolution);
+
+                    if (this.IsRunning)
+                    {
+                        await this.StartAsync();
+                    }
+                }
+                else
+                {
+                    // Resolution remains unchanged
+                }
             }
         }
 
