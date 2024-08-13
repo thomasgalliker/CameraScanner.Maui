@@ -35,20 +35,18 @@
             VerticalOptions="Start">
 
             <Grid
-                RowDefinitions="Auto, Auto"
-                RowSpacing="8"
+                ColumnDefinitions="*, *"
+                ColumnSpacing="8"
                 VerticalOptions="Fill">
 
                 <Button
-                    Grid.Row="0"
+                    Grid.Column="0"
                     Command="{Binding StartCameraCommand}"
-                    IsEnabled="{Binding IsScannerEnabled, Converter={StaticResource BoolInverter}}"
                     Text="Start Camera"
                     HorizontalOptions="Fill" />
                 <Button
-                    Grid.Row="1"
+                    Grid.Column="1"
                     Command="{Binding StopCameraCommand}"
-                    IsEnabled="{Binding IsScannerEnabled}"
                     Text="Stop Camera"
                     HorizontalOptions="Fill" />
             </Grid>
