@@ -57,8 +57,16 @@
                 Text="ICameraPermissions" />
 
             <Button
+                Command="{Binding CheckCameraPermissionsCommand}"
+                Text="Check camera permission"
+                HorizontalOptions="Fill" />
+            <Button
                 Command="{Binding RequestCameraPermissionsCommand}"
                 Text="Request camera permission"
+                HorizontalOptions="Fill" />
+            <Button
+                Command="{Binding CheckAndRequestCameraPermissionsCommand}"
+                Text="Check &amp; request camera permission"
                 HorizontalOptions="Fill" />
             <Label>
                 <Label.FormattedText>
@@ -75,7 +83,7 @@
 
             <Label
                 Style="{StaticResource Heading2LabelStyle}"
-                Text="Pages" />
+                Text="Test Pages" />
             <Button
                 Command="{Binding NavigateToPageCommand}"
                 CommandParameter="DefaultCameraViewPage"
