@@ -31,6 +31,8 @@ namespace CameraScanner.Maui
         private readonly CameraView cameraView;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
+        private readonly ICameraPermissions cameraPermissions;
+        private readonly IDeviceDisplay deviceDisplay;
         private readonly Context context;
         private readonly IExecutorService cameraExecutor;
         private readonly ImageView imageView;
@@ -47,11 +49,15 @@ namespace CameraScanner.Maui
         internal CameraManager(
             ILogger<CameraManager> logger,
             ILoggerFactory loggerFactory,
+            ICameraPermissions cameraPermissions,
+            IDeviceDisplay deviceDisplay,
             CameraView cameraView,
             Context context)
         {
             this.logger = logger;
             this.loggerFactory = loggerFactory;
+            this.cameraPermissions = cameraPermissions;
+            this.deviceDisplay = deviceDisplay;
             this.context = context;
             this.cameraView = cameraView;
 
@@ -152,53 +158,73 @@ namespace CameraScanner.Maui
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
-        internal void Start()
+        internal async void UpdateCameraFacing()
         {
-            // TODO: Check permissions before accessing camera preview
+            this.logger.LogDebug("UpdateCameraFacing");
+            await this.StartAsync();
+        }
 
-            if (this.cameraController is not null)
+        internal async Task StartAsync()
+        {
+            this.logger.LogDebug("StartAsync");
+
+            try
             {
-                if (this.IsRunning)
+                if (!await this.cameraPermissions.CheckPermissionAsync())
                 {
-                    this.cameraController.Unbind();
-                    this.IsRunning = false;
-                }
-
-                ILifecycleOwner lifecycleOwner = null;
-                if (this.context is ILifecycleOwner owner)
-                {
-                    lifecycleOwner = owner;
-                }
-                else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
-                {
-                    lifecycleOwner = (this.context as ContextWrapper)?.BaseContext as ILifecycleOwner;
-                }
-                else if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity is ILifecycleOwner l)
-                {
-                    lifecycleOwner = l;
-                }
-
-                if (lifecycleOwner is null)
-                {
+                    this.logger.LogInformation("UpdateCameraAsync: Camera permission not granted");
                     return;
                 }
 
-                if (this.cameraController.CameraSelector is null)
+                if (this.cameraController is not null)
                 {
-                    this.UpdateCamera();
+                    if (this.IsRunning)
+                    {
+                        this.cameraController.Unbind();
+                        this.IsRunning = false;
+                    }
+
+                    ILifecycleOwner lifecycleOwner = null;
+                    if (this.context is ILifecycleOwner owner)
+                    {
+                        lifecycleOwner = owner;
+                    }
+                    else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
+                    {
+                        lifecycleOwner = ((ContextWrapper)this.context)?.BaseContext as ILifecycleOwner;
+                    }
+                    else if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity is ILifecycleOwner l)
+                    {
+                        lifecycleOwner = l;
+                    }
+
+                    if (lifecycleOwner is null)
+                    {
+                        return;
+                    }
+
+                    if (this.cameraController.CameraSelector == null)
+                    {
+                        this.UpdateCamera();
+                    }
+
+                    if (this.cameraController.ImageAnalysisTargetSize == null)
+                    {
+                        this.UpdateCaptureQuality();
+                    }
+
+                    this.UpdateOutput();
+                    this.UpdateBarcodeFormats();
+                    this.UpdateTorch();
+
+                    this.cameraController.BindToLifecycle(lifecycleOwner);
+                    this.IsRunning = true;
                 }
-
-                if (this.cameraController.ImageAnalysisTargetSize is null)
-                {
-                    this.UpdateCaptureQuality();
-                }
-
-                this.UpdateOutput();
-                this.UpdateBarcodeFormats();
-                this.UpdateTorch();
-
-                this.cameraController.BindToLifecycle(lifecycleOwner);
-                this.IsRunning = true;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "StartAsync failed with exception");
+                throw;
             }
         }
 
@@ -307,11 +333,11 @@ namespace CameraScanner.Maui
             }
         }
 
-        internal void UpdateCameraEnabled()
+        internal async void UpdateCameraEnabled()
         {
             if (this.cameraView.CameraEnabled)
             {
-                this.Start();
+                await this.StartAsync();
             }
             else
             {
