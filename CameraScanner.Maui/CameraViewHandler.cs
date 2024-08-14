@@ -10,11 +10,15 @@ namespace CameraScanner.Maui
     {
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
+        private readonly ICameraPermissions cameraPermissions;
+        private readonly IDeviceInfo deviceInfo;
+        private readonly IDeviceDisplay deviceDisplay;
+
         private CameraManager cameraManager;
 
         private static readonly PropertyMapper<CameraView, CameraViewHandler> CameraViewMapper = new()
         {
-            [nameof(CameraView.CameraFacing)] = (handler, _) => handler.cameraManager?.UpdateCamera(),
+            [nameof(CameraView.CameraFacing)] = (handler, _) => handler.cameraManager?.UpdateCameraFacing(),
             [nameof(CameraView.CaptureQuality)] = (handler, _) => handler.cameraManager?.UpdateCaptureQuality(),
             [nameof(CameraView.BarcodeFormats)] = (handler, _) => handler.cameraManager?.UpdateBarcodeFormats(),
             [nameof(CameraView.TorchOn)] = (handler, _) => handler.cameraManager?.UpdateTorch(),
@@ -32,6 +36,9 @@ namespace CameraScanner.Maui
             var loggerFactory = IPlatformApplication.Current.Services.GetService<ILoggerFactory>();
             this.logger = loggerFactory.CreateLogger<CameraViewHandler>();
             this.loggerFactory = loggerFactory;
+            this.cameraPermissions = IPlatformApplication.Current.Services.GetService<ICameraPermissions>();
+            this.deviceInfo = IPlatformApplication.Current.Services.GetService<IDeviceInfo>();
+            this.deviceDisplay = IPlatformApplication.Current.Services.GetService<IDeviceDisplay>();
         }
 
         protected override void ConnectHandler(BarcodeView platformView)

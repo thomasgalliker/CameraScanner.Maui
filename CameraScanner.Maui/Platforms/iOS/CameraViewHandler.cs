@@ -9,6 +9,8 @@ namespace CameraScanner.Maui
             this.cameraManager = new CameraManager(
                 this.loggerFactory.CreateLogger<CameraManager>(),
                 this.loggerFactory,
+                this.cameraPermissions,
+                this.deviceInfo,
                 this.VirtualView);
 
             return this.cameraManager.BarcodeView;
