@@ -27,6 +27,14 @@ namespace CameraDemoApp.ViewModels
             this.dialogService = dialogService;
 
             this.IsScannerEnabled = true;
+
+            // _ = Enumerable.Range(1, count: 3).Select(async i =>
+            // {
+            //     await Task.Delay(i * 1000);
+            //     this.IsScannerEnabled = true;
+            //     this.IsScannerEnabled = false;
+            //     this.IsScannerEnabled = true;
+            // }).ToArray();
         }
 
         public bool IsScannerEnabled

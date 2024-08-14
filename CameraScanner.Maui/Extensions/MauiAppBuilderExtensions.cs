@@ -1,4 +1,6 @@
-﻿namespace CameraScanner.Maui
+﻿using Microsoft.Extensions.DependencyInjection.Extensions;
+
+namespace CameraScanner.Maui
 {
     public static class MauiAppBuilderExtensions
     {
@@ -10,8 +12,10 @@
                 handlers.AddHandler<CameraView, CameraViewHandler>();
             });
 
-            builder.Services.AddSingleton<ICameraPermissions>(_ => CameraPermissions.Current);
-            builder.Services.AddSingleton<IBarcodeScanner>(_ => BarcodeScanner.Current);
+            builder.Services.TryAddSingleton<ICameraPermissions>(_ => ICameraPermissions.Current);
+            builder.Services.TryAddSingleton<IBarcodeScanner>(_ => IBarcodeScanner.Current);
+            builder.Services.TryAddSingleton<IDeviceInfo>(_ => DeviceInfo.Current);
+            builder.Services.TryAddSingleton<IDeviceDisplay>(_ => DeviceDisplay.Current);
 #endif
 
             return builder;

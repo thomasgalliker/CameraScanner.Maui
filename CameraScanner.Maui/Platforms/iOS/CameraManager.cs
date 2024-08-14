@@ -1,4 +1,6 @@
 using AVFoundation;
+using CameraScanner.Maui;
+using CameraScanner.Maui.Utils;
 using CoreAnimation;
 using CoreFoundation;
 using CoreGraphics;
@@ -18,6 +20,8 @@ namespace CameraScanner.Maui
         private readonly string instance = new Guid().ToString().Substring(0, 5).ToUpperInvariant();
         private static readonly AVCaptureDeviceType[] SupportedCaptureDeviceTypes = InitializeCaptureDevices();
 
+        private readonly AsyncLock updateCameraLock = new AsyncLock();
+
         internal BarcodeView BarcodeView => this.barcodeView;
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
@@ -34,6 +38,8 @@ namespace CameraScanner.Maui
         private readonly BarcodeView barcodeView;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
+        private readonly ICameraPermissions cameraPermissions;
+        private readonly IDeviceInfo deviceInfo;
         private readonly CameraView cameraView;
         private readonly CAShapeLayer shapeLayer;
         private readonly NSObject subjectAreaChangedNotification;
@@ -47,10 +53,14 @@ namespace CameraScanner.Maui
         internal CameraManager(
             ILogger<CameraManager> logger,
             ILoggerFactory loggerFactory,
+            ICameraPermissions cameraPermissions,
+            IDeviceInfo deviceInfo,
             CameraView cameraView)
         {
             this.logger = logger;
             this.loggerFactory = loggerFactory;
+            this.cameraPermissions = cameraPermissions;
+            this.deviceInfo = deviceInfo;
             this.cameraView = cameraView;
 
             this.captureSession = new AVCaptureSession();
@@ -94,9 +104,9 @@ namespace CameraScanner.Maui
             this.barcodeView.AddGestureRecognizer(this.tapGestureRecognizer);
         }
 
-        internal void Start()
+        internal async Task StartAsync()
         {
-            this.logger.LogDebug("Start");
+            this.logger.LogDebug("StartAsync");
 
             try
             {
@@ -105,7 +115,7 @@ namespace CameraScanner.Maui
                     this.Stop();
                 }
 
-                if (this.captureSession is not null)
+                if (this.captureSession != null)
                 {
                     if (this.captureSession.Running)
                     {
@@ -114,7 +124,7 @@ namespace CameraScanner.Maui
 
                     if (this.captureSession.Inputs.Length == 0)
                     {
-                        this.UpdateCamera();
+                        await this.UpdateCameraAsync();
                     }
 
                     if (this.captureSession.SessionPreset is null)
@@ -137,12 +147,12 @@ namespace CameraScanner.Maui
                     this.UpdateBarcodeDetectionFrameRate();
 
                     this.started = true;
-                    this.logger.LogDebug("Start finished successfully");
+                    this.logger.LogDebug("StartAsync finished successfully");
                 }
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Start failed with exception");
+                this.logger.LogError(ex, "StartAsync failed with exception");
                 throw;
             }
         }
@@ -162,7 +172,7 @@ namespace CameraScanner.Maui
                 {
                     if (this.captureDevice is not null && this.captureDevice.TorchActive)
                     {
-                        CaptureDeviceLock(this.captureDevice, () => this.captureDevice.TorchMode = AVCaptureTorchMode.Off);
+                        this.SetTorchModeOn(AVCaptureTorchMode.Off);
 
                         if (this.cameraView is not null)
                         {
@@ -244,89 +254,103 @@ namespace CameraScanner.Maui
             }
         }
 
-
-        internal void UpdateCamera()
+        internal async void UpdateCameraFacing()
         {
-            this.logger.LogDebug("UpdateCamera");
+            this.logger.LogDebug("UpdateCameraFacing");
+            await this.UpdateCameraAsync();
+        }
 
-            if (DeviceInfo.Current.DeviceType == DeviceType.Virtual)
+        internal async Task UpdateCameraAsync()
+        {
+            using (await this.updateCameraLock.LockAsync())
             {
-                this.logger.LogDebug("No camera available on iOS simulator.");
-                return;
-            }
+                this.logger.LogDebug("UpdateCameraAsync");
 
-            if (this.captureSession != null)
-            {
-                try
+                if (this.deviceInfo.DeviceType == DeviceType.Virtual)
                 {
-                    const AVMediaTypes mediaType = AVMediaTypes.Video;
+                    this.logger.LogInformation("UpdateCameraAsync: No camera available on iOS simulator.");
+                    return;
+                }
 
-                    var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
+                if (!await this.cameraPermissions.CheckPermissionAsync())
+                {
+                    this.logger.LogInformation("UpdateCameraAsync: Camera permission not granted");
+                    return;
+                }
 
-                    using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
-                               SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
+                if (this.captureSession != null)
+                {
+                    try
                     {
-                        var captureDevices = captureDeviceDiscoverySession.Devices;
-                        var captureDevicesAndZoomValues = captureDevices.Select(d => (
-                                CaptureDevice: d,
-                                ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
-                            .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
-                            .ToArray();
+                        const AVMediaTypes mediaType = AVMediaTypes.Video;
 
-                        this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
-                                             ?? AVCaptureDevice.GetDefaultDevice(mediaType);
-                    }
+                        var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
 
-                    if (this.captureDevice == null)
-                    {
-                        throw new Exception("No AVCaptureDevice could be found");
-                    }
-
-                    ConfigureCaptureSession(this.captureSession, cs =>
-                    {
-                        if (this.captureInput != null)
+                        using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
+                                   SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
                         {
-                            if (this.captureSession.Inputs.Contains(this.captureInput))
+                            var captureDevices = captureDeviceDiscoverySession.Devices;
+                            var captureDevicesAndZoomValues = captureDevices.Select(d => (
+                                    CaptureDevice: d,
+                                    ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
+                                .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
+                                .ToArray();
+
+                            this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
+                                                 ?? AVCaptureDevice.GetDefaultDevice(mediaType);
+                        }
+
+                        if (this.captureDevice == null)
+                        {
+                            throw new Exception("No AVCaptureDevice could be found");
+                        }
+
+                        ConfigureCaptureSession(this.captureSession, cs =>
+                        {
+                            if (this.captureInput != null)
                             {
-                                this.captureSession.RemoveInput(this.captureInput);
+                                if (this.captureSession.Inputs.Contains(this.captureInput))
+                                {
+                                    this.captureSession.RemoveInput(this.captureInput);
+                                }
+
+                                this.captureInput.Dispose();
                             }
 
-                            this.captureInput.Dispose();
-                        }
+                            this.captureInput = new AVCaptureDeviceInput(this.captureDevice, out _);
 
-                        this.captureInput = new AVCaptureDeviceInput(this.captureDevice, out _);
+                            if (this.captureSession.CanAddInput(this.captureInput))
+                            {
+                                this.captureSession.AddInput(this.captureInput);
+                            }
 
-                        if (this.captureSession.CanAddInput(this.captureInput))
+                            this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
+                        });
+
+                        this.UpdateMinMaxZoomFactor();
+                        this.UpdateDeviceSwitchZoomFactors();
+
+                        if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
                         {
-                            this.captureSession.AddInput(this.captureInput);
+                            // Set requested zoom
+                            this.SetVideoZoomFactor(requestZoomFactor);
+                        }
+                        else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
+                                 and > 1F)
+                        {
+                            // Set default zoom
+                            this.SetVideoZoomFactor(defaultCameraZoom);
                         }
 
-                        this.captureSession.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                    });
+                        this.UpdateCurrentZoomFactor();
 
-                    this.UpdateMinMaxZoomFactor();
-                    this.UpdateDeviceSwitchZoomFactors();
-
-                    if (this.cameraView.RequestZoomFactor is float requestZoomFactor and > 1F)
-                    {
-                        // Set requested zoom
-                        this.SetVideoZoomFactor(requestZoomFactor);
+                        this.ResetFocus();
                     }
-                    else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
-                             and > 1F)
+                    catch (Exception ex)
                     {
-                        // Set default zoom
-                        this.SetVideoZoomFactor(defaultCameraZoom);
+                        this.logger.LogError(ex, "UpdateCameraAsync failed with exception");
+                        throw;
                     }
-
-                    this.UpdateCurrentZoomFactor();
-
-                    this.ResetFocus();
-                }
-                catch (Exception ex)
-                {
-                    this.logger.LogError(ex, "UpdateCamera failed with exception");
-                    throw;
                 }
             }
         }
@@ -386,25 +410,24 @@ namespace CameraScanner.Maui
             {
                 if (this.cameraView.TorchOn)
                 {
-                    CaptureDeviceLock(this.captureDevice, () =>
-                    {
-                        if (this.captureDevice.IsTorchModeSupported(AVCaptureTorchMode.On))
-                        {
-                            this.captureDevice.TorchMode = AVCaptureTorchMode.On;
-                        }
-                    });
+                    this.SetTorchModeOn(AVCaptureTorchMode.On);
                 }
                 else
                 {
-                    CaptureDeviceLock(this.captureDevice, () =>
-                    {
-                        if (this.captureDevice.IsTorchModeSupported(AVCaptureTorchMode.Off))
-                        {
-                            this.captureDevice.TorchMode = AVCaptureTorchMode.Off;
-                        }
-                    });
+                    this.SetTorchModeOn(AVCaptureTorchMode.Off);
                 }
             }
+        }
+
+        private void SetTorchModeOn(AVCaptureTorchMode torchMode)
+        {
+            CaptureDeviceLock(this.captureDevice, () =>
+            {
+                if (this.captureDevice.IsTorchModeSupported(torchMode))
+                {
+                    this.captureDevice.TorchMode = torchMode;
+                }
+            });
         }
 
         private void UpdateDeviceSwitchZoomFactors()
@@ -505,7 +528,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        internal void UpdateCameraEnabled()
+        internal async void UpdateCameraEnabled()
         {
             this.logger.LogDebug("UpdateCameraEnabled");
 
@@ -516,7 +539,7 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.CameraEnabled)
             {
-                this.Start();
+                await this.StartAsync();
             }
             else
             {
@@ -710,7 +733,7 @@ namespace CameraScanner.Maui
                         captureDevice.UnlockForConfiguration();
                     }
                 }
-            }//);
+            } //);
         }
 
         private static void ConfigureCaptureSession(AVCaptureSession captureSession, Action<AVCaptureSession> action)
@@ -727,7 +750,7 @@ namespace CameraScanner.Maui
                 {
                     captureSession.CommitConfiguration();
                 }
-            }//);
+            } //);
         }
 
         public void Dispose()

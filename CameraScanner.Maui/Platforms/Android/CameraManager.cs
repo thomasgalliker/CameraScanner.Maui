@@ -31,6 +31,8 @@ namespace CameraScanner.Maui
         private readonly CameraView cameraView;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
+        private readonly ICameraPermissions cameraPermissions;
+        private readonly IDeviceDisplay deviceDisplay;
         private readonly Context context;
         private readonly IExecutorService cameraExecutor;
         private readonly ImageView imageView;
@@ -47,11 +49,15 @@ namespace CameraScanner.Maui
         internal CameraManager(
             ILogger<CameraManager> logger,
             ILoggerFactory loggerFactory,
+            ICameraPermissions cameraPermissions,
+            IDeviceDisplay deviceDisplay,
             CameraView cameraView,
             Context context)
         {
             this.logger = logger;
             this.loggerFactory = loggerFactory;
+            this.cameraPermissions = cameraPermissions;
+            this.deviceDisplay = deviceDisplay;
             this.context = context;
             this.cameraView = cameraView;
 
@@ -96,7 +102,7 @@ namespace CameraScanner.Maui
             this.BarcodeView = new BarcodeView(this.context);
             this.BarcodeView.AddView(this.relativeLayout);
 
-            DeviceDisplay.Current.MainDisplayInfoChanged += this.Current_MainDisplayInfoChanged;
+            this.deviceDisplay.MainDisplayInfoChanged += this.OnMainDisplayInfoChanged;
         }
 
         private void OnTorchStateChanged(object sender, TorchStateEventArgs e)
@@ -152,53 +158,73 @@ namespace CameraScanner.Maui
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
-        internal void Start()
+        internal async void UpdateCameraFacing()
         {
-            // TODO: Check permissions before accessing camera preview
+            this.logger.LogDebug("UpdateCameraFacing");
+            await this.StartAsync();
+        }
 
-            if (this.cameraController is not null)
+        internal async Task StartAsync()
+        {
+            this.logger.LogDebug("StartAsync");
+
+            try
             {
-                if (this.IsRunning)
+                if (!await this.cameraPermissions.CheckPermissionAsync())
                 {
-                    this.cameraController.Unbind();
-                    this.IsRunning = false;
-                }
-
-                ILifecycleOwner lifecycleOwner = null;
-                if (this.context is ILifecycleOwner owner)
-                {
-                    lifecycleOwner = owner;
-                }
-                else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
-                {
-                    lifecycleOwner = (this.context as ContextWrapper)?.BaseContext as ILifecycleOwner;
-                }
-                else if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity is ILifecycleOwner l)
-                {
-                    lifecycleOwner = l;
-                }
-
-                if (lifecycleOwner is null)
-                {
+                    this.logger.LogInformation("UpdateCameraAsync: Camera permission not granted");
                     return;
                 }
 
-                if (this.cameraController.CameraSelector is null)
+                if (this.cameraController is not null)
                 {
-                    this.UpdateCamera();
+                    if (this.IsRunning)
+                    {
+                        this.cameraController.Unbind();
+                        this.IsRunning = false;
+                    }
+
+                    ILifecycleOwner lifecycleOwner = null;
+                    if (this.context is ILifecycleOwner owner)
+                    {
+                        lifecycleOwner = owner;
+                    }
+                    else if ((this.context as ContextWrapper)?.BaseContext is ILifecycleOwner)
+                    {
+                        lifecycleOwner = ((ContextWrapper)this.context)?.BaseContext as ILifecycleOwner;
+                    }
+                    else if (Microsoft.Maui.ApplicationModel.Platform.CurrentActivity is ILifecycleOwner l)
+                    {
+                        lifecycleOwner = l;
+                    }
+
+                    if (lifecycleOwner is null)
+                    {
+                        return;
+                    }
+
+                    if (this.cameraController.CameraSelector == null)
+                    {
+                        this.UpdateCamera();
+                    }
+
+                    if (this.cameraController.ImageAnalysisTargetSize == null)
+                    {
+                        this.UpdateCaptureQuality();
+                    }
+
+                    this.UpdateOutput();
+                    this.UpdateBarcodeFormats();
+                    this.UpdateTorch();
+
+                    this.cameraController.BindToLifecycle(lifecycleOwner);
+                    this.IsRunning = true;
                 }
-
-                if (this.cameraController.ImageAnalysisTargetSize is null)
-                {
-                    this.UpdateCaptureQuality();
-                }
-
-                this.UpdateOutput();
-                this.UpdateBarcodeFormats();
-                this.UpdateTorch();
-
-                this.cameraController.BindToLifecycle(lifecycleOwner);
-                this.IsRunning = true;
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "StartAsync failed with exception");
+                throw;
             }
         }
 
@@ -266,17 +292,25 @@ namespace CameraScanner.Maui
 
         //TODO Implement setImageAnalysisResolutionSelector
         //https://developer.android.com/reference/androidx/camera/view/CameraController#setImageAnalysisResolutionSelector(androidx.camera.core.resolutionselector.ResolutionSelector)
-        internal void UpdateCaptureQuality()
+        internal async void UpdateCaptureQuality()
         {
             if (this.cameraController is LifecycleCameraController lifecycleCameraController)
             {
                 var resolution = this.GetTargetResolution();
-                lifecycleCameraController.ImageAnalysisTargetSize = new CameraController.OutputSize(resolution);
-            }
 
-            if (this.IsRunning)
-            {
-                this.Start();
+                if (!resolution.Equals(lifecycleCameraController.ImageAnalysisTargetSize?.Resolution))
+                {
+                    lifecycleCameraController.ImageAnalysisTargetSize = new CameraController.OutputSize(resolution);
+
+                    if (this.IsRunning)
+                    {
+                        await this.StartAsync();
+                    }
+                }
+                else
+                {
+                    // Resolution remains unchanged
+                }
             }
         }
 
@@ -307,11 +341,11 @@ namespace CameraScanner.Maui
             }
         }
 
-        internal void UpdateCameraEnabled()
+        internal async void UpdateCameraEnabled()
         {
             if (this.cameraView.CameraEnabled)
             {
-                this.Start();
+                await this.StartAsync();
             }
             else
             {
@@ -427,7 +461,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        private void Current_MainDisplayInfoChanged(object sender, DisplayInfoChangedEventArgs e)
+        private void OnMainDisplayInfoChanged(object sender, DisplayInfoChangedEventArgs e)
         {
             _ = Task.Run(async () =>
             {
@@ -441,9 +475,9 @@ namespace CameraScanner.Maui
                             this.UpdateCaptureQuality();
                         }
                     }
-                    catch (Exception)
+                    catch
                     {
-                        DeviceDisplay.Current.MainDisplayInfoChanged -= this.Current_MainDisplayInfoChanged;
+                        // Ignore
                     }
                 });
             });
@@ -459,13 +493,7 @@ namespace CameraScanner.Maui
         {
             if (disposing)
             {
-                try
-                {
-                    DeviceDisplay.Current.MainDisplayInfoChanged -= this.Current_MainDisplayInfoChanged;
-                }
-                catch (Exception)
-                {
-                }
+                this.deviceDisplay.MainDisplayInfoChanged -= this.OnMainDisplayInfoChanged;
 
                 this.Stop();
 
@@ -495,7 +523,7 @@ namespace CameraScanner.Maui
         {
             CaptureQuality? captureQuality = this.cameraView.CaptureQuality;
 
-            if (DeviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait)
+            if (this.deviceDisplay.MainDisplayInfo.Orientation == DisplayOrientation.Portrait)
             {
                 return captureQuality switch
                 {

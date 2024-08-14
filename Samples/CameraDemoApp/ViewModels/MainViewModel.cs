@@ -18,7 +18,9 @@ namespace CameraDemoApp.ViewModels
         private IAsyncRelayCommand appearingCommand;
         private bool isInitialized;
         private bool authorizationStatus;
+        private IAsyncRelayCommand checkCameraPermissionsCommand;
         private IAsyncRelayCommand requestCameraPermissionsCommand;
+        private IAsyncRelayCommand checkAndRequestCameraPermissionsCommand;
         private IAsyncRelayCommand<string> navigateToPageCommand;
         private IAsyncRelayCommand<string> openUrlCommand;
 
@@ -55,7 +57,7 @@ namespace CameraDemoApp.ViewModels
         {
             try
             {
-                await this.UpdateAuthorizationStatusAsync();
+                await this.CheckCameraPermissionsAsync();
             }
             catch (Exception ex)
             {
@@ -64,15 +66,28 @@ namespace CameraDemoApp.ViewModels
             }
         }
 
-        private async Task UpdateAuthorizationStatusAsync()
-        {
-            this.AuthorizationStatus = await this.cameraPermissions.CheckPermissionAsync();
-        }
-
         public bool AuthorizationStatus
         {
             get => this.authorizationStatus;
             private set => this.SetProperty(ref this.authorizationStatus, value);
+        }
+
+        public ICommand CheckCameraPermissionsCommand
+        {
+            get => this.checkCameraPermissionsCommand ??= new AsyncRelayCommand(this.CheckCameraPermissionsAsync);
+        }
+
+        private async Task CheckCameraPermissionsAsync()
+        {
+            try
+            {
+                this.AuthorizationStatus = await this.cameraPermissions.CheckPermissionAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "CheckCameraPermissionsAsync failed with exception");
+                await this.dialogService.DisplayAlertAsync("Error", $"Check for camera permissions failed: {ex.Message}", "OK");
+            }
         }
 
         public ICommand RequestCameraPermissionsCommand
@@ -84,14 +99,31 @@ namespace CameraDemoApp.ViewModels
         {
             try
             {
-                //await this.cameraPermissions.CheckAndRequesPermissionAsync();
-                await this.cameraPermissions.RequestPermissionAsync();
-                await this.UpdateAuthorizationStatusAsync();
+                this.AuthorizationStatus = await this.cameraPermissions.RequestPermissionAsync();
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "RequestCameraPermissionsAsync failed with exception");
                 await this.dialogService.DisplayAlertAsync("Error", $"Request for camera permissions failed: {ex.Message}", "OK");
+            }
+        }
+
+
+        public ICommand CheckAndRequestCameraPermissionsCommand
+        {
+            get => this.checkAndRequestCameraPermissionsCommand ??= new AsyncRelayCommand(this.CheckAndRequestCameraPermissionsAsync);
+        }
+
+        private async Task CheckAndRequestCameraPermissionsAsync()
+        {
+            try
+            {
+                this.AuthorizationStatus = await this.cameraPermissions.CheckAndRequestPermissionAsync();
+            }
+            catch (Exception ex)
+            {
+                this.logger.LogError(ex, "CheckAndRequestCameraPermissionsAsync failed with exception");
+                await this.dialogService.DisplayAlertAsync("Error", $"CheckAndRequest for camera permissions failed: {ex.Message}", "OK");
             }
         }
 

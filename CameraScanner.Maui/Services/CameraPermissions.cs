@@ -2,11 +2,10 @@
 {
     public class CameraPermissions : ICameraPermissions
     {
-        private static readonly Lazy<ICameraPermissions> Implementation = new Lazy<ICameraPermissions>(CreateInstance, LazyThreadSafetyMode.PublicationOnly);
+        private static readonly Lazy<ICameraPermissions> Implementation =
+            new Lazy<ICameraPermissions>(CreateInstance, LazyThreadSafetyMode.PublicationOnly);
 
-        /// <summary>
-        /// Current plugin implementation to use
-        /// </summary>
+        /// <inheritdoc cref="ICameraPermissions.Current"/>
         public static ICameraPermissions Current
         {
             get => Implementation.Value;
@@ -31,27 +30,20 @@
             return permissionStatus == PermissionStatus.Granted;
         }
 
-        public async Task<bool> CheckAndRequesPermissionAsync()
-        {
-            var permissionStatus = await Permissions.CheckStatusAsync<Permissions.Camera>();
-            if (permissionStatus != PermissionStatus.Granted)
-            {
-                permissionStatus = await Permissions.RequestAsync<Permissions.Camera>();
-
-                if (permissionStatus == PermissionStatus.Granted)
-                {
-                    return true;
-                }
-            }
-
-            return false;
-        }
-
-
         public async Task<bool> RequestPermissionAsync()
         {
             var permissionStatus = await Permissions.RequestAsync<Permissions.Camera>();
             return permissionStatus == PermissionStatus.Granted;
+        }
+
+        public async Task<bool> CheckAndRequestPermissionAsync()
+        {
+            if (await this.CheckPermissionAsync())
+            {
+                return true;
+            }
+
+            return await this.RequestPermissionAsync();
         }
     }
 }
