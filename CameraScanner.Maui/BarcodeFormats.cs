@@ -26,7 +26,10 @@
         MicroQR     = 1 << 15, // 32768
         MicroPdf417 = 1 << 16, // 65536
 
-        All = Aztec | Code128 | Code39 | Code93 | DataMatrix | Ean13 | Ean8 | ITF | Pdf417 | QR |
-              UPC_A | UPC_E | Codabar | GS1DataBar | I2OF5 | MicroQR | MicroPdf417
+        All1D = Code128 | Code39 | Code93 | Ean13 | Ean8 | ITF | UPC_A | UPC_E | Codabar | GS1DataBar | I2OF5,
+        
+        All2D = Aztec | DataMatrix | QR | MicroQR | Pdf417 | MicroPdf417,
+
+        All = All1D | All2D,
     }
 }
