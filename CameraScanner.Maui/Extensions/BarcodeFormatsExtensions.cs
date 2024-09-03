@@ -6,7 +6,11 @@ namespace CameraScanner.Maui.Extensions
         {
             return Enum.GetValues(typeof(BarcodeFormats))
                 .Cast<BarcodeFormats>()
-                .Where(role => barcodeFormats.HasFlag(role) && role != BarcodeFormats.None && role != BarcodeFormats.All)
+                .Where(role => barcodeFormats.HasFlag(role) &&
+                               role != BarcodeFormats.None &&
+                               role != BarcodeFormats.All &&
+                               role != BarcodeFormats.All1D &&
+                               role != BarcodeFormats.All2D)
                 .Select(role => role)
                 .ToArray();
         }
