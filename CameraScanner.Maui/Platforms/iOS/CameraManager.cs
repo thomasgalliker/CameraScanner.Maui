@@ -15,6 +15,7 @@ using Vision;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     internal class CameraManager : IDisposable
     {
         private readonly string instance = new Guid().ToString().Substring(0, 5).ToUpperInvariant();

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     internal class BarcodeAnalyzer : AVCaptureVideoDataOutputSampleBufferDelegate
     {
         // private readonly ILogger logger;
