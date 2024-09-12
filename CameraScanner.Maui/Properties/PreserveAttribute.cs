@@ -2,7 +2,7 @@
 
 namespace CameraScanner.Maui
 {
-    [AttributeUsage(AttributeTargets.All)]
+    [AttributeUsage(AttributeTargets.All, AllowMultiple = true)]
     [EditorBrowsable(EditorBrowsableState.Never)]
     internal sealed class PreserveAttribute : Attribute
     {
