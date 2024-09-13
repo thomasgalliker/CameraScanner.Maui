@@ -23,24 +23,37 @@
         RowDefinitions="*, Auto, Auto"
         RowSpacing="16">
 
-        <Image
-            Grid.Row="0"
-            Source="{Binding Image}" />
+        <Grid Grid.Row="0">
+            <Image
+                Grid.Row="0"
+                Source="{Binding Image}"
+                BackgroundColor="LightBlue" />
+            <c:BarcodeResultOverlay
+                Grid.Row="0"
+                BarcodeResults="{Binding BarcodeResults}"
+                InvalidateDrawableAfter="{x:Null}"
+                StrokeColor="Red"
+                StrokeSize="4">
+                <c:BarcodeResultOverlay.BarcodeDrawable>
+                    <c:BoundingBoxBarcodeDrawable />
+                </c:BarcodeResultOverlay.BarcodeDrawable>
+            </c:BarcodeResultOverlay>
+        </Grid>
 
         <VerticalStackLayout
             Grid.Row="1"
+            BackgroundColor="Yellow"
             BindableLayout.ItemTemplate="{StaticResource BarcodeResultItemTemplate}"
             BindableLayout.ItemsSource="{Binding BarcodeResults}" />
 
         <VerticalStackLayout
             Grid.Row="2"
+            BackgroundColor="LightGreen"
             VerticalOptions="Start">
-
             <Grid
                 RowDefinitions="Auto"
                 RowSpacing="8"
                 VerticalOptions="Fill">
-
                 <Button
                     Grid.Row="0"
                     Command="{Binding PickPhotoCommand}"
