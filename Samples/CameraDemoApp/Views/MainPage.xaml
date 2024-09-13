@@ -28,23 +28,20 @@
                     Grid.Column="0"
                     Source="logo.png"
                     HeightRequest="100" />
-                <Label
-                    Grid.Column="1">
+                <Label Grid.Column="1">
                     <Label.FormattedText>
                         <FormattedString>
+                            <Span Text="MAUI sample app for camera preview and barcode detection. This sample app is used to demonstrate and test the main features of the nuget package " />
                             <Span
-                                Text="MAUI sample app for camera preview and barcode detection. This sample app is used to demonstrate and test the main features of the nuget package " />
-                            <Span
-                                Text="CameraScanner.Maui"
-                                Style="{StaticResource HyperlinkSpanStyle}">
+                                Style="{StaticResource HyperlinkSpanStyle}"
+                                Text="CameraScanner.Maui">
                                 <Span.GestureRecognizers>
                                     <TapGestureRecognizer
                                         Command="{Binding OpenUrlCommand}"
-                                        CommandParameter="https://www.nuget.org/packages/CameraScanner.Maui"/>
+                                        CommandParameter="https://www.nuget.org/packages/CameraScanner.Maui" />
                                 </Span.GestureRecognizers>
                             </Span>
-                            <Span
-                                Text="." />
+                            <Span Text="." />
                         </FormattedString>
                     </Label.FormattedText>
                 </Label>
