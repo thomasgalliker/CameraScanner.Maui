@@ -8,7 +8,7 @@
     <MauiVersion>8.0.82</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
 
     <!-- Display name -->
     <ApplicationTitle>CameraDemoApp</ApplicationTitle>
