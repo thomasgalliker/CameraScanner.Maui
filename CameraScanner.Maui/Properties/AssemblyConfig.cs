@@ -2,7 +2,7 @@
 using CameraScanner.Maui;
 
 [assembly: InternalsVisibleTo("CameraScanner.Maui.Tests")]
-[assembly: InternalsVisibleTo("MauiSampleApp")]
+[assembly: InternalsVisibleTo("CameraDemoApp")]
 [assembly: InternalsVisibleTo("DynamicProxyGenAssembly2")]
 
 [assembly: XmlnsDefinition("http://camerascanner.maui", "CameraScanner.Maui")]
