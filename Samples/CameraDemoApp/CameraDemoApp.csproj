@@ -129,13 +129,4 @@
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <MauiXaml Update="Views\FilePickerPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\ItemTemplates\BarcodeResultItemTemplate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-  </ItemGroup>
-
 </Project>
