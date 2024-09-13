@@ -34,7 +34,26 @@ namespace CameraDemoApp.ViewModels
         public BarcodeResult[] BarcodeResults
         {
             get => this.barcodeResults;
-            private set => this.SetProperty(ref this.barcodeResults, value);
+            private set
+            {
+                if (this.SetProperty(ref this.barcodeResults, value))
+                {
+                    this.OnPropertyChanged(nameof(this.BarcodeResultsCountText));
+                }
+            }
+        }
+
+        public string BarcodeResultsCountText
+        {
+            get
+            {
+                if (this.BarcodeResults is not BarcodeResult[] barcodeResults)
+                {
+                    return null;
+                }
+
+                return string.Format("Number of barcodes found: {0}", barcodeResults.Length);
+            }
         }
 
         public IAsyncRelayCommand PickPhotoCommand
@@ -50,14 +69,6 @@ namespace CameraDemoApp.ViewModels
                 var fileResult = await this.mediaPicker.PickPhotoAsync(options);
                 if (fileResult != null)
                 {
-                    // save the file into local storage
-                    //var localFilePath = Path.Combine(FileSystem.CacheDirectory, fileResult.FileName);
-
-                    //using var sourceStream = await fileResult.OpenReadAsync();
-                    //using var localFileStream = File.OpenWrite(localFilePath);
-
-                    //await sourceStream.CopyToAsync(localFileStream);
-
                     var barcodeResults = await this.barcodeScanner.ScanFromImageAsync(fileResult);
                     this.Image = ImageSource.FromFile(fileResult.FullPath);
                     this.BarcodeResults = barcodeResults.ToArray();

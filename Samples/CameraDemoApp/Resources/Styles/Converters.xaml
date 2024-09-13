@@ -22,4 +22,6 @@
         FalseValue="Pause"
         TrueValue="Resume" />
 
+    <c:StringIsNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
+
 </ResourceDictionary>
