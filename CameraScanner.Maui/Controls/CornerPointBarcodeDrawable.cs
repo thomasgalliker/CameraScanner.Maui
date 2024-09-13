@@ -2,21 +2,23 @@ namespace CameraScanner.Maui.Controls
 {
     public class CornerPointBarcodeDrawable : BarcodeDrawable
     {
+        protected override bool IsValid(BarcodeResult barcodeResult)
+        {
+            return barcodeResult.CornerPoints is Point[] cornerPoints && cornerPoints.Length == 4;
+        }
+
         protected override void DrawResult(ICanvas canvas, BarcodeResult barcodeResult)
         {
             // Draw path around corner points
-            if (barcodeResult.CornerPoints is Point[] cornerPoints && cornerPoints.Length != 0)
+            var cornerToCornerPath = new PathF();
+            cornerToCornerPath.MoveTo(barcodeResult.CornerPoints.Last());
+
+            foreach (var cornerPoint in barcodeResult.CornerPoints)
             {
-                var cornerToCornerPath = new PathF();
-                cornerToCornerPath.MoveTo(cornerPoints.Last());
-
-                foreach (var cornerPoint in cornerPoints)
-                {
-                    cornerToCornerPath.LineTo(cornerPoint);
-                }
-
-                canvas.DrawPath(cornerToCornerPath);
+                cornerToCornerPath.LineTo(cornerPoint);
             }
+
+            canvas.DrawPath(cornerToCornerPath);
         }
 
         protected override PointF GetTextPosition(BarcodeResult barcodeResult)
