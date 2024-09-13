@@ -60,6 +60,29 @@
     <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
   </ItemGroup>
 
+  <!-- Android build properties -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
+    <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
+    <AndroidDexTool>d8</AndroidDexTool>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Debug'">
+    <AndroidLinkMode>None</AndroidLinkMode>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
+    <AndroidLinkMode>SdkOnly</AndroidLinkMode>
+    <AndroidLinkTool>r8</AndroidLinkTool>
+  </PropertyGroup>
+
+  <!-- iOS build properties -->
+  <PropertyGroup Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Debug'">
+    <MtouchDebug>true</MtouchDebug>
+    <MtouchLink>None</MtouchLink>
+  </PropertyGroup>
+  <PropertyGroup Condition="$(TargetFramework.Contains('-ios')) and '$(Configuration)' == 'Release'">
+    <MtouchDebug>false</MtouchDebug>
+    <MtouchLink>SdkOnly</MtouchLink>
+  </PropertyGroup>
+
   <ItemGroup>
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
@@ -77,6 +100,10 @@
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.Runtime.Ktx" Version="2.8.2.1" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModel" Version="2.8.2.1" />
     <PackageReference Include="Xamarin.AndroidX.Lifecycle.ViewModel.Ktx" Version="2.8.2.1" />
+  </ItemGroup>
+
+  <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
+    <ProguardConfiguration Include="Platforms\Android\proguard.cfg" />
   </ItemGroup>
 
 </Project>
