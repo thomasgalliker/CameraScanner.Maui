@@ -20,8 +20,9 @@ namespace CameraDemoApp
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
+                    fonts.AddFont("IBMPlexMono-Regular.ttf", "IBMPlexMonoRegular");
+                    fonts.AddFont("IBMPlexSans-Regular.ttf", "IBMPlexSansRegular");
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
-                    fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
 
 

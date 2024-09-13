@@ -7,7 +7,7 @@
     xmlns:itemTemplates="clr-namespace:CameraDemoApp.Views.ItemTemplates"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.FilePickerPage"
-    Title="Universal Barcode Scanner"
+    Title="File Picker"
     x:DataType="vm:FilePickerViewModel">
 
     <ContentPage.Resources>

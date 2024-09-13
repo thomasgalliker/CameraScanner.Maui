@@ -34,17 +34,25 @@ namespace CameraScanner.Maui.Controls
 
                 foreach (var barcodeResult in results)
                 {
-                    this.DrawResult(canvas, barcodeResult);
+                    if (this.IsValid(barcodeResult))
+                    {
+                        this.DrawResult(canvas, barcodeResult);
 
-                    // Display preview text underneath the barcode result
-                    var displayValue = GetPreviewText(barcodeResult);
+                        // Display preview text underneath the barcode result
+                        var displayValue = GetPreviewText(barcodeResult);
 
-                    var textPosition = this.GetTextPosition(barcodeResult);
-
-                    DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, this.strokeColor, this.textColor);
+                        var textPosition = this.GetTextPosition(barcodeResult);
+                        DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, this.strokeColor, this.textColor);
+                    }
+                    else
+                    {
+                        // TODO: There are cases where we don't get valid barcode position information
+                    }
                 }
             }
         }
+
+        protected abstract bool IsValid(BarcodeResult barcodeResult);
 
         protected abstract void DrawResult(ICanvas canvas, BarcodeResult barcodeResult);
 

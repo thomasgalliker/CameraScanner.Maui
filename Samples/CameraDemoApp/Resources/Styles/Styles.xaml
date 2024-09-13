@@ -200,23 +200,19 @@
         <Setter Property="FontSize" Value="18" />
         <Setter Property="FontAttributes" Value="Bold" />
     </Style>
-    
-    <Style TargetType="Label" x:Key="DebugLabelStyle">
-        <Setter Property="BackgroundColor" Value="#5cffec00" />
+
+    <Style
+        x:Key="DebugLabelStyle"
+        TargetType="Label">
+        <Setter Property="BackgroundColor" Value="#99000000" />
+        <Setter Property="TextColor" Value="{StaticResource White}" />
         <Setter Property="VerticalOptions" Value="Start" />
         <Setter Property="HorizontalOptions" Value="Start" />
-        <Setter Property="FontAttributes" Value="Bold" />
+        <Setter Property="Padding" Value="4" />
         <Setter Property="FontSize" Value="11" />
-        <Setter Property="FontFamily">
-            <OnPlatform x:TypeArguments="x:String">
-                <OnPlatform.Platforms>
-                    <On Platform="Android" Value="monospace" />
-                    <On Platform="iOS" Value="Courier" />
-                </OnPlatform.Platforms>
-            </OnPlatform>
-        </Setter>
+        <Setter Property="FontFamily" Value="IBMPlexMonoRegular" />
     </Style>
-    
+
     <Style
         BasedOn="{StaticResource LabelStyle}"
         TargetType="Label" />
