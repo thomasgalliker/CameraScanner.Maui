@@ -1,7 +1,7 @@
 # CameraScanner.Maui
 [![Version](https://img.shields.io/nuget/v/CameraScanner.Maui.svg)](https://www.nuget.org/packages/CameraScanner.Maui)  [![Downloads](https://img.shields.io/nuget/dt/CameraScanner.Maui.svg)](https://www.nuget.org/packages/CameraScanner.Maui)
 
-This library offers camera preview and barcode scanning functionality for .NET MAUI apps using native platform APIs with **Google ML Kit** and **Apple Vision framework**.
+This library offers camera preview and barcode scanning functionality for .NET MAUI apps using native platform APIs with **Google ML Kit** and **Apple VisionKit**.
 
 ### Download and Install CameraScanner.Maui
 This library is available on NuGet: https://www.nuget.org/packages/CameraScanner.Maui

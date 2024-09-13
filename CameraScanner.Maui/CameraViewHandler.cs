@@ -6,6 +6,7 @@ using Microsoft.Maui.Handlers;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     public partial class CameraViewHandler : ViewHandler<CameraView, BarcodeView>
     {
         private readonly ILogger logger;
