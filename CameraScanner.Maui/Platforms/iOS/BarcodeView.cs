@@ -5,6 +5,7 @@ using UIKit;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     public class BarcodeView : UIView
     {
         private readonly AVCaptureVideoPreviewLayer previewLayer;

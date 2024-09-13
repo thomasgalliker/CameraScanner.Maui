@@ -5,6 +5,7 @@ using Size = Android.Util.Size;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     internal class BarcodeAnalyzer : Java.Lang.Object, ImageAnalysis.IAnalyzer
     {
         private readonly ILogger<BarcodeAnalyzer> logger;

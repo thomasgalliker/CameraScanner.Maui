@@ -24,6 +24,7 @@ using Size = Android.Util.Size;
 
 namespace CameraScanner.Maui
 {
+    [Preserve(AllMembers = true)]
     internal class CameraManager : IDisposable
     {
         private const int AimRadius = 25;
