@@ -5,10 +5,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <MauiVersion>8.0.80</MauiVersion>
+    <MauiVersion>8.0.82</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
+    <Nullable>disable</Nullable>
 
     <!-- Display name -->
     <ApplicationTitle>CameraDemoApp</ApplicationTitle>
@@ -83,7 +83,7 @@
     <AndroidPackageFormat>aab</AndroidPackageFormat>
     <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
     <JavaMaximumHeapSize>1G</JavaMaximumHeapSize>
-    <AndroidSupportedAbis>armeabi-v7a;x86;x86_64;arm64-v8a</AndroidSupportedAbis>
+    <RuntimeIdentifiers>android-arm;android-arm64;android-x86;android-x64</RuntimeIdentifiers>
     <RunAOTCompilation>true</RunAOTCompilation>
     <AndroidEnableProfiledAot>true</AndroidEnableProfiledAot>
   </PropertyGroup>
@@ -127,15 +127,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <MauiXaml Update="Views\FilePickerPage.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
-    <MauiXaml Update="Views\ItemTemplates\BarcodeResultItemTemplate.xaml">
-      <Generator>MSBuild:Compile</Generator>
-    </MauiXaml>
   </ItemGroup>
 
 </Project>

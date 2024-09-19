@@ -20,6 +20,41 @@ namespace CameraScanner.Maui.Tests.Extensions
         }
 
         [Fact]
+        public void ShouldConvertFlagsToArray_All1D()
+        {
+            // Arrange
+            var barcodeFormats = BarcodeFormats.All1D;
+
+            // Act
+            var barcodeFormatsArray = barcodeFormats.ToArray();
+
+            // Assert
+            barcodeFormatsArray.Should().HaveCount(11);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.None);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All1D);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All2D);
+        }
+        
+
+        [Fact]
+        public void ShouldConvertFlagsToArray_All2D()
+        {
+            // Arrange
+            var barcodeFormats = BarcodeFormats.All2D;
+
+            // Act
+            var barcodeFormatsArray = barcodeFormats.ToArray();
+
+            // Assert
+            barcodeFormatsArray.Should().HaveCount(6);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.None);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All1D);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All2D);
+        }
+
+        [Fact]
         public void ShouldConvertFlagsToArray_All()
         {
             // Arrange
@@ -32,6 +67,8 @@ namespace CameraScanner.Maui.Tests.Extensions
             barcodeFormatsArray.Should().HaveCount(17);
             barcodeFormatsArray.Should().NotContain(BarcodeFormats.None);
             barcodeFormatsArray.Should().NotContain(BarcodeFormats.All);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All1D);
+            barcodeFormatsArray.Should().NotContain(BarcodeFormats.All2D);
         }
 
         [Fact]

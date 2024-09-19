@@ -7,7 +7,7 @@
     xmlns:itemTemplates="clr-namespace:CameraDemoApp.Views.ItemTemplates"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.FilePickerPage"
-    Title="Universal Barcode Scanner"
+    Title="File Picker"
     x:DataType="vm:FilePickerViewModel">
 
     <ContentPage.Resources>
@@ -20,33 +20,60 @@
 
     <Grid
         Padding="16"
-        RowDefinitions="*, Auto, Auto"
-        RowSpacing="16">
+        RowDefinitions="*, Auto"
+        RowSpacing="8">
 
-        <Image
-            Grid.Row="0"
-            Source="{Binding Image}" />
+        <Grid Grid.Row="0">
+            <Image
+                Grid.Row="0"
+                Source="{Binding Image}"
+                BackgroundColor="{StaticResource Gray100}"
+                SizeChanged="Image_SizeChanged"
+                HorizontalOptions="Fill"
+                VerticalOptions="Start" />
+
+            <!--  BarcodeResultOverlay does not (yet) properly work with photo picker  -->
+            <!--<c:BarcodeResultOverlay
+                Grid.Row="0"
+                BarcodeResults="{Binding BarcodeResults}"
+                InvalidateDrawableAfter="{x:Null}"
+                SizeChanged="BarcodeResultOverlay_SizeChanged"
+                StrokeColor="Red"
+                StrokeSize="4">
+                <c:BarcodeResultOverlay.BarcodeDrawable>
+                    <c:BoundingBoxBarcodeDrawable />
+                </c:BarcodeResultOverlay.BarcodeDrawable>
+            </c:BarcodeResultOverlay>-->
+        </Grid>
 
         <VerticalStackLayout
             Grid.Row="1"
-            BindableLayout.ItemTemplate="{StaticResource BarcodeResultItemTemplate}"
-            BindableLayout.ItemsSource="{Binding BarcodeResults}" />
+            Spacing="8">
 
-        <VerticalStackLayout
-            Grid.Row="2"
-            VerticalOptions="Start">
+            <ScrollView MaximumHeightRequest="200">
+                <VerticalStackLayout
+                    BindableLayout.ItemTemplate="{StaticResource BarcodeResultItemTemplate}"
+                    BindableLayout.ItemsSource="{Binding BarcodeResults}"
+                    Spacing="4" />
+            </ScrollView>
 
-            <Grid
-                RowDefinitions="Auto"
-                RowSpacing="8"
-                VerticalOptions="Fill">
+            <Label
+                FontAttributes="Bold"
+                IsVisible="{Binding BarcodeResultsCountText, Converter={StaticResource StringIsNotNullOrEmptyConverter}}"
+                Text="{Binding BarcodeResultsCountText}" />
 
-                <Button
-                    Grid.Row="0"
-                    Command="{Binding PickPhotoCommand}"
-                    Text="Pick Photo"
-                    HorizontalOptions="Fill" />
-            </Grid>
+            <VerticalStackLayout VerticalOptions="Start">
+                <Grid
+                    RowDefinitions="Auto"
+                    RowSpacing="8"
+                    VerticalOptions="Fill">
+                    <Button
+                        Grid.Row="0"
+                        Command="{Binding PickPhotoCommand}"
+                        Text="Pick Photo"
+                        HorizontalOptions="Fill" />
+                </Grid>
+            </VerticalStackLayout>
         </VerticalStackLayout>
     </Grid>
 </ContentPage>

@@ -2,28 +2,30 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using Microsoft.Maui.Graphics.Platform;
 
 namespace CameraDemoApp.ViewModels
 {
     public class FilePickerViewModel : ObservableObject
     {
         private readonly ILogger logger;
+        private readonly IMediaPicker mediaPicker;
         private readonly IBarcodeScanner barcodeScanner;
 
-        private PlatformImage image;
+        private ImageSource image;
         private IAsyncRelayCommand pickPhotoCommand;
         private BarcodeResult[] barcodeResults;
 
         public FilePickerViewModel(
             ILogger<FilePickerViewModel> logger,
+            IMediaPicker mediaPicker,
             IBarcodeScanner barcodeScanner)
         {
             this.logger = logger;
+            this.mediaPicker = mediaPicker;
             this.barcodeScanner = barcodeScanner;
         }
 
-        public PlatformImage Image
+        public ImageSource Image
         {
             get => this.image;
             private set => this.SetProperty(ref this.image, value);
@@ -32,7 +34,26 @@ namespace CameraDemoApp.ViewModels
         public BarcodeResult[] BarcodeResults
         {
             get => this.barcodeResults;
-            private set => this.SetProperty(ref this.barcodeResults, value);
+            private set
+            {
+                if (this.SetProperty(ref this.barcodeResults, value))
+                {
+                    this.OnPropertyChanged(nameof(this.BarcodeResultsCountText));
+                }
+            }
+        }
+
+        public string BarcodeResultsCountText
+        {
+            get
+            {
+                if (this.BarcodeResults is not BarcodeResult[] barcodeResults)
+                {
+                    return null;
+                }
+
+                return string.Format("Number of barcodes found: {0}", barcodeResults.Length);
+            }
         }
 
         public IAsyncRelayCommand PickPhotoCommand
@@ -45,18 +66,11 @@ namespace CameraDemoApp.ViewModels
             try
             {
                 var options = new MediaPickerOptions { Title = "Test picker" };
-                var fileResult = await MediaPicker.PickPhotoAsync(options);
+                var fileResult = await this.mediaPicker.PickPhotoAsync(options);
                 if (fileResult != null)
                 {
-                    // save the file into local storage
-                    //var localFilePath = Path.Combine(FileSystem.CacheDirectory, fileResult.FileName);
-
-                    //using var sourceStream = await fileResult.OpenReadAsync();
-                    //using var localFileStream = File.OpenWrite(localFilePath);
-
-                    //await sourceStream.CopyToAsync(localFileStream);
-
                     var barcodeResults = await this.barcodeScanner.ScanFromImageAsync(fileResult);
+                    this.Image = ImageSource.FromFile(fileResult.FullPath);
                     this.BarcodeResults = barcodeResults.ToArray();
                 }
             }
@@ -64,6 +78,7 @@ namespace CameraDemoApp.ViewModels
             {
                 this.logger.LogError(ex, "PickPhotoAsync failed with exception");
                 this.BarcodeResults = [];
+                this.Image = null;
             }
         }
     }

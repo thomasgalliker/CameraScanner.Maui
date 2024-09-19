@@ -123,8 +123,15 @@ namespace CameraScanner.Maui.Platforms.Services
                 }
                 else
                 {
-                    previewRect = RectF.Zero;
-                    cornerPoints = [];
+                    previewRect = rectF.AsRectangleF();
+                    cornerPoints = barcode.GetCornerPoints()
+                       .Select(p =>
+                       {
+                           var pointF = new global::Android.Graphics.PointF(p);
+                           return pointF;
+                       })
+                       .Select(p => new Point(p.X, p.Y))
+                       .ToArray();
                 }
       
 

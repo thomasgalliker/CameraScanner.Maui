@@ -1,12 +1,11 @@
 using System.Windows.Input;
 using CameraScanner.Maui.Utils;
+using Microsoft.Maui.Graphics.Text;
 
 namespace CameraScanner.Maui.Controls
 {
     public partial class BarcodeResultOverlay : GraphicsView
     {
-        private static readonly TimeSpan ClearResultOverlayDelay = TimeSpan.FromMilliseconds(500);
-
         private readonly TaskDelayer taskDelayer;
 
         public BarcodeResultOverlay()
@@ -14,6 +13,18 @@ namespace CameraScanner.Maui.Controls
             this.InitializeComponent();
             this.taskDelayer = new TaskDelayer();
             this.Drawable = this.BarcodeDrawable;
+        }
+
+        protected override void OnSizeAllocated(double width, double height)
+        {
+            base.OnSizeAllocated(width, height);
+            //UpdateDrawable(
+            //   this,
+            //   this.BarcodeResults,
+            //   this.StrokeSize,
+            //   this.StrokeColor,
+            //   this.TextColor,
+            //   this.InvalidateDrawableAfter);
         }
 
         public static readonly BindableProperty BarcodeDrawableProperty = BindableProperty.Create(
@@ -61,7 +72,8 @@ namespace CameraScanner.Maui.Controls
                     barcodeResults,
                     barcodeResultOverlay.StrokeSize,
                     barcodeResultOverlay.StrokeColor,
-                    barcodeResultOverlay.TextColor);
+                    barcodeResultOverlay.TextColor,
+                    barcodeResultOverlay.InvalidateDrawableAfter);
             }
         }
 
@@ -89,7 +101,8 @@ namespace CameraScanner.Maui.Controls
                     barcodeResultOverlay.BarcodeResults,
                     strokeSize,
                     barcodeResultOverlay.StrokeColor,
-                    barcodeResultOverlay.TextColor);
+                    barcodeResultOverlay.TextColor,
+                    barcodeResultOverlay.InvalidateDrawableAfter);
             }
         }
 
@@ -117,7 +130,8 @@ namespace CameraScanner.Maui.Controls
                     barcodeResultOverlay.BarcodeResults,
                     barcodeResultOverlay.StrokeSize,
                     strokeColor,
-                    barcodeResultOverlay.TextColor);
+                    barcodeResultOverlay.TextColor,
+                    barcodeResultOverlay.InvalidateDrawableAfter);
             }
         }
 
@@ -145,7 +159,8 @@ namespace CameraScanner.Maui.Controls
                     barcodeResultOverlay.BarcodeResults,
                     barcodeResultOverlay.StrokeSize,
                     barcodeResultOverlay.StrokeColor,
-                    textColor);
+                    textColor,
+                    barcodeResultOverlay.InvalidateDrawableAfter);
             }
         }
 
@@ -155,17 +170,47 @@ namespace CameraScanner.Maui.Controls
             set => this.SetValue(TextColorProperty, value);
         }
 
+        public static readonly BindableProperty InvalidateDrawableAfterProperty = BindableProperty.Create(
+            nameof(InvalidateDrawableAfter),
+            typeof(TimeSpan?),
+            typeof(BarcodeResultOverlay),
+            TimeSpan.FromMilliseconds(500),
+            propertyChanged: OnInvalidateDrawableAfterPropertyChanged);
+
+
+        private static void OnInvalidateDrawableAfterPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var barcodeResultOverlay = (BarcodeResultOverlay)bindable;
+
+            UpdateDrawable(
+                 barcodeResultOverlay,
+                 barcodeResultOverlay.BarcodeResults,
+                 barcodeResultOverlay.StrokeSize,
+                 barcodeResultOverlay.StrokeColor,
+                 barcodeResultOverlay.TextColor,
+                 newValue as TimeSpan?);
+        }
+
+        public TimeSpan? InvalidateDrawableAfter
+        {
+            get => (TimeSpan?)this.GetValue(InvalidateDrawableAfterProperty);
+            set => this.SetValue(InvalidateDrawableAfterProperty, value);
+        }
+
         private static void UpdateDrawable(BarcodeResultOverlay barcodeResultOverlay,
-            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor)
+            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor, TimeSpan? invalidateDrawableAfter)
         {
             barcodeResultOverlay.BarcodeDrawable.Update(barcodeResults, strokeSize, strokeColor, textColor);
             barcodeResultOverlay.Invalidate();
 
-            barcodeResultOverlay.taskDelayer.RunWithDelay(ClearResultOverlayDelay, () =>
+            if (invalidateDrawableAfter is TimeSpan delay)
             {
-                barcodeResultOverlay.BarcodeDrawable.Reset();
-                MainThread.BeginInvokeOnMainThread(barcodeResultOverlay.Invalidate);
-            });
+                barcodeResultOverlay.taskDelayer.RunWithDelay(delay, () =>
+                {
+                    barcodeResultOverlay.BarcodeDrawable.Reset();
+                    MainThread.BeginInvokeOnMainThread(barcodeResultOverlay.Invalidate);
+                });
+            }
         }
 
         private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)

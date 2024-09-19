@@ -6,20 +6,22 @@
     xmlns:c="clr-namespace:ValueConverters;assembly=ValueConverters">
 
     <c:BoolInverter x:Key="BoolInverter" />
-    
-    <c:BoolToImageSourceConverter 
-        x:Key="BoolToTorchConverter" 
-        TrueValue="flashlight_off.png"
-        FalseValue="flashlight.png" />
 
-    <c:BoolToStringConverter 
-        x:Key="BoolToStartStopConverter" 
-        TrueValue="Stop"
-        FalseValue="Start" />
+    <c:BoolToImageSourceConverter
+        x:Key="BoolToTorchConverter"
+        FalseValue="flashlight.png"
+        TrueValue="flashlight_off.png" />
 
-    <c:BoolToStringConverter 
-        x:Key="BoolToPauseResumeConverter" 
-        TrueValue="Resume"
-        FalseValue="Pause" />
+    <c:BoolToStringConverter
+        x:Key="BoolToStartStopConverter"
+        FalseValue="Start"
+        TrueValue="Stop" />
+
+    <c:BoolToStringConverter
+        x:Key="BoolToPauseResumeConverter"
+        FalseValue="Pause"
+        TrueValue="Resume" />
+
+    <c:StringIsNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
 
 </ResourceDictionary>
