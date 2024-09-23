@@ -91,7 +91,10 @@ namespace CameraScanner.Maui
                     }
                 });
 
-            this.previewLayer = new AVCaptureVideoPreviewLayer(this.captureSession) { VideoGravity = AVLayerVideoGravity.ResizeAspectFill };
+            this.previewLayer = new AVCaptureVideoPreviewLayer(this.captureSession)
+            {
+                VideoGravity = AVLayerVideoGravity.ResizeAspectFill
+            };
             this.shapeLayer = new CAShapeLayer
             {
                 Path = UIBezierPath.FromOval(new CGRect(-AimRadius, -AimRadius, 2 * AimRadius, 2 * AimRadius)).CGPath,
