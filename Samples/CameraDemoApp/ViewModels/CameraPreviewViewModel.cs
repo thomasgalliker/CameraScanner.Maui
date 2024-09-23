@@ -24,6 +24,8 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand shutterCommand;
         private IRelayCommand imageCapturedCommand;
         private bool captureNextFrame;
+        private float? minZoomFactor;
+        private float? maxZoomFactor;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
@@ -75,6 +77,30 @@ namespace CameraDemoApp.ViewModels
             set
             {
                 if (this.SetProperty(ref this.currentZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MinZoomFactor
+        {
+            get => this.minZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.minZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MaxZoomFactor
+        {
+            get => this.maxZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.maxZoomFactor, value))
                 {
                     this.OnPropertyChanged(nameof(this.DebugInfo));
                 }
@@ -160,6 +186,8 @@ namespace CameraDemoApp.ViewModels
                     $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
                     $"RequestZoomFactor: {this.RequestZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
                     $"CurrentZoomFactor: {this.CurrentZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
+                    $"MinZoomFactor: {this.MinZoomFactor}{Environment.NewLine}" +
+                    $"MaxZoomFactor: {this.MaxZoomFactor}{Environment.NewLine}" +
                     $"CameraFacing: {this.CameraFacing}";
             }
         }
