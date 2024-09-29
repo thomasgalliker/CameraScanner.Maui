@@ -25,7 +25,10 @@
             CaptureQuality="{Binding CaptureQuality}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"
-            TorchOn="{Binding TorchOn}" />
+            TorchOn="{Binding TorchOn}"
+            CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
+            MaxZoomFactor="{Binding MaxZoomFactor}" />
 
         <c:BarcodeResultOverlay
             Grid.Row="0"

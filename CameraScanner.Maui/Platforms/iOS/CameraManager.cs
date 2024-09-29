@@ -91,7 +91,10 @@ namespace CameraScanner.Maui
                     }
                 });
 
-            this.previewLayer = new AVCaptureVideoPreviewLayer(this.captureSession) { VideoGravity = AVLayerVideoGravity.ResizeAspectFill };
+            this.previewLayer = new AVCaptureVideoPreviewLayer(this.captureSession)
+            {
+                VideoGravity = AVLayerVideoGravity.ResizeAspectFill
+            };
             this.shapeLayer = new CAShapeLayer
             {
                 Path = UIBezierPath.FromOval(new CGRect(-AimRadius, -AimRadius, 2 * AimRadius, 2 * AimRadius)).CGPath,
@@ -286,19 +289,22 @@ namespace CameraScanner.Maui
                         const AVMediaTypes mediaType = AVMediaTypes.Video;
 
                         var captureDevicePosition = MapCameraFacing(this.cameraView.CameraFacing);
+                        float? virtualDeviceSwitchOverVideoZoomFactor;
 
                         using (var captureDeviceDiscoverySession = AVCaptureDeviceDiscoverySession.Create(
                                    SupportedCaptureDeviceTypes, mediaType, captureDevicePosition))
                         {
-                            var captureDevices = captureDeviceDiscoverySession.Devices;
-                            var captureDevicesAndZoomValues = captureDevices.Select(d => (
-                                    CaptureDevice: d,
-                                    ZoomFactor: DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(d, 40f)))
-                                .OrderBy(x => x.ZoomFactor ?? float.MaxValue)
-                                .ToArray();
+                            // Find the camera with the most virtual device switch overs.
+                            // This is the virtual camera which allows to zoom through all physical cameras.
+                            // More info: https://developer.apple.com/documentation/avfoundation/avcaptureprimaryconstituentdevicerestrictedswitchingbehaviorconditions
+                            var selectedCaptureDevice = captureDeviceDiscoverySession.Devices
+                                .OrderByDescending(d => d.VirtualDeviceSwitchOverVideoZoomFactors.Length)
+                                .FirstOrDefault();
 
-                            this.captureDevice = captureDevicesAndZoomValues.FirstOrDefault().CaptureDevice
-                                                 ?? AVCaptureDevice.GetDefaultDevice(mediaType);
+                            virtualDeviceSwitchOverVideoZoomFactor = selectedCaptureDevice.VirtualDeviceSwitchOverVideoZoomFactors
+                                .FirstOrDefault()?.FloatValue;
+
+                            this.captureDevice = selectedCaptureDevice;
                         }
 
                         if (this.captureDevice == null)
@@ -336,7 +342,7 @@ namespace CameraScanner.Maui
                             // Set requested zoom
                             this.SetVideoZoomFactor(requestZoomFactor);
                         }
-                        else if (DeviceAutomaticVideoZoomFactor.GetDefaultCameraZoom2(this.captureDevice, 40f) is float defaultCameraZoom
+                        else if (virtualDeviceSwitchOverVideoZoomFactor is float defaultCameraZoom
                                  and > 1F)
                         {
                             // Set default zoom

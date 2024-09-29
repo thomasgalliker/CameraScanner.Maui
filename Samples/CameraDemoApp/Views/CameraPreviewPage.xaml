@@ -22,6 +22,8 @@
             CameraFacing="{Binding CameraFacing}"
             CaptureNextFrame="{Binding CaptureNextFrame}"
             CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
+            MaxZoomFactor="{Binding MaxZoomFactor}"
             OnImageCapturedCommand="{Binding ImageCapturedCommand}"
             RequestZoomFactor="{Binding RequestZoomFactor}"
             TorchOn="{Binding TorchOn}" />
