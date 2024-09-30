@@ -11,7 +11,12 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem
+            Command="{Binding CloseCommand}"
+            Priority="99"
+            IconImageSource="close.png" />
+        <ToolbarItem
             Command="{Binding ToggleTorchCommand}"
+            Priority="0"
             IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}" />
     </ContentPage.ToolbarItems>
 
