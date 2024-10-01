@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net8.0-android;net8.0-ios17</TargetFrameworks>
+    <TargetFrameworks>net8.0;net8.0-android34.0;net8.0-ios17.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <UseMaui>true</UseMaui>
     <MauiVersion>8.0.3</MauiVersion>
