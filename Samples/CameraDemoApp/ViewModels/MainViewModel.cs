@@ -22,6 +22,7 @@ namespace CameraDemoApp.ViewModels
         private IAsyncRelayCommand requestCameraPermissionsCommand;
         private IAsyncRelayCommand checkAndRequestCameraPermissionsCommand;
         private IAsyncRelayCommand<string> navigateToPageCommand;
+        private IAsyncRelayCommand<string> navigateToModalPageCommand;
         private IAsyncRelayCommand<string> openUrlCommand;
 
         public MainViewModel(
@@ -135,6 +136,17 @@ namespace CameraDemoApp.ViewModels
         private async Task NavigateToPageAsync(string page)
         {
             await this.navigationService.PushAsync(page);
+        }
+
+
+        public IAsyncRelayCommand<string> NavigateToModalPageCommand
+        {
+            get => this.navigateToModalPageCommand ??= new AsyncRelayCommand<string>(this.NavigateToModalPageAsync);
+        }
+
+        private async Task NavigateToModalPageAsync(string page)
+        {
+            await this.navigationService.PushModalAsync(page);
         }
 
         public IAsyncRelayCommand<string> OpenUrlCommand

@@ -11,6 +11,7 @@ namespace CameraDemoApp.ViewModels
     public class CameraPreviewViewModel : ObservableObject
     {
         private readonly ILogger logger;
+        private readonly INavigationService navigationService;
         private readonly IDialogService dialogService;
 
         private IRelayCommand toggleCameraFacingCommand;
@@ -26,12 +27,15 @@ namespace CameraDemoApp.ViewModels
         private bool captureNextFrame;
         private float? minZoomFactor;
         private float? maxZoomFactor;
+        private IAsyncRelayCommand closeCommand;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
+            INavigationService navigationService,
             IDialogService dialogService)
         {
             this.logger = logger;
+            this.navigationService = navigationService;
             this.dialogService = dialogService;
 
             this.CameraFacing = CameraFacing.Front;
@@ -176,6 +180,16 @@ namespace CameraDemoApp.ViewModels
         private void ToggleTorch()
         {
             this.TorchOn = !this.TorchOn;
+        }
+
+        public IAsyncRelayCommand CloseCommand
+        {
+            get => this.closeCommand ??= new AsyncRelayCommand(this.CloseAsync);
+        }
+
+        private async Task CloseAsync()
+        {
+            await this.navigationService.PopModalAsync();
         }
 
         public string DebugInfo
