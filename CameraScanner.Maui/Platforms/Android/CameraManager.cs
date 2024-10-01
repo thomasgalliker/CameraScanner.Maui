@@ -10,7 +10,6 @@ using CameraScanner.Maui.Platforms.Android;
 using Java.Util.Concurrent;
 using Microsoft.Extensions.Logging;
 using Microsoft.Maui.Graphics.Platform;
-using Xamarin.Google.MLKit.Vision.Barcode.Common;
 using Xamarin.Google.MLKit.Vision.BarCode;
 using Xamarin.Google.MLKit.Vision.Common;
 using static Android.Views.ViewGroup;

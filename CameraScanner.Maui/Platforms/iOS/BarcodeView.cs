@@ -33,17 +33,18 @@ namespace CameraScanner.Maui
                 this.shapeLayer.Position = new CGPoint(this.Layer.Bounds.Width / 2, this.Layer.Bounds.Height / 2);
             }
 
-            if (this.previewLayer?.Connection is not null && this.previewLayer.Connection.SupportsVideoOrientation)
+            var previewLayerConnection = this.previewLayer?.Connection;
+            if (previewLayerConnection is not null && previewLayerConnection.SupportsVideoOrientation)
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
                 {
                     var interfaceOrientation = this.Window.WindowScene?.InterfaceOrientation;
-                    this.previewLayer.Connection.VideoOrientation = GetVideoOrientation(interfaceOrientation);
+                    previewLayerConnection.VideoOrientation = GetVideoOrientation(interfaceOrientation);
                 }
                 else
                 {
                     // TODO
-                    this.previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
+                    previewLayerConnection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
                 }
             }
         }
