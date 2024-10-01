@@ -40,6 +40,7 @@
     <PackageReleaseNotes>1.4
 - Optimize camera device selection on iOS.
 - Optimize default zoom selection on iOS.
+- Improve automatic disconnection from handler.
 
 1.3
 - Cleanup ICameraPermissions interface, add static Current to ICameraPermissions.
