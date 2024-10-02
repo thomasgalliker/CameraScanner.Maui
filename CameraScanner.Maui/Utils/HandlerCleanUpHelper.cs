@@ -33,13 +33,13 @@ namespace CameraScanner.Maui.Utils
                 if (view.Handler is not IElementHandler elementHandler)
                 {
                     Trace.WriteLine(
-                        $"HandlerCleanUpHelper.OnPageUnloaded: Page \"{GetPageNameForLogging(targetPage)}\" is no longer present on the navigation stack " +
+                        $"HandlerCleanUpHelper.OnNavigatedFrom: Page \"{GetPageNameForLogging(targetPage)}\" is no longer present on the navigation stack " +
                         $"--> {view.GetType().Name}.Handler is null");
                 }
                 else
                 {
                     Trace.WriteLine(
-                        $"HandlerCleanUpHelper.OnPageUnloaded: Page \"{GetPageNameForLogging(targetPage)}\" is no longer present on the navigation stack " +
+                        $"HandlerCleanUpHelper.OnNavigatedFrom: Page \"{GetPageNameForLogging(targetPage)}\" is no longer present on the navigation stack " +
                         $"--> {elementHandler.GetType().Name}.DisconnectHandler()");
                     elementHandler.DisconnectHandler();
                 }
@@ -47,7 +47,7 @@ namespace CameraScanner.Maui.Utils
 
             targetPage.NavigatedFrom += OnNavigatedFrom;
 
-            Trace.WriteLine($"HandlerCleanUpHelper.AddCleanUpEvent for Page \"{GetPageNameForLogging(targetPage)}\"");
+            Trace.WriteLine($"HandlerCleanUpHelper.AddCleanUpEvent for \"{view.GetType().Name}\" on page \"{GetPageNameForLogging(targetPage)}\"");
         }
 
         private static string GetPageNameForLogging(Page targetPage)
