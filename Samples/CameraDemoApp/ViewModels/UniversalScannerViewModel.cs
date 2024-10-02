@@ -25,6 +25,9 @@ namespace CameraDemoApp.ViewModels
         private bool torchOn;
         private IRelayCommand toggleTorchCommand;
         private uint? barcodeDetectionFrameRate;
+        private float? currentZoomFactor;
+        private float? minZoomFactor;
+        private float? maxZoomFactor;
 
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
@@ -187,6 +190,42 @@ namespace CameraDemoApp.ViewModels
             }
         }
 
+        public float? CurrentZoomFactor
+        {
+            get => this.currentZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.currentZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MinZoomFactor
+        {
+            get => this.minZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.minZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MaxZoomFactor
+        {
+            get => this.maxZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.maxZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
         public IRelayCommand<BarcodeResult> BarcodeResultTappedCommand
         {
             get => this.barcodeResultTappedCommand ??= new RelayCommand<BarcodeResult>(this.OnBarcodeResultTapped);
@@ -210,6 +249,9 @@ namespace CameraDemoApp.ViewModels
                     $"IsScannerEnabled: {this.IsScannerEnabled}{Environment.NewLine}" +
                     $"IsScannerPause: {this.IsScannerPause}{Environment.NewLine}" +
                     $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
+                    $"CurrentZoomFactor: {this.CurrentZoomFactor}{Environment.NewLine}" +
+                    $"MinZoomFactor: {this.MinZoomFactor}{Environment.NewLine}" +
+                    $"MaxZoomFactor: {this.MaxZoomFactor}{Environment.NewLine}" +
                     $"CaptureQuality: {this.CaptureQuality}{Environment.NewLine}" +
                     $"BarcodeFormats: {this.BarcodeFormats}{Environment.NewLine}" +
                     $"BarcodeDetectionFrameRate: {this.BarcodeDetectionFrameRate?.ToString() ?? "null"}";

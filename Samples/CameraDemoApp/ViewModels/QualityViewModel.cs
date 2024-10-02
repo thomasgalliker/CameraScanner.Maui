@@ -60,7 +60,7 @@ namespace CameraDemoApp.ViewModels
 
         public override int GetHashCode()
         {
-            return this.Value != null ? this.Value.GetHashCode() : 0;
+            return this.Value.GetHashCode();
         }
     }
 }

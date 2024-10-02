@@ -11,6 +11,7 @@ namespace CameraDemoApp.ViewModels
     public class CameraPreviewViewModel : ObservableObject
     {
         private readonly ILogger logger;
+        private readonly INavigationService navigationService;
         private readonly IDialogService dialogService;
 
         private IRelayCommand toggleCameraFacingCommand;
@@ -24,12 +25,17 @@ namespace CameraDemoApp.ViewModels
         private IRelayCommand shutterCommand;
         private IRelayCommand imageCapturedCommand;
         private bool captureNextFrame;
+        private float? minZoomFactor;
+        private float? maxZoomFactor;
+        private IAsyncRelayCommand closeCommand;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
+            INavigationService navigationService,
             IDialogService dialogService)
         {
             this.logger = logger;
+            this.navigationService = navigationService;
             this.dialogService = dialogService;
 
             this.CameraFacing = CameraFacing.Front;
@@ -75,6 +81,30 @@ namespace CameraDemoApp.ViewModels
             set
             {
                 if (this.SetProperty(ref this.currentZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MinZoomFactor
+        {
+            get => this.minZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.minZoomFactor, value))
+                {
+                    this.OnPropertyChanged(nameof(this.DebugInfo));
+                }
+            }
+        }
+
+        public float? MaxZoomFactor
+        {
+            get => this.maxZoomFactor;
+            set
+            {
+                if (this.SetProperty(ref this.maxZoomFactor, value))
                 {
                     this.OnPropertyChanged(nameof(this.DebugInfo));
                 }
@@ -152,6 +182,16 @@ namespace CameraDemoApp.ViewModels
             this.TorchOn = !this.TorchOn;
         }
 
+        public IAsyncRelayCommand CloseCommand
+        {
+            get => this.closeCommand ??= new AsyncRelayCommand(this.CloseAsync);
+        }
+
+        private async Task CloseAsync()
+        {
+            await this.navigationService.PopModalAsync();
+        }
+
         public string DebugInfo
         {
             get
@@ -160,6 +200,8 @@ namespace CameraDemoApp.ViewModels
                     $"TorchOn: {this.TorchOn}{Environment.NewLine}" +
                     $"RequestZoomFactor: {this.RequestZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
                     $"CurrentZoomFactor: {this.CurrentZoomFactor?.ToString() ?? "null"}{Environment.NewLine}" +
+                    $"MinZoomFactor: {this.MinZoomFactor}{Environment.NewLine}" +
+                    $"MaxZoomFactor: {this.MaxZoomFactor}{Environment.NewLine}" +
                     $"CameraFacing: {this.CameraFacing}";
             }
         }

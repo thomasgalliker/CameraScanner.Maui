@@ -391,14 +391,14 @@ namespace CameraScanner.Maui
                     this.poolingTimer.Start();
                 }
 
-                foreach (var result in barcodeResults)
+                foreach (var barcodeResult in barcodeResults)
                 {
-                    if (!this.pooledResults.Add(result))
+                    if (!this.pooledResults.Add(barcodeResult))
                     {
-                        if (this.pooledResults.TryGetValue(result, out var currentResult))
+                        if (this.pooledResults.TryGetValue(barcodeResult, out var currentResult))
                         {
-                            currentResult.PreviewBoundingBox = result.PreviewBoundingBox;
-                            currentResult.ImageBoundingBox = result.ImageBoundingBox;
+                            currentResult.PreviewBoundingBox = barcodeResult.PreviewBoundingBox;
+                            currentResult.ImageBoundingBox = barcodeResult.ImageBoundingBox;
                         }
                     }
                 }

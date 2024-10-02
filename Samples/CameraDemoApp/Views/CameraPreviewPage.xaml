@@ -11,7 +11,12 @@
 
     <ContentPage.ToolbarItems>
         <ToolbarItem
+            Command="{Binding CloseCommand}"
+            Priority="99"
+            IconImageSource="close.png" />
+        <ToolbarItem
             Command="{Binding ToggleTorchCommand}"
+            Priority="0"
             IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}" />
     </ContentPage.ToolbarItems>
 
@@ -22,6 +27,8 @@
             CameraFacing="{Binding CameraFacing}"
             CaptureNextFrame="{Binding CaptureNextFrame}"
             CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
+            MaxZoomFactor="{Binding MaxZoomFactor}"
             OnImageCapturedCommand="{Binding ImageCapturedCommand}"
             RequestZoomFactor="{Binding RequestZoomFactor}"
             TorchOn="{Binding TorchOn}" />

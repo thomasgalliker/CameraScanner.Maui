@@ -35,26 +35,25 @@
             {
                 return true;
             }
-            else
-            {
-                return false;
-            }
+
+            return false;
         }
+
         public override bool Equals(object obj)
         {
             if (obj is null)
             {
                 return false;
             }
-            else if (obj is not BarcodeResult barcode)
+
+            if (obj is not BarcodeResult barcode)
             {
                 return false;
             }
-            else
-            {
-                return base.Equals(barcode);
-            }
+
+            return base.Equals(barcode);
         }
+
         public override int GetHashCode()
         {
             return this.RawValue?.GetHashCode() ?? 0;
