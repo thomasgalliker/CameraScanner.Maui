@@ -8,7 +8,7 @@ namespace CameraScanner.Maui.Utils
     /// </summary>
     internal static class HandlerCleanUpHelper
     {
-        public static void AddCleanUpEvent(this IView view)
+        internal static void AddCleanUpEvent(this IView view)
         {
             if (view is not Element element)
             {
