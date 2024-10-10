@@ -7,19 +7,31 @@ namespace CameraScanner.Maui
     public class CameraView : View
     {
         private readonly IVibration vibration;
-        private readonly HashSet<BarcodeResult> pooledResults;
+        private readonly List<BarcodeResult> pooledResults;
         private readonly Timer poolingTimer;
 
         public CameraView() : this(Vibration.Default)
         {
             this.pooledResults = [];
             this.poolingTimer = new Timer { AutoReset = false };
-            this.poolingTimer.Elapsed += this.PoolingTimer_Elapsed; // TODO: Memory leak!
         }
 
         internal CameraView(IVibration vibration)
         {
             this.vibration = vibration;
+        }
+
+        protected override void OnHandlerChanged()
+        {
+            if (this.Handler != null)
+            {
+                this.poolingTimer.Elapsed += this.PoolingTimer_Elapsed;
+            }
+            else
+            {
+                this.poolingTimer.Elapsed -= this.PoolingTimer_Elapsed;
+                this.poolingTimer.Stop();
+            }
         }
 
         /// <summary>
@@ -128,7 +140,18 @@ namespace CameraScanner.Maui
             nameof(PoolingInterval),
             typeof(int),
             typeof(CameraView),
-            0);
+            0,
+            propertyChanged: PoolingIntervalPropertyChanged);
+
+        private static void PoolingIntervalPropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var cameraView = (CameraView)bindable;
+
+            if (newValue is int newInt)
+            {
+                cameraView.poolingTimer.Interval = newInt;
+            }
+        }
 
         /// <summary>
         /// Enables pooling of detections for better detection of multiple barcodes at once.
@@ -385,22 +408,26 @@ namespace CameraScanner.Maui
 
             if (this.PoolingInterval > 0)
             {
-                if (!this.poolingTimer.Enabled)
-                {
-                    this.poolingTimer.Interval = this.PoolingInterval;
-                    this.poolingTimer.Start();
-                }
-
                 foreach (var barcodeResult in barcodeResults)
                 {
-                    if (!this.pooledResults.Add(barcodeResult))
+                    var pooledResult = this.pooledResults.FirstOrDefault(r =>
+                        barcodeResult.DisplayValue == r.DisplayValue &&
+                        barcodeResult.ImageBoundingBox.IntersectsWith(r.ImageBoundingBox));
+
+                    if (pooledResult == null)
                     {
-                        if (this.pooledResults.TryGetValue(barcodeResult, out var currentResult))
-                        {
-                            currentResult.PreviewBoundingBox = barcodeResult.PreviewBoundingBox;
-                            currentResult.ImageBoundingBox = barcodeResult.ImageBoundingBox;
-                        }
+                        this.pooledResults.Add(barcodeResult);
                     }
+                    else
+                    {
+                        pooledResult.PreviewBoundingBox = barcodeResult.PreviewBoundingBox;
+                        pooledResult.ImageBoundingBox = barcodeResult.ImageBoundingBox;
+                    }
+                }
+
+                if (this.poolingTimer.Enabled == false)
+                {
+                    this.poolingTimer.Start();
                 }
             }
             else

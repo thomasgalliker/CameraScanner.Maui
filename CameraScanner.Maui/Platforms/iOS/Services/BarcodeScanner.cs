@@ -98,11 +98,10 @@ namespace CameraScanner.Maui.Platforms.Services
 
                     var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
 
-                    outputResults.Add(new BarcodeResult
+                    outputResults.Add(new BarcodeResult(barcode.PayloadStringValue)
                     {
                         BarcodeType = BarcodeTypes.Unknown, // TODO: Implement mapping
                         BarcodeFormat = barcode.Symbology.ToBarcodeFormats(),
-                        DisplayValue = barcode.PayloadStringValue,
                         RawValue = barcode.PayloadStringValue,
                         RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
                         PreviewBoundingBox = previewBoundingBox,
