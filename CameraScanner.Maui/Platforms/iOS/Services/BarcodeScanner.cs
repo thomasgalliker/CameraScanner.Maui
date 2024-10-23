@@ -3,6 +3,7 @@ using AVFoundation;
 using CameraScanner.Maui.Platforms.Extensions;
 using CoreGraphics;
 using CoreImage;
+using CoreML;
 using Foundation;
 using Microsoft.Maui.Graphics.Platform;
 using Microsoft.Maui.Platform;
@@ -43,18 +44,47 @@ namespace CameraScanner.Maui.Platforms.Services
             }
 
             VNBarcodeObservation[] observations = null;
-            using var barcodeRequest = new VNDetectBarcodesRequest((request, error) =>
+
+            void VNDetectBarcodesRequestCompletionHandler(VNRequest request, NSError error)
             {
                 if (error is null)
                 {
                     observations = request.GetResults<VNBarcodeObservation>();
                 }
-            });
-            using var handler = new VNImageRequestHandler(image.CGImage, new NSDictionary());
-            await Task.Run(() => handler.Perform([barcodeRequest], out _));
-            var barcodeResults = new HashSet<BarcodeResult>();
-            ProcessBarcodeResult(observations, barcodeResults);
-            return barcodeResults;
+                else
+                {
+                    // TODO Log error
+                }
+            }
+
+            using (var barcodeRequest = new VNDetectBarcodesRequest(VNDetectBarcodesRequestCompletionHandler))
+            {
+#if DEBUG
+                if (DeviceInfo.DeviceType == DeviceType.Virtual)
+                {
+                    // The iOS simulator does not have dedicated ML hardware
+                    // but why does it not automatically enable CPU-based barcode detection?
+                    barcodeRequest.UsesCpuOnly = true;
+
+                    // For some reason the iOS simulator does not return barcode detection results
+                    // if we use the latest revision.
+                    barcodeRequest.Revision = (VNDetectBarcodesRequestRevision)2;
+                }
+#endif
+
+                using (var handler = new VNImageRequestHandler(image.CGImage, new NSDictionary()))
+                {
+                    await Task.Run(() =>
+                    {
+                        if (!handler.Perform([barcodeRequest], out var error))
+                        {
+                        }
+                    });
+                    var barcodeResults = new HashSet<BarcodeResult>();
+                    ProcessBarcodeResult(observations, barcodeResults);
+                    return barcodeResults;
+                }
+            }
         }
 
         internal static void ProcessBarcodeResult(VNBarcodeObservation[] inputResults, HashSet<BarcodeResult> outputResults,
@@ -82,13 +112,7 @@ namespace CameraScanner.Maui.Platforms.Services
                         var bottomLeft = GetPoint(previewLayer, barcode.BottomLeft);
                         var bottomRight = GetPoint(previewLayer, barcode.BottomRight);
 
-                        cornerPoints = new[]
-                        {
-                            topLeft,
-                            bottomLeft,
-                            bottomRight,
-                            topRight,
-                        };
+                        cornerPoints = new[] { topLeft, bottomLeft, bottomRight, topRight, };
                     }
                     else
                     {

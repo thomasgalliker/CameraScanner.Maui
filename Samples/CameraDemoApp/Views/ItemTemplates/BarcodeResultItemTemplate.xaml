@@ -2,49 +2,19 @@
 <ContentView
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:c="http://camerascanner.maui"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.ItemTemplates.BarcodeResultItemTemplate"
-    x:DataType="c:BarcodeResult"
+    x:DataType="vm:BarcodeResultItemViewModel"
     BackgroundColor="{StaticResource Secondary}">
+    <ContentView.GestureRecognizers>
+        <TapGestureRecognizer Command="{Binding BarcodeResultTappedCommand}" />
+    </ContentView.GestureRecognizers>
 
-    <ContentView.Resources>
-        <ResourceDictionary>
-            <Style TargetType="Label">
-                <Setter Property="FontFamily" Value="IBMPlexMonoRegular" />
-            </Style>
-        </ResourceDictionary>
-    </ContentView.Resources>
-
-    <Grid
-        ColumnDefinitions="Auto, *"
-        ColumnSpacing="8"
-        RowDefinitions="Auto, Auto, Auto"
-        RowSpacing="4">
+    <VerticalStackLayout Spacing="4">
         <Label
-            Grid.Row="0"
-            Grid.Column="0"
-            FontAttributes="Bold"
-            Text="RawValue" />
+            Text="{Binding BarcodeResult.DisplayValue}"
+            FontFamily="IBMPlexMonoBold" />
         <Label
-            Grid.Row="0"
-            Grid.Column="1"
-            FontAttributes="Bold"
-            Text="{Binding RawValue}" />
-        <Label
-            Grid.Row="1"
-            Grid.Column="0"
-            Text="BarcodeFormat" />
-        <Label
-            Grid.Row="1"
-            Grid.Column="1"
-            Text="{Binding BarcodeFormat}" />
-        <Label
-            Grid.Row="2"
-            Grid.Column="0"
-            Text="BarcodeType" />
-        <Label
-            Grid.Row="2"
-            Grid.Column="1"
-            Text="{Binding BarcodeType}" />
-    </Grid>
+            Text="{Binding BarcodeResult.BarcodeFormat}" />
+    </VerticalStackLayout>
 </ContentView>
