@@ -120,6 +120,7 @@
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+    <PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
     <PackageReference Include="Sentry.Maui" Version="4.12.1" />
     <PackageReference Include="ValueConverters.MAUI" Version="3.0.26" />
   </ItemGroup>

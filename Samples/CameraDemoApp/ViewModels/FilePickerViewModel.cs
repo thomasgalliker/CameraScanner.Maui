@@ -6,7 +6,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CameraDemoApp.ViewModels
 {
-    public class FilePickerViewModel : ObservableObject
+    public class FilePickerViewModel : ObservableObject, INavigatedTo
     {
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
@@ -34,6 +34,12 @@ namespace CameraDemoApp.ViewModels
             this.dialogService = dialogService;
             this.navigationService = navigationService;
             this.barcodeScanner = barcodeScanner;
+        }
+
+        public Task NavigatedToAsync()
+        {
+            _ = this.PickPhotoAsync();
+            return Task.CompletedTask;
         }
 
         public ImageSource Image

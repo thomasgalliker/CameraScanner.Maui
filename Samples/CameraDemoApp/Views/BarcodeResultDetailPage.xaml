@@ -14,20 +14,16 @@
         <VerticalStackLayout
             Padding="16"
             Spacing="16">
+            
             <VerticalStackLayout
                 Spacing="4">
-                <VerticalStackLayout.Behaviors>
-                    <mct:TouchBehavior
-                        LongPressDuration="750"
-                        LongPressCommand="{Binding CopyDisplayValueCommand}"/>
-                </VerticalStackLayout.Behaviors>
                 <Label
                     Text="DisplayValue" />
                 <Label
                     Text="{Binding BarcodeResult.DisplayValue}"
                     FontFamily="IBMPlexMonoBold" />
             </VerticalStackLayout>
-
+            
             <VerticalStackLayout
                 Spacing="4">
                 <Label
@@ -36,7 +32,7 @@
                     Text="{Binding BarcodeResult.BarcodeFormat}"
                     FontFamily="IBMPlexMonoBold" />
             </VerticalStackLayout>
-
+            
             <VerticalStackLayout
                 Spacing="4">
                 <Label
@@ -45,6 +41,20 @@
                     Text="{Binding BarcodeResult.BarcodeType}"
                     FontFamily="IBMPlexMonoBold" />
             </VerticalStackLayout>
+            <VerticalStackLayout
+                Spacing="4">
+                <VerticalStackLayout.Behaviors>
+                    <mct:TouchBehavior
+                        LongPressDuration="750"
+                        LongPressCommand="{Binding CopyDisplayValueCommand}"/>
+                </VerticalStackLayout.Behaviors>
+                <Label
+                    Text="BarcodeResult dump:" />
+                <Label
+                    Text="{Binding BarcodeResultDump}"
+                    FontFamily="IBMPlexMonoRegular" />
+            </VerticalStackLayout>
+           
         </VerticalStackLayout>
     </ScrollView>
 </ContentPage>

@@ -28,6 +28,7 @@ namespace CameraDemoApp.Services.Navigation
                 var page = this.ResolvePage(pageName);
                 var navigation = GetNavigation();
                 await navigation.PushAsync(page);
+                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
                 await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
             }
             catch (Exception ex)

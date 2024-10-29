@@ -1,21 +1,20 @@
-using System.Windows.Input;
 using CameraDemoApp.Services.Navigation;
 using CameraScanner.Maui;
 using CommunityToolkit.Maui.Alerts;
-using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
-using UIKit;
 
 namespace CameraDemoApp.ViewModels
 {
     public class BarcodeResultDetailViewModel : ObservableObject, INavigatedTo<BarcodeResult>
     {
-        private readonly ILogger logger;
         private readonly IClipboard clipboard;
+        private readonly DumpOptions dumpOptions;
+        private readonly ILogger logger;
 
         private BarcodeResult barcodeResult;
+        private string barcodeResultDump;
         private IAsyncRelayCommand copyDisplayValueCommand;
 
         public BarcodeResultDetailViewModel(
@@ -24,12 +23,12 @@ namespace CameraDemoApp.ViewModels
         {
             this.logger = logger;
             this.clipboard = clipboard;
-        }
 
-        public Task NavigatedToAsync(BarcodeResult barcodeResult)
-        {
-            this.BarcodeResult = barcodeResult;
-            return Task.CompletedTask;
+            this.dumpOptions = new DumpOptions { DumpStyle = DumpStyle.Console };
+            this.dumpOptions.CustomInstanceFormatters.AddFormatter<byte[]>(b => Convert.ToHexString(b));
+            this.dumpOptions.CustomInstanceFormatters.AddFormatter<RectF>(rectF => $"{rectF.Width} x {rectF.Height}");
+            this.dumpOptions.CustomInstanceFormatters.AddFormatter<Point[]>(points =>
+                $"[{string.Join(", ", points.Select(x => $"{{{x.X}, {x.Y}}}"))}]");
         }
 
         public BarcodeResult BarcodeResult
@@ -38,16 +37,27 @@ namespace CameraDemoApp.ViewModels
             private set => this.SetProperty(ref this.barcodeResult, value);
         }
 
-        public IAsyncRelayCommand CopyDisplayValueCommand
+        public string BarcodeResultDump
         {
-            get => this.copyDisplayValueCommand ??= new AsyncRelayCommand(this.CopyDisplayValueAsync);
+            get => this.barcodeResultDump;
+            private set => this.SetProperty(ref this.barcodeResultDump, value);
+        }
+
+        public IAsyncRelayCommand CopyDisplayValueCommand =>
+            this.copyDisplayValueCommand ??= new AsyncRelayCommand(this.CopyDisplayValueAsync);
+
+        public Task NavigatedToAsync(BarcodeResult barcodeResult)
+        {
+            this.BarcodeResult = barcodeResult;
+            this.BarcodeResultDump = ObjectDumper.Dump(barcodeResult, this.dumpOptions);
+            return Task.CompletedTask;
         }
 
         private async Task CopyDisplayValueAsync()
         {
-            if (this.BarcodeResult?.DisplayValue is string displayValue)
+            if (this.BarcodeResultDump is string barcodeResult)
             {
-                await this.clipboard.SetTextAsync(displayValue);
+                await this.clipboard.SetTextAsync(barcodeResult);
                 _ = Toast.Make("Copied!").Show();
             }
         }
