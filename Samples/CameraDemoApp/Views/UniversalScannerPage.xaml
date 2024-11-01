@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -25,7 +25,10 @@
             CaptureQuality="{Binding CaptureQuality}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"
-            TorchOn="{Binding TorchOn}" />
+            TorchOn="{Binding TorchOn}"
+            CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
+            MaxZoomFactor="{Binding MaxZoomFactor}" />
 
         <c:BarcodeResultOverlay
             Grid.Row="0"

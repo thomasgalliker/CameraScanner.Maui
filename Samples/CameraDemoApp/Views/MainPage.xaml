@@ -97,7 +97,7 @@
                 Text="Universal Barcode Scanner"
                 HorizontalOptions="Fill" />
             <Button
-                Command="{Binding NavigateToPageCommand}"
+                Command="{Binding NavigateToModalPageCommand}"
                 CommandParameter="CameraPreviewPage"
                 Text="CameraPreview Demo"
                 HorizontalOptions="Fill" />

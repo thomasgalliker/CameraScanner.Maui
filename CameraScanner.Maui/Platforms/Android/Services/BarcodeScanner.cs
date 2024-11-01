@@ -133,13 +133,12 @@ namespace CameraScanner.Maui.Platforms.Services
                        .Select(p => new Point(p.X, p.Y))
                        .ToArray();
                 }
-      
 
-                outputResults.Add(new BarcodeResult
+
+                outputResults.Add(new BarcodeResult(barcode.DisplayValue)
                 {
                     BarcodeType = ConvertBarcodeResultTypes(barcode.ValueType),
                     BarcodeFormat = (BarcodeFormats)barcode.Format,
-                    DisplayValue = barcode.DisplayValue,
                     RawValue = barcode.RawValue,
                     RawBytes = barcode.GetRawBytes(),
                     PreviewBoundingBox = previewRect,

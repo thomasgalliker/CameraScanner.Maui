@@ -16,13 +16,20 @@ namespace CameraDemoApp.Services.Navigation
             this.serviceProvider = serviceProvider;
         }
 
-        public async Task PushAsync(string pageName)
+        public Task PushAsync(string pageName)
+        {
+            return this.PushAsync<object>(pageName, null);
+        }
+
+        public async Task PushAsync<T>(string pageName, T parameter)
         {
             try
             {
                 var page = this.ResolvePage(pageName);
                 var navigation = GetNavigation();
                 await navigation.PushAsync(page);
+                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
+                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
             }
             catch (Exception ex)
             {

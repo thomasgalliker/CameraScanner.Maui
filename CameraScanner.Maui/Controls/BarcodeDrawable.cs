@@ -8,6 +8,20 @@ namespace CameraScanner.Maui.Controls
         private float strokeSize;
         private Color strokeColor;
         private Color textColor;
+        private double width;
+        private double height;
+
+        public virtual void OnSizeAllocated(double width, double height)
+        {
+            this.width = width;
+            this.height = height;
+        }
+
+        public double Width => this.width;
+
+        public double Height => this.height;
+
+        public double StrokeSize => this.strokeSize;
 
         public void Update(BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor)
         {
@@ -15,6 +29,12 @@ namespace CameraScanner.Maui.Controls
             this.strokeSize = strokeSize;
             this.strokeColor = strokeColor;
             this.textColor = textColor;
+        }
+
+
+        public virtual RectF ConvertRectF(RectF source)
+        {
+            return source;
         }
 
         public void Reset()

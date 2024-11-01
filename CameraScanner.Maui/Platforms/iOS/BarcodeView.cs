@@ -33,17 +33,19 @@ namespace CameraScanner.Maui
                 this.shapeLayer.Position = new CGPoint(this.Layer.Bounds.Width / 2, this.Layer.Bounds.Height / 2);
             }
 
-            if (this.previewLayer?.Connection is not null && this.previewLayer.Connection.SupportsVideoOrientation)
+            var previewLayerConnection = this.previewLayer?.Connection;
+            if (previewLayerConnection is not null && previewLayerConnection.SupportsVideoOrientation)
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
                 {
                     var interfaceOrientation = this.Window.WindowScene?.InterfaceOrientation;
-                    this.previewLayer.Connection.VideoOrientation = GetVideoOrientation(interfaceOrientation);
+                    previewLayerConnection.VideoOrientation = GetVideoOrientation(interfaceOrientation);
                 }
                 else
                 {
                     // TODO
-                    this.previewLayer.Connection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
+                    // https://github.com/pcgversion/vision-camera-code-scanner/blob/78b98a27dc3074eaafe8789f7ccd6d190494fe21/ios/VisionCameraCodeScanner.swift#L262
+                    previewLayerConnection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
                 }
             }
         }

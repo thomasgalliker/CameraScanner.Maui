@@ -2,7 +2,6 @@ namespace CameraScanner.Maui.Controls
 {
     public class BoundingBoxBarcodeDrawable : BarcodeDrawable
     {
-
         protected override bool IsValid(BarcodeResult barcodeResult)
         {
             return barcodeResult.PreviewBoundingBox != RectF.Zero;
