@@ -59,6 +59,12 @@ namespace CameraScanner.Maui
             this.cameraManager.Dispose();
             base.DisconnectHandler(barcodeView);
         }
+
+        internal async Task TakePhotoAsync()
+        {
+            this.logger.LogDebug("TakePhotoAsync");
+            await Task.Delay(1000);  // Simulating shutter delay
+        }
     }
 }
 #endif

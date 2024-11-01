@@ -1,4 +1,5 @@
 ﻿using System.Windows.Input;
+using AndroidX.Camera.View;
 using Microsoft.Maui.Graphics.Platform;
 using Timer = System.Timers.Timer;
 
@@ -20,6 +21,8 @@ namespace CameraScanner.Maui
         internal CameraView(IVibration vibration)
         {
             this.vibration = vibration;
+            this.ShutterAction = this.TakePhotoAsync;
+            this.ShutterCommand = new Command(async () => await this.TakePhotoAsync());
         }
 
         /// <summary>
@@ -462,6 +465,55 @@ namespace CameraScanner.Maui
                     this.OnImageCapturedCommand?.Execute(image);
                 }
             });
+        }
+
+        public static readonly BindableProperty CameraControllerProperty = BindableProperty.Create(
+            nameof(CameraController),
+            typeof(ICameraController),
+            typeof(CameraView),
+            null,
+            defaultBindingMode: BindingMode.OneWayToSource);
+
+        public ICameraController CameraController
+        {
+            get => (ICameraController)this.GetValue(CameraControllerProperty);
+            private set => this.SetValue(CameraControllerProperty, value);
+        }
+
+
+        public static readonly BindableProperty ShutterActionProperty = BindableProperty.Create(
+            nameof(ShutterAction),
+            typeof(Func<Task>),
+            typeof(CameraView),
+            null,
+            defaultBindingMode: BindingMode.OneWayToSource);
+
+        public Func<Task> ShutterAction
+        {
+            get => (Func<Task>)this.GetValue(ShutterActionProperty);
+            private set => this.SetValue(ShutterActionProperty, value);
+        }
+
+        public static readonly BindableProperty ShutterCommandProperty = BindableProperty.Create(
+            nameof(ShutterCommand),
+            typeof(ICommand),
+            typeof(CameraView),
+            defaultBindingMode: BindingMode.OneWayToSource);
+
+        public ICommand ShutterCommand
+        {
+            get => (ICommand)this.GetValue(ShutterCommandProperty);
+            private set => this.SetValue(ShutterCommandProperty, value);
+        }
+
+        public async Task TakePhotoAsync()
+        {
+#if ANDROID || IOS
+            if (this.Handler is CameraViewHandler cameraViewHandler)
+            {
+                await cameraViewHandler.TakePhotoAsync();
+            }
+#endif
         }
     }
 }

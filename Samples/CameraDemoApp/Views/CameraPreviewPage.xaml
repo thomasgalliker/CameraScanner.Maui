@@ -24,11 +24,13 @@
             CurrentZoomFactor="{Binding CurrentZoomFactor}"
             OnImageCapturedCommand="{Binding ImageCapturedCommand}"
             RequestZoomFactor="{Binding RequestZoomFactor}"
+            ShutterAction="{Binding ShutterAction}"
+            CameraController="{Binding }"
             TorchOn="{Binding TorchOn}" />
 
         <c:CameraOverlay
             Grid.Row="0"
-            ShutterCommand="{Binding ShutterCommand}" />
+            ShutterCommand="{Binding Source={x:Reference CameraView}, Path=ShutterCommand}" />
 
         <!--  Debug infos  -->
         <VerticalStackLayout
@@ -62,6 +64,11 @@
                 Grid.Row="0"
                 Command="{Binding ToggleCameraFacingCommand}"
                 Text="Toggle"
+                HorizontalOptions="Fill" />
+            <Button
+                Grid.Row="0"
+                Command="{Binding ShutterCommand}"
+                Text="Take Photo"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </Grid>

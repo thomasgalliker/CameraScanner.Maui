@@ -21,9 +21,9 @@ namespace CameraDemoApp.ViewModels
         private float? currentZoomFactor;
         private bool torchOn;
         private IRelayCommand toggleTorchCommand;
-        private IRelayCommand shutterCommand;
+        private IAsyncRelayCommand shutterCommand;
         private IRelayCommand imageCapturedCommand;
-        private bool captureNextFrame;
+        private Func<Task> shutterAction;
 
         public CameraPreviewViewModel(
             ILogger<CameraPreviewViewModel> logger,
@@ -101,20 +101,30 @@ namespace CameraDemoApp.ViewModels
             this.RequestZoomFactor = this.CurrentZoomFactor - 0.1F;
         }
 
-        public IRelayCommand ShutterCommand
+        public IAsyncRelayCommand ShutterCommand
         {
-            get => this.shutterCommand ??= new RelayCommand(this.Shutter);
+            get => this.shutterCommand ??= new AsyncRelayCommand(this.ShutterAsync);
         }
 
-        private void Shutter()
+        public Func<Task> ShutterAction
         {
-            this.CaptureNextFrame = true;
+            set => this.shutterAction = value;
+            get => this.shutterAction;
         }
 
-        public bool CaptureNextFrame
+        private async Task ShutterAsync()
         {
-            get => this.captureNextFrame;
-            set => this.SetProperty(ref this.captureNextFrame, value);
+            try
+            {
+                await this.ShutterAction?.Invoke();
+            }
+            catch (Exception _)
+            {
+              //  await this.dialogService.DisplayAlertAsync(
+              //"ImageCaptured",
+              //"Successfully returned PlatformImage",
+              //"OK");
+            }
         }
 
         public IRelayCommand ImageCapturedCommand

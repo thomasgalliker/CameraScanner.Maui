@@ -31,11 +31,13 @@
     <PackageId>CameraScanner.Maui</PackageId>
     <PackageTags>camera;preview;barcode;scanner;maui</PackageTags>
     <PackageIcon>logo.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageLicenseFile>LICENSE</PackageLicenseFile>
     <PackageProjectUrl>https://github.com/thomasgalliker/CameraScanner.Maui</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/thomasgalliker/CameraScanner.Maui</RepositoryUrl>
     <Company>superdev GmbH</Company>
+    <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <PackageReleaseNotes>1.3
 - Cleanup ICameraPermissions interface, add static Current to ICameraPermissions.
@@ -50,14 +52,12 @@
 1.0
 - Initial release.
     </PackageReleaseNotes>
-    <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
     <None Include="..\README.md" Pack="True" PackagePath="\" />
     <None Include="..\LICENSE" Pack="True" PackagePath="\" />
-    <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
   </ItemGroup>
 
   <!-- Android build properties -->
