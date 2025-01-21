@@ -5,7 +5,7 @@ This library offers camera preview and barcode scanning functionality for .NET M
 
 ### Download and Install CameraScanner.Maui
 This library is available on NuGet: https://www.nuget.org/packages/CameraScanner.Maui
-Use the following command to install Plugin.FirebasePushNotifications using NuGet package manager console:
+Use the following command to install CameraScanner.Maui using NuGet package manager console:
 
     PM> Install-Package CameraScanner.Maui
 
