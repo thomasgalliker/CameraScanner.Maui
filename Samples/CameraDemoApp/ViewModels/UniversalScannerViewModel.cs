@@ -39,7 +39,7 @@ namespace CameraDemoApp.ViewModels
             this.popupService = popupService;
 
             this.BarcodeFormats = BarcodeFormats.All;
-            this.CaptureQuality = CaptureQuality.Medium;
+            this.CaptureQuality = CaptureQuality.High;
             this.IsScannerEnabled = true;
         }
 
