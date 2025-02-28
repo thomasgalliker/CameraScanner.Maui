@@ -142,8 +142,9 @@ steps:
     SourceFolder: '$(system.defaultworkingdirectory)'
 
     Contents: |
-     **\bin\$(BuildConfiguration)\**
-     **\bin\*.nupkg
+      **\bin\$(BuildConfiguration)\**
+      **\bin\*.nupkg
+      **\bin\*.snupkg
 
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
      

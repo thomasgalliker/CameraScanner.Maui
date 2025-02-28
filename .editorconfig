@@ -175,4 +175,4 @@ dotnet_diagnostic.IDE0051.severity = warning
 dotnet_diagnostic.CS1591.severity = none
 
 # CA1416: Validate platform compatibility
-dotnet_diagnostic.CA1416.severity = info
+dotnet_diagnostic.CA1416.severity = suggestion
