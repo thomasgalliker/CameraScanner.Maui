@@ -138,7 +138,6 @@ namespace CameraDemoApp.ViewModels
             await this.navigationService.PushAsync(page);
         }
 
-
         public IAsyncRelayCommand<string> NavigateToModalPageCommand
         {
             get => this.navigateToModalPageCommand ??= new AsyncRelayCommand<string>(this.NavigateToModalPageAsync);
