@@ -86,10 +86,9 @@ namespace CameraScanner.Maui
                 {
                     proxyImage.Close();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    this.logger.LogError(ex, "Analyze -> IImageProxy.Close failed with exception");
-                    // MainThread.BeginInvokeOnMainThread(() => this.cameraManager.Start());
+                    // Ignore
                 }
             }
         }
