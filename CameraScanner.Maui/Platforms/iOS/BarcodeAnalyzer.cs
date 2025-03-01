@@ -15,7 +15,7 @@ namespace CameraScanner.Maui
         private uint? barcodeDetectionFrameRate;
 
         internal BarcodeAnalyzer(
-            ILogger<BarcodeAnalyzer> logger,
+            // ILogger<BarcodeAnalyzer> logger,
             CameraManager cameraManager)
         {
             // this.logger = logger;
@@ -82,20 +82,20 @@ namespace CameraScanner.Maui
                     // this.logger.LogDebug("DidOutputSampleBuffer -> frame skipped");
                 }
             }
-            catch (Exception ex)
+            catch (Exception _)
             {
                 // this.logger.LogError(ex, "DidOutputSampleBuffer failed with exception");
             }
+
             finally
             {
                 try
                 {
                     sampleBuffer.Dispose();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    // this.logger.LogError(ex, "DidOutputSampleBuffer -> CMSampleBuffer.Dispose failed with exception");
-                    // MainThread.BeginInvokeOnMainThread(() => this.cameraManager.Start());
+                    // Ignore
                 }
             }
         }
