@@ -15,7 +15,7 @@ namespace CameraScanner.Maui
         private uint? barcodeDetectionFrameRate;
 
         internal BarcodeAnalyzer(
-            // ILogger<BarcodeAnalyzer> logger,
+            ILogger<BarcodeAnalyzer> logger,
             CameraManager cameraManager)
         {
             // this.logger = logger;
