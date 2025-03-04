@@ -79,9 +79,9 @@ namespace CameraScanner.Maui
                     // this.logger.LogDebug("Analyze -> frame skipped (BarcodeDetectionFrameRate)");
                 }
             }
-            catch (Exception _)
+            catch (Exception ex)
             {
-                // this.logger.LogError(ex, "Analyze failed with exception");
+                this.logger.LogError(ex, "Analyze failed with exception");
             }
             finally
             {

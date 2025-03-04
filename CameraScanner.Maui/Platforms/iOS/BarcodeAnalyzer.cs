@@ -8,7 +8,7 @@ namespace CameraScanner.Maui
     [Preserve(AllMembers = true)]
     internal class BarcodeAnalyzer : AVCaptureVideoDataOutputSampleBufferDelegate
     {
-        // private readonly ILogger logger;
+        private readonly ILogger logger;
         private readonly CameraManager cameraManager;
 
         private uint? skippedFrames;
@@ -18,7 +18,7 @@ namespace CameraScanner.Maui
             ILogger<BarcodeAnalyzer> logger,
             CameraManager cameraManager)
         {
-            // this.logger = logger;
+            this.logger = logger;
             this.cameraManager = cameraManager;
         }
 
@@ -82,9 +82,9 @@ namespace CameraScanner.Maui
                     // this.logger.LogDebug("DidOutputSampleBuffer -> frame skipped");
                 }
             }
-            catch (Exception _)
+            catch (Exception ex)
             {
-                // this.logger.LogError(ex, "DidOutputSampleBuffer failed with exception");
+                this.logger.LogError(ex, "DidOutputSampleBuffer failed with exception");
             }
 
             finally
