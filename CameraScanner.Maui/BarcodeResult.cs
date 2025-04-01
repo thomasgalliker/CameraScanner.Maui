@@ -7,27 +7,60 @@
             this.DisplayValue = displayValue;
         }
 
+        public BarcodeResult(string displayValue, BarcodeTypes barcodeType)
+        {
+            this.DisplayValue = displayValue;
+            this.BarcodeType = barcodeType;
+        }
+
+        public BarcodeResult(string displayValue, BarcodeTypes barcodeType, BarcodeFormats barcodeFormat)
+        {
+            this.DisplayValue = displayValue;
+            this.BarcodeType = barcodeType;
+            this.BarcodeFormat = barcodeFormat;
+        }
+
+        public BarcodeResult(
+            string displayValue,
+            BarcodeTypes barcodeType,
+            BarcodeFormats barcodeFormat,
+            string rawValue,
+            byte[] rawBytes,
+            RectF previewBoundingBox,
+            RectF imageBoundingBox,
+            Point[] cornerPoints)
+        {
+            this.DisplayValue = displayValue;
+            this.BarcodeType = barcodeType;
+            this.BarcodeFormat = barcodeFormat;
+            this.RawValue = rawValue;
+            this.RawBytes = rawBytes;
+            this.PreviewBoundingBox = previewBoundingBox;
+            this.ImageBoundingBox = imageBoundingBox;
+            this.CornerPoints = cornerPoints;
+        }
+
         /// <summary>
         /// Gets the barcode type of the scan result, e.g. WiFi, URL, etc...
         /// </summary>
-        public BarcodeTypes BarcodeType { get; set; }
+        public BarcodeTypes BarcodeType { get; }
 
         /// <summary>
         /// Gets the barcode format, e.g. QRCode, EAN13, etc...
         /// </summary>
-        public BarcodeFormats BarcodeFormat { get; set; }
+        public BarcodeFormats BarcodeFormat { get; }
 
         public string DisplayValue { get; }
 
-        public string RawValue { get; set; }
+        public string RawValue { get; }
 
-        public byte[] RawBytes { get; set; }
+        public byte[] RawBytes { get; }
 
-        public RectF PreviewBoundingBox { get; set; }
+        public RectF PreviewBoundingBox { get; internal set; }
 
-        public RectF ImageBoundingBox { get; set; }
+        public RectF ImageBoundingBox { get; internal set; }
 
-        public Point[] CornerPoints { get; set; }
+        public Point[] CornerPoints { get; }
 
         public bool Equals(BarcodeResult other)
         {

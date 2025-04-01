@@ -134,18 +134,26 @@ namespace CameraScanner.Maui.Platforms.Services
                        .ToArray();
                 }
 
+                var barcodeResult = new BarcodeResult(
+                    displayValue: barcode.DisplayValue,
+                    barcodeType: ConvertBarcodeResultTypes(barcode.ValueType),
+                    barcodeFormat: ConvertBarcodeFormat(barcode),
+                    rawValue: barcode.RawValue,
+                    rawBytes: barcode.GetRawBytes(),
+                    previewBoundingBox: previewRect,
+                    imageBoundingBox: imageRect,
+                    cornerPoints: cornerPoints);
 
-                outputResults.Add(new BarcodeResult(barcode.DisplayValue)
-                {
-                    BarcodeType = ConvertBarcodeResultTypes(barcode.ValueType),
-                    BarcodeFormat = (BarcodeFormats)barcode.Format,
-                    RawValue = barcode.RawValue,
-                    RawBytes = barcode.GetRawBytes(),
-                    PreviewBoundingBox = previewRect,
-                    ImageBoundingBox = imageRect,
-                    CornerPoints = cornerPoints,
-                });
+                barcodeResults.Add(barcodeResult);
             }
+
+            return barcodeResults;
+        }
+
+        private static BarcodeFormats ConvertBarcodeFormat(Barcode barcode)
+        {
+            // TODO: Add more safety + logging here
+            return (BarcodeFormats)barcode.Format;
         }
 
         internal static void InvertLuminance(Image image)

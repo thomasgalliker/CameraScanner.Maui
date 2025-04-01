@@ -122,16 +122,19 @@ namespace CameraScanner.Maui.Platforms.Services
 
                     var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
 
-                    outputResults.Add(new BarcodeResult(barcode.PayloadStringValue)
-                    {
-                        BarcodeType = BarcodeTypes.Unknown, // TODO: Implement mapping
-                        BarcodeFormat = barcode.Symbology.ToBarcodeFormats(),
-                        RawValue = barcode.PayloadStringValue,
-                        RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
-                        PreviewBoundingBox = previewBoundingBox,
-                        ImageBoundingBox = imageBoundingBox,
-                        CornerPoints = cornerPoints,
-                    });
+                    // TODO: Implement mapping for BarcodeTypes
+
+                    var barcodeResult = new BarcodeResult(
+                        displayValue: barcode.PayloadStringValue,
+                        barcodeType: BarcodeTypes.Unknown,
+                        barcodeFormat: barcode.Symbology.ToBarcodeFormats(),
+                        rawValue: barcode.PayloadStringValue,
+                        rawBytes: GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
+                        previewBoundingBox: previewBoundingBox,
+                        imageBoundingBox: imageBoundingBox,
+                        cornerPoints: cornerPoints);
+
+                    outputResults.Add(barcodeResult);
                 }
             }
         }
