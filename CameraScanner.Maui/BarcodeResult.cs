@@ -1,5 +1,8 @@
-﻿namespace CameraScanner.Maui
+﻿using System.Diagnostics;
+
+namespace CameraScanner.Maui
 {
+    [DebuggerDisplay("{this.BarcodeFormat}")]
     public class BarcodeResult : IEquatable<BarcodeResult>
     {
         public BarcodeResult(string displayValue)
