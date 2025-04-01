@@ -44,8 +44,8 @@ namespace CameraScanner.Maui
         private readonly CameraView cameraView;
         private readonly CAShapeLayer shapeLayer;
         private readonly NSObject subjectAreaChangedNotification;
-        private readonly VNDetectBarcodesRequest detectBarcodesRequest;
-        private readonly VNSequenceRequestHandler sequenceRequestHandler;
+        private VNDetectBarcodesRequest detectBarcodesRequest;
+        private VNSequenceRequestHandler sequenceRequestHandler;
         private readonly UITapGestureRecognizer tapGestureRecognizer;
 
         private HashSet<BarcodeResult> barcodeResults = [];
@@ -267,9 +267,9 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            if (this.detectBarcodesRequest is not null && this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
+            if (this.detectBarcodesRequest is not null)
             {
-                var vnBarcodeSymbologies = barcodeFormats.ToPlatform();
+                var vnBarcodeSymbologies = this.cameraView.BarcodeFormats.ToPlatform();
                 this.detectBarcodesRequest.Symbologies = vnBarcodeSymbologies;
             }
         }
@@ -810,8 +810,6 @@ namespace CameraScanner.Maui
 
                     this.Stop();
 
-                    //await Task.Delay(200);
-
                     // this.logger.LogDebug("RemoveObserver");
                     NSNotificationCenter.DefaultCenter.RemoveObserver(this.subjectAreaChangedNotification);
 
@@ -858,9 +856,11 @@ namespace CameraScanner.Maui
 
                     // this.logger.LogDebug("sequenceRequestHandler.Dispose");
                     this.sequenceRequestHandler?.Dispose();
+                    this.sequenceRequestHandler = null;
 
                     // this.logger.LogDebug("detectBarcodesRequest.Dispose");
                     this.detectBarcodesRequest?.Dispose();
+                    this.detectBarcodesRequest = null;
 
                     // this.logger.LogDebug("tapGestureRecognizer.Dispose");
                     this.tapGestureRecognizer?.Dispose();

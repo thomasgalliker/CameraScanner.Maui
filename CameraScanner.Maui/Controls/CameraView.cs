@@ -444,7 +444,7 @@ namespace CameraScanner.Maui
 
         private void TriggerOnDetectionFinished(BarcodeResult[] barcodeResults)
         {
-            if (!barcodeResults.Any())
+            if (barcodeResults.Length == 0)
             {
                 return;
             }
