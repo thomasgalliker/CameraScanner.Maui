@@ -21,14 +21,6 @@ trigger:
     exclude:
     - Docs/*
 
-schedules:
-- cron: "0 0 1 * *"
-  displayName: At 00:00 on day-of-month 1
-  branches:
-    include:
-    - develop
-  always: true
-
 variables:
   solution: 'CameraScanner.Maui.sln'
   buildPlatform: 'Any CPU'
