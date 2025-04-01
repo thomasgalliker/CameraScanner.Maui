@@ -399,7 +399,7 @@ namespace CameraScanner.Maui
 
         public event EventHandler<OnImageCapturedEventArg> OnImageCaptured;
 
-        internal void DetectionFinished(HashSet<BarcodeResult> barcodeResults)
+        internal void DetectionFinished(BarcodeResult[] barcodeResults)
         {
             if (barcodeResults is null)
             {
@@ -432,7 +432,7 @@ namespace CameraScanner.Maui
             }
             else
             {
-                this.TriggerOnDetectionFinished(barcodeResults.ToArray());
+                this.TriggerOnDetectionFinished(barcodeResults);
             }
         }
 

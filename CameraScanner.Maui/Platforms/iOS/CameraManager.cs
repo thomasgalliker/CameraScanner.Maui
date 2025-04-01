@@ -48,7 +48,7 @@ namespace CameraScanner.Maui
         private readonly VNSequenceRequestHandler sequenceRequestHandler;
         private readonly UITapGestureRecognizer tapGestureRecognizer;
 
-        private readonly HashSet<BarcodeResult> barcodeResults = [];
+        private HashSet<BarcodeResult> barcodeResults = [];
         private const int AimRadius = 8;
 
         internal CameraManager(
@@ -72,7 +72,7 @@ namespace CameraScanner.Maui
                 if (error is null)
                 {
                     var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
-                    Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.barcodeResults, this.previewLayer);
+                    this.barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.previewLayer);
                 }
                 else
                 {
@@ -634,8 +634,6 @@ namespace CameraScanner.Maui
                     return;
                 }
 
-                this.barcodeResults.Clear();
-
                 this.sequenceRequestHandler?.Perform([this.detectBarcodesRequest], cvPixelBuffer, out _);
 
                 if (this.cameraView.AimMode)
@@ -664,11 +662,15 @@ namespace CameraScanner.Maui
                     }
                 }
 
-                this.cameraView.DetectionFinished(this.barcodeResults);
+                this.cameraView.DetectionFinished(this.barcodeResults.ToArray());
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "PerformBarcodeDetection failed with exception");
+            }
+            finally
+            {
+                this.barcodeResults.Clear();
             }
         }
 

@@ -41,7 +41,6 @@ namespace CameraScanner.Maui
         private readonly RelativeLayout relativeLayout;
         private readonly ZoomStateObserver zoomStateObserver;
         private readonly TorchStateObserver torchStateObserver;
-        private readonly HashSet<BarcodeResult> barcodeResults = [];
 
         private BarcodeAnalyzer barcodeAnalyzer;
         private IMLKitBarcodeScanner barcodeScanner;
@@ -393,52 +392,60 @@ namespace CameraScanner.Maui
 
             //this.logger.LogDebug("PerformBarcodeDetectionAsync");
 
-            this.barcodeResults.Clear();
-            using var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false);
-            using var source = new ImageProxyTransformFactory { UsingRotationDegrees = true }.GetOutputTransform(proxy);
-            using var coordinateTransform = new CoordinateTransform(source, target);
-
-            using var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
-            using var results = await this.barcodeScanner.Process(image);
-
-            Platforms.Services.BarcodeScanner.ProcessBarcodeResult(results, this.barcodeResults, coordinateTransform);
-
-            if (this.cameraView.ForceInverted)
+            using (var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false))
             {
-                Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
-                using var invertedImage = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
-                using var invertedResults = await this.barcodeScanner.Process(invertedImage);
-
-                Platforms.Services.BarcodeScanner.ProcessBarcodeResult(invertedResults, this.barcodeResults, coordinateTransform);
-            }
-
-            if (this.cameraView.AimMode)
-            {
-                var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
-
-                foreach (var barcode in this.barcodeResults)
+                using (var source = new ImageProxyTransformFactory { UsingRotationDegrees = true }.GetOutputTransform(proxy))
                 {
-                    if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                    using (var coordinateTransform = new CoordinateTransform(source, target))
                     {
-                        this.barcodeResults.Remove(barcode);
+                        using (var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees))
+                        {
+                            using (var resultsArray = await this.barcodeScanner.Process(image))
+                            {
+                                var barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArray, coordinateTransform);
+
+                                if (this.cameraView.ForceInverted)
+                                {
+                                    Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
+                                    using var imageInverted = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
+                                    using var resultsArrayInverted = await this.barcodeScanner.Process(imageInverted);
+
+                                    var barcodeResultsInverted = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArrayInverted, coordinateTransform);
+                                    barcodeResults.UnionWith(barcodeResultsInverted);
+                                }
+
+                                if (this.cameraView.AimMode)
+                                {
+                                    var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
+
+                                    foreach (var barcode in barcodeResults)
+                                    {
+                                        if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                                        {
+                                            barcodeResults.Remove(barcode);
+                                        }
+                                    }
+                                }
+
+                                if (this.cameraView.ViewfinderMode)
+                                {
+                                    var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
+
+                                    foreach (var barcode in barcodeResults)
+                                    {
+                                        if (!previewRect.Contains(barcode.PreviewBoundingBox))
+                                        {
+                                            barcodeResults.Remove(barcode);
+                                        }
+                                    }
+                                }
+
+                                this.cameraView.DetectionFinished(barcodeResults.ToArray());
+                            }
+                        }
                     }
                 }
             }
-
-            if (this.cameraView.ViewfinderMode)
-            {
-                var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
-
-                foreach (var barcode in this.barcodeResults)
-                {
-                    if (!previewRect.Contains(barcode.PreviewBoundingBox))
-                    {
-                        this.barcodeResults.Remove(barcode);
-                    }
-                }
-            }
-
-            this.cameraView.DetectionFinished(this.barcodeResults);
         }
 
         internal void CaptureImage(IImageProxy proxy)
@@ -454,6 +461,7 @@ namespace CameraScanner.Maui
             {
                 this.cameraController.ClearImageAnalysisAnalyzer();
                 this.barcodeAnalyzer?.Dispose();
+                this.barcodeAnalyzer = null;
 
                 var barcodeAnalyzerLogger = this.loggerFactory.CreateLogger<BarcodeAnalyzer>();
                 this.barcodeAnalyzer = new BarcodeAnalyzer(barcodeAnalyzerLogger, this);
@@ -514,6 +522,7 @@ namespace CameraScanner.Maui
                 this.previewView?.Dispose();
                 this.cameraController?.Dispose();
                 this.barcodeAnalyzer?.Dispose();
+                this.barcodeAnalyzer = null;
                 this.barcodeScanner?.Dispose();
                 this.cameraExecutor?.Dispose();
             }
