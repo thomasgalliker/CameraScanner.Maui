@@ -20,7 +20,9 @@ namespace CameraDemoApp
                 .UseMauiCommunityToolkit()
                 .ConfigureFonts(fonts =>
                 {
+                    fonts.AddFont("IBMPlexMono-Bold.ttf", "IBMPlexMonoBold");
                     fonts.AddFont("IBMPlexMono-Regular.ttf", "IBMPlexMonoRegular");
+                    fonts.AddFont("IBMPlexSans-Bold.ttf", "IBMPlexSansBold");
                     fonts.AddFont("IBMPlexSans-Regular.ttf", "IBMPlexSansRegular");
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
@@ -39,6 +41,7 @@ namespace CameraDemoApp
             builder.Services.AddSingleton<IDialogService, DialogService>();
             builder.Services.AddSingleton<ILauncher>(_ => Launcher.Default);
             builder.Services.AddSingleton<IMediaPicker>(_ => MediaPicker.Default);
+            builder.Services.AddSingleton<IClipboard>(_ => Clipboard.Default);
 
             // Register pages and view models
             builder.Services.AddTransient<MainPage>();
@@ -57,6 +60,9 @@ namespace CameraDemoApp
 
             builder.Services.AddTransient<FilePickerPage>();
             builder.Services.AddTransient<FilePickerViewModel>();
+
+            builder.Services.AddTransient<BarcodeResultDetailPage>();
+            builder.Services.AddTransient<BarcodeResultDetailViewModel>();
 
             builder.Services.AddTransientPopup<ScannerConfigPopup, ScannerConfigViewModel>();
 

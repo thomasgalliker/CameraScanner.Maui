@@ -8,7 +8,7 @@ namespace CameraScanner.Maui.Utils
     /// </summary>
     internal static class HandlerCleanUpHelper
     {
-        public static void AddCleanUpEvent(this IView view)
+        internal static void AddCleanUpEvent(this IView view)
         {
             if (view is not Element element)
             {
@@ -18,8 +18,14 @@ namespace CameraScanner.Maui.Utils
             var parentPage = element.GetRealParentPages().FirstOrDefault();
             var targetPage = PageHelper.GetTarget(parentPage);
 
-            void OnNavigatedFrom(object sender, NavigatedFromEventArgs e)
+            async void OnDisappearing(object sender, EventArgs e)
             {
+                // For some reason we cannot use NavigatedFrom. When NavigatedFrom is fired,
+                // the navigated page is still on the navigation stack which seems pretty odd.
+                // The only way we could check if the page is navigated away is
+                // to wait some milliseconds after the Disappearing event. It's a hack but it works well.
+                await Task.Delay(200);
+
                 var pagesIsUsed = CheckIfPageIsUsed(targetPage);
                 if (pagesIsUsed)
                 {
@@ -27,8 +33,8 @@ namespace CameraScanner.Maui.Utils
                 }
 
                 // If the target page is no longer used anywhere on the navigation stack nor on the modal stack,
-                // we can safely unsubscribe from NavigatedFrom event and call DisconnectHandler.
-                targetPage.NavigatedFrom -= OnNavigatedFrom;
+                // we can safely unsubscribe from Disappearing event and call DisconnectHandler.
+                targetPage.Disappearing -= OnDisappearing;
 
                 if (view.Handler is not IElementHandler elementHandler)
                 {
@@ -45,7 +51,7 @@ namespace CameraScanner.Maui.Utils
                 }
             }
 
-            targetPage.NavigatedFrom += OnNavigatedFrom;
+            targetPage.Disappearing += OnDisappearing;
 
             Trace.WriteLine($"HandlerCleanUpHelper.AddCleanUpEvent for \"{view.GetType().Name}\" on page \"{GetPageNameForLogging(targetPage)}\"");
         }

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
 
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
@@ -6,12 +6,13 @@
     xmlns:c="http://camerascanner.maui"
     xmlns:itemTemplates="clr-namespace:CameraDemoApp.Views.ItemTemplates"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    xmlns:converters="clr-namespace:CameraDemoApp.Converters"
     x:Class="CameraDemoApp.Views.FilePickerPage"
     Title="File Picker"
     x:DataType="vm:FilePickerViewModel">
-
     <ContentPage.Resources>
         <ResourceDictionary>
+            <converters:BarcodeResultSelector x:Key="BarcodeResultSelector" />
             <DataTemplate x:Key="BarcodeResultItemTemplate">
                 <itemTemplates:BarcodeResultItemTemplate />
             </DataTemplate>
@@ -21,34 +22,45 @@
     <Grid
         Padding="16"
         RowDefinitions="*, Auto"
-        RowSpacing="8">
+        RowSpacing="16">
 
-        <Grid Grid.Row="0">
-            <Image
+        <Grid Grid.Row="0" RowDefinitions="Auto, *">
+            <Border
                 Grid.Row="0"
-                Source="{Binding Image}"
-                BackgroundColor="{StaticResource Gray100}"
-                SizeChanged="Image_SizeChanged"
-                HorizontalOptions="Fill"
-                VerticalOptions="Start" />
-
+                IsVisible="{Binding Image, Converter={StaticResource IsNotNullToBoolConverter}}"
+                Stroke="{StaticResource Gray600}"
+                StrokeLineCap="Flat"
+                StrokeDashArray="2,3"
+                StrokeDashOffset="6"
+                StrokeThickness="4"
+                Background="{StaticResource Gray100}"
+                HorizontalOptions="Center">
+                <Image
+                    Source="{Binding Image}"
+                    Aspect="AspectFit"
+                    SizeChanged="Image_SizeChanged"
+                    HorizontalOptions="Fill"
+                    VerticalOptions="Start" />
+            </Border>
+            
             <!--  BarcodeResultOverlay does not (yet) properly work with photo picker  -->
-            <!--<c:BarcodeResultOverlay
-                Grid.Row="0"
-                BarcodeResults="{Binding BarcodeResults}"
-                InvalidateDrawableAfter="{x:Null}"
-                SizeChanged="BarcodeResultOverlay_SizeChanged"
-                StrokeColor="Red"
-                StrokeSize="4">
-                <c:BarcodeResultOverlay.BarcodeDrawable>
-                    <c:BoundingBoxBarcodeDrawable />
-                </c:BarcodeResultOverlay.BarcodeDrawable>
-            </c:BarcodeResultOverlay>-->
+            <!-- <c:BarcodeResultOverlay -->
+            <!--     Grid.Row="0" -->
+            <!--     BarcodeResults="{Binding BarcodeResults, Converter={StaticResource BarcodeResultSelector}}" -->
+            <!--     InvalidateDrawableAfter="{x:Null}" -->
+            <!--     SizeChanged="BarcodeResultOverlay_SizeChanged" -->
+            <!--     StrokeColor="Red" -->
+            <!--     StrokeSize="4" -->
+            <!--     BarcodeResultTappedCommand="{Binding BarcodeResultTappedCommand}"> -->
+            <!--     <c:BarcodeResultOverlay.BarcodeDrawable> -->
+            <!--         <c:ImageBoundingBoxBarcodeDrawable /> -->
+            <!--     </c:BarcodeResultOverlay.BarcodeDrawable> -->
+            <!-- </c:BarcodeResultOverlay> -->
         </Grid>
 
         <VerticalStackLayout
             Grid.Row="1"
-            Spacing="8">
+            Spacing="16">
 
             <ScrollView MaximumHeightRequest="200">
                 <VerticalStackLayout

@@ -22,6 +22,7 @@
         FalseValue="Pause"
         TrueValue="Resume" />
 
+    <c:NullToBoolConverter x:Key="IsNotNullToBoolConverter" IsInverted="True" />
     <c:StringIsNotNullOrEmptyConverter x:Key="StringIsNotNullOrEmptyConverter" />
 
 </ResourceDictionary>

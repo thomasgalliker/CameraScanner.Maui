@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:c="http://camerascanner.maui"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
+    x:Class="CameraDemoApp.Views.BarcodeResultDetailPage"
+    Title="Barcode Details"
+    x:DataType="vm:BarcodeResultDetailViewModel">
+    
+    <ScrollView>
+        <VerticalStackLayout
+            Padding="16"
+            Spacing="16">
+            
+            <VerticalStackLayout
+                Spacing="4">
+                <Label
+                    Text="DisplayValue" />
+                <Label
+                    Text="{Binding BarcodeResult.DisplayValue}"
+                    FontFamily="IBMPlexMonoBold" />
+            </VerticalStackLayout>
+            
+            <VerticalStackLayout
+                Spacing="4">
+                <Label
+                    Text="BarcodeFormat" />
+                <Label
+                    Text="{Binding BarcodeResult.BarcodeFormat}"
+                    FontFamily="IBMPlexMonoBold" />
+            </VerticalStackLayout>
+            
+            <VerticalStackLayout
+                Spacing="4">
+                <Label
+                    Text="BarcodeType" />
+                <Label
+                    Text="{Binding BarcodeResult.BarcodeType}"
+                    FontFamily="IBMPlexMonoBold" />
+            </VerticalStackLayout>
+            <VerticalStackLayout
+                Spacing="4">
+                <VerticalStackLayout.Behaviors>
+                    <mct:TouchBehavior
+                        LongPressDuration="750"
+                        LongPressCommand="{Binding CopyDisplayValueCommand}"/>
+                </VerticalStackLayout.Behaviors>
+                <Label
+                    Text="BarcodeResult dump:" />
+                <Label
+                    Text="{Binding BarcodeResultDump}"
+                    FontFamily="IBMPlexMonoRegular" />
+            </VerticalStackLayout>
+           
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

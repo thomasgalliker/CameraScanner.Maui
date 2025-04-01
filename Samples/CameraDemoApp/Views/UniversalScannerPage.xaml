@@ -23,12 +23,14 @@
             BarcodeFormats="{Binding BarcodeFormats}"
             CameraEnabled="{Binding IsScannerEnabled}"
             CaptureQuality="{Binding CaptureQuality}"
+            CurrentZoomFactor="{Binding CurrentZoomFactor}"
+            ForceInverted="True"
+            MaxZoomFactor="{Binding MaxZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"
             TorchOn="{Binding TorchOn}"
-            CurrentZoomFactor="{Binding CurrentZoomFactor}"
-            MinZoomFactor="{Binding MinZoomFactor}"
-            MaxZoomFactor="{Binding MaxZoomFactor}" />
+            ViewfinderMode="True" />
 
         <c:BarcodeResultOverlay
             Grid.Row="0"

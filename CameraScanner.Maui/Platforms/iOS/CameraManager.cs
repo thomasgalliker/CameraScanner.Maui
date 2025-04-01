@@ -33,9 +33,9 @@ namespace CameraScanner.Maui
         private AVCaptureInput captureInput;
         private BarcodeAnalyzer barcodeAnalyzer;
 
-        private readonly AVCaptureVideoDataOutput videoDataOutput;
+        private AVCaptureVideoDataOutput videoDataOutput;
         private readonly AVCaptureVideoPreviewLayer previewLayer;
-        private readonly AVCaptureSession captureSession;
+        private AVCaptureSession captureSession;
         private readonly BarcodeView barcodeView;
         private readonly ILogger logger;
         private readonly ILoggerFactory loggerFactory;
@@ -119,40 +119,47 @@ namespace CameraScanner.Maui
                     this.Stop();
                 }
 
-                if (this.captureSession != null)
+                if (this.videoDataOutput is not AVCaptureVideoDataOutput videoDataOutput)
                 {
-                    if (this.captureSession.Running)
-                    {
-                        this.captureSession.StopRunning();
-                    }
-
-                    if (this.captureSession.Inputs.Length == 0)
-                    {
-                        await this.UpdateCameraAsync();
-                    }
-
-                    if (this.captureSession.SessionPreset is null)
-                    {
-                        this.UpdateCaptureQuality();
-                    }
-
-                    if (!this.captureSession.Outputs.Contains(this.videoDataOutput) &&
-                        this.captureSession.CanAddOutput(this.videoDataOutput))
-                    {
-                        ConfigureCaptureSession(this.captureSession, cs => cs.AddOutput(this.videoDataOutput));
-                    }
-
-                    this.captureSession.StartRunning();
-                    this.UpdateOutput();
-                    this.UpdateBarcodeFormats();
-                    this.UpdateTorch();
-                    this.UpdateMinMaxZoomFactor();
-                    this.UpdateDeviceSwitchZoomFactors();
-                    this.UpdateBarcodeDetectionFrameRate();
-
-                    this.started = true;
-                    this.logger.LogDebug("StartAsync finished successfully");
+                    return;
                 }
+
+                if (this.captureSession is not AVCaptureSession captureSession)
+                {
+                    return;
+                }
+
+                if (captureSession.Running)
+                {
+                    captureSession.StopRunning();
+                }
+
+                if (captureSession.Inputs.Length == 0)
+                {
+                    await this.UpdateCameraAsync();
+                }
+
+                if (captureSession.SessionPreset is null)
+                {
+                    this.UpdateCaptureQuality();
+                }
+
+                if (!captureSession.Outputs.Contains(videoDataOutput) &&
+                    captureSession.CanAddOutput(videoDataOutput))
+                {
+                    ConfigureCaptureSession(captureSession, cs => cs.AddOutput(videoDataOutput));
+                }
+
+                captureSession.StartRunning();
+                this.UpdateOutput();
+                this.UpdateBarcodeFormats();
+                this.UpdateTorch();
+                this.UpdateMinMaxZoomFactor();
+                this.UpdateDeviceSwitchZoomFactors();
+                this.UpdateBarcodeDetectionFrameRate();
+
+                this.started = true;
+                this.logger.LogDebug("StartAsync finished successfully");
             }
             catch (Exception ex)
             {
@@ -172,22 +179,29 @@ namespace CameraScanner.Maui
                     return;
                 }
 
-                if (this.captureSession != null)
+                if (this.captureSession is not AVCaptureSession captureSession)
                 {
-                    if (this.captureDevice is not null && this.captureDevice.TorchActive)
-                    {
-                        this.SetTorchModeOn(AVCaptureTorchMode.Off);
+                    return;
+                }
 
-                        if (this.cameraView is not null)
-                        {
-                            this.cameraView.TorchOn = false;
-                        }
-                    }
+                if (this.captureDevice is not AVCaptureDevice captureDevice)
+                {
+                    return;
+                }
 
-                    if (this.captureSession.Running)
+                if (captureDevice.TorchActive)
+                {
+                    this.SetTorchModeOn(AVCaptureTorchMode.Off);
+
+                    if (this.cameraView is not null)
                     {
-                        this.captureSession.StopRunning();
+                        this.cameraView.TorchOn = false;
                     }
+                }
+
+                if (captureSession.Running)
+                {
+                    captureSession.StopRunning();
                 }
 
                 this.started = false;
@@ -209,13 +223,15 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            if (this.captureSession is not null)
+            if (this.captureSession is not AVCaptureSession captureSession)
             {
-                ConfigureCaptureSession(this.captureSession, cs =>
-                {
-                    cs.SessionPreset = GetBestSupportedPreset(this.captureSession, this.cameraView.CaptureQuality);
-                });
+                return;
             }
+
+            ConfigureCaptureSession(captureSession, cs =>
+            {
+                cs.SessionPreset = GetBestSupportedPreset(captureSession, this.cameraView.CaptureQuality);
+            });
         }
 
         private static NSString GetBestSupportedPreset(AVCaptureSession captureSession, CaptureQuality captureQuality)
@@ -439,23 +455,32 @@ namespace CameraScanner.Maui
 
         private void UpdateDeviceSwitchZoomFactors()
         {
-            this.logger.LogDebug("UpdateRequestZoomFactor");
+            this.logger.LogDebug("UpdateDeviceSwitchZoomFactors");
 
             if (this.disposed)
             {
                 return;
             }
 
-            if (this.cameraView is null || this.captureDevice is null)
+            if (this.cameraView is not CameraView cameraView)
+            {
+                return;
+            }
+
+            if (this.captureDevice is not AVCaptureDevice captureDevice)
             {
                 return;
             }
 
             if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
             {
-                this.cameraView.DeviceSwitchZoomFactors = this.captureDevice.VirtualDeviceSwitchOverVideoZoomFactors
-                    .Select(s => (float)s)
-                    .ToArray();
+                if (captureDevice.VirtualDeviceSwitchOverVideoZoomFactors is NSNumber[] zoomFactors)
+                {
+                    cameraView.DeviceSwitchZoomFactors = zoomFactors
+                        .Where(z => z != null)
+                        .Select(z => z.FloatValue)
+                        .ToArray();
+                }
             }
         }
 
@@ -766,7 +791,7 @@ namespace CameraScanner.Maui
             GC.SuppressFinalize(this);
         }
 
-        protected virtual async void Dispose(bool disposing)
+        protected virtual void Dispose(bool disposing)
         {
             if (this.disposed)
             {
@@ -783,56 +808,62 @@ namespace CameraScanner.Maui
 
                     this.Stop();
 
-                    await Task.Delay(200);
+                    //await Task.Delay(200);
 
-                    this.logger.LogDebug("RemoveObserver");
+                    // this.logger.LogDebug("RemoveObserver");
                     NSNotificationCenter.DefaultCenter.RemoveObserver(this.subjectAreaChangedNotification);
 
                     if (this.tapGestureRecognizer is not null)
                     {
-                        this.logger.LogDebug("RemoveGestureRecognizer");
+                        // this.logger.LogDebug("RemoveGestureRecognizer");
                         this.barcodeView?.RemoveGestureRecognizer(this.tapGestureRecognizer);
                     }
 
-                    this.logger.LogDebug("SetSampleBufferDelegate");
+                    // this.logger.LogDebug("SetSampleBufferDelegate");
                     this.videoDataOutput?.SetSampleBufferDelegate(null, null);
 
-                    this.logger.LogDebug("barcodeAnalyzer.Dispose");
+                    // this.logger.LogDebug("barcodeAnalyzer.Dispose");
                     this.barcodeAnalyzer?.Dispose();
                     this.barcodeAnalyzer = null;
 
-                    this.logger.LogDebug("RemoveFromSuperLayer1");
+                    // this.logger.LogDebug("previewLayer.RemoveFromSuperLayer");
                     this.previewLayer?.RemoveFromSuperLayer();
-                    this.logger.LogDebug("RemoveFromSuperLayer2");
+                    // this.logger.LogDebug("shapeLayer.RemoveFromSuperLayer");
                     this.shapeLayer?.RemoveFromSuperLayer();
 
-                    this.logger.LogDebug("barcodeView.Dispose");
+                    // this.logger.LogDebug("barcodeView.Dispose");
                     this.barcodeView?.Dispose();
-                    this.logger.LogDebug("previewLayer.Dispose");
+                    // this.logger.LogDebug("previewLayer.Dispose");
                     this.previewLayer?.Dispose();
-                    this.logger.LogDebug("shapeLayer.Dispose");
+                    // this.logger.LogDebug("shapeLayer.Dispose");
                     this.shapeLayer?.Dispose();
 
-                    this.logger.LogDebug("captureSession.Dispose");
+                    // this.logger.LogDebug("captureSession.Dispose");
                     this.captureSession?.Dispose();
-                    this.logger.LogDebug("videoDataOutput.Dispose");
+                    this.captureSession = null;
+
+                    // this.logger.LogDebug("videoDataOutput.Dispose");
                     this.videoDataOutput?.Dispose();
-                    this.logger.LogDebug("captureInput.Dispose");
+                    this.videoDataOutput = null;
+
+                    // this.logger.LogDebug("captureInput.Dispose");
                     this.captureInput?.Dispose();
+                    this.captureInput = null;
 
-                    this.logger.LogDebug("captureDevice.Dispose");
+                    // this.logger.LogDebug("captureDevice.Dispose");
                     this.captureDevice?.Dispose();
+                    this.captureDevice = null;
 
-                    this.logger.LogDebug("sequenceRequestHandler.Dispose");
+                    // this.logger.LogDebug("sequenceRequestHandler.Dispose");
                     this.sequenceRequestHandler?.Dispose();
 
-                    this.logger.LogDebug("detectBarcodesRequest.Dispose");
+                    // this.logger.LogDebug("detectBarcodesRequest.Dispose");
                     this.detectBarcodesRequest?.Dispose();
 
-                    this.logger.LogDebug("tapGestureRecognizer.Dispose");
+                    // this.logger.LogDebug("tapGestureRecognizer.Dispose");
                     this.tapGestureRecognizer?.Dispose();
 
-                    this.logger.LogDebug("captureDevice.Dispose");
+                    // this.logger.LogDebug("subjectAreaChangedNotification.Dispose");
                     this.subjectAreaChangedNotification?.Dispose();
 
                     this.logger.LogDebug("Dispose finished");

@@ -40,7 +40,7 @@ namespace CameraScanner.Maui
 
         public bool PauseScanning { get; set; }
 
-        public async void Analyze(IImageProxy proxyImage)
+        public void Analyze(IImageProxy proxyImage)
         {
             try
             {
@@ -59,11 +59,14 @@ namespace CameraScanner.Maui
                     }
                     else
                     {
-                        var run = await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
-                        if (run == false)
+                        Task.Run(async () =>
                         {
-                            // this.logger.LogDebug("Analyze -> frame skipped (already in progress)");
-                        }
+                            var run = await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
+                            if (run == false)
+                            {
+                                // this.logger.LogDebug("Analyze -> frame skipped (already in progress)");
+                            }
+                        }).Wait();
                     }
 
                     if (this.BarcodeDetectionFrameRate != null)
@@ -86,10 +89,9 @@ namespace CameraScanner.Maui
                 {
                     proxyImage.Close();
                 }
-                catch (Exception ex)
+                catch
                 {
-                    this.logger.LogError(ex, "Analyze -> IImageProxy.Close failed with exception");
-                    // MainThread.BeginInvokeOnMainThread(() => this.cameraManager.Start());
+                    // Ignore
                 }
             }
         }

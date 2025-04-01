@@ -2,6 +2,11 @@
 {
     public class BarcodeResult : IEquatable<BarcodeResult>
     {
+        public BarcodeResult(string displayValue)
+        {
+            this.DisplayValue = displayValue;
+        }
+
         /// <summary>
         /// Gets the barcode type of the scan result, e.g. WiFi, URL, etc...
         /// </summary>
@@ -12,7 +17,7 @@
         /// </summary>
         public BarcodeFormats BarcodeFormat { get; set; }
 
-        public string DisplayValue { get; set; }
+        public string DisplayValue { get; }
 
         public string RawValue { get; set; }
 
@@ -31,12 +36,12 @@
                 return false;
             }
 
-            if (this.RawValue == other.RawValue && this.ImageBoundingBox.IntersectsWith(other.ImageBoundingBox))
+            if (ReferenceEquals(this, other))
             {
                 return true;
             }
 
-            return false;
+            return this.DisplayValue == other.DisplayValue;
         }
 
         public override bool Equals(object obj)
@@ -46,17 +51,32 @@
                 return false;
             }
 
-            if (obj is not BarcodeResult barcode)
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != this.GetType())
             {
                 return false;
             }
 
-            return base.Equals(barcode);
+            return this.Equals((BarcodeResult)obj);
         }
 
         public override int GetHashCode()
         {
-            return this.RawValue?.GetHashCode() ?? 0;
+            return this.DisplayValue != null ? this.DisplayValue?.GetHashCode() ?? 0 : 0;
+        }
+
+        public static bool operator ==(BarcodeResult left, BarcodeResult right)
+        {
+            return Equals(left, right);
+        }
+
+        public static bool operator !=(BarcodeResult left, BarcodeResult right)
+        {
+            return !Equals(left, right);
         }
     }
 }

@@ -8,6 +8,11 @@
         Task PushAsync(string page);
 
         /// <summary>
+        /// Pushes the given <paramref name="page"/> with parameter <paramref name="parameter"/> to the navigation stack.
+        /// </summary>
+        Task PushAsync<T>(string page, T parameter);
+
+        /// <summary>
         /// Pushes the given <paramref name="page"/> to the navigation stack in a modal context.
         /// </summary>
         Task PushModalAsync(string page);

@@ -44,6 +44,7 @@ namespace CameraScanner.Maui
                 else
                 {
                     // TODO
+                    // https://github.com/pcgversion/vision-camera-code-scanner/blob/78b98a27dc3074eaafe8789f7ccd6d190494fe21/ios/VisionCameraCodeScanner.swift#L262
                     previewLayerConnection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
                 }
             }

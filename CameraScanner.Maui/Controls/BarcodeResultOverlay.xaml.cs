@@ -18,13 +18,8 @@ namespace CameraScanner.Maui.Controls
         protected override void OnSizeAllocated(double width, double height)
         {
             base.OnSizeAllocated(width, height);
-            //UpdateDrawable(
-            //   this,
-            //   this.BarcodeResults,
-            //   this.StrokeSize,
-            //   this.StrokeColor,
-            //   this.TextColor,
-            //   this.InvalidateDrawableAfter);
+
+            this.BarcodeDrawable?.OnSizeAllocated(width, height);
         }
 
         public static readonly BindableProperty BarcodeDrawableProperty = BindableProperty.Create(
@@ -45,6 +40,7 @@ namespace CameraScanner.Maui.Controls
 
             if (newValue is IBarcodeDrawable newBarcodeDrawable)
             {
+                newBarcodeDrawable.OnSizeAllocated(barcodeResultOverlay.Width, barcodeResultOverlay.Height);
                 barcodeResultOverlay.Drawable = newBarcodeDrawable;
             }
         }
@@ -197,8 +193,13 @@ namespace CameraScanner.Maui.Controls
             set => this.SetValue(InvalidateDrawableAfterProperty, value);
         }
 
-        private static void UpdateDrawable(BarcodeResultOverlay barcodeResultOverlay,
-            BarcodeResult[] barcodeResults, float strokeSize, Color strokeColor, Color textColor, TimeSpan? invalidateDrawableAfter)
+        private static void UpdateDrawable(
+            BarcodeResultOverlay barcodeResultOverlay,
+            BarcodeResult[] barcodeResults,
+            float strokeSize,
+            Color strokeColor,
+            Color textColor,
+            TimeSpan? invalidateDrawableAfter)
         {
             barcodeResultOverlay.BarcodeDrawable.Update(barcodeResults, strokeSize, strokeColor, textColor);
             barcodeResultOverlay.Invalidate();
@@ -215,12 +216,28 @@ namespace CameraScanner.Maui.Controls
 
         private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
         {
+            if (this.BarcodeResultTappedCommand is not ICommand barcodeResultTappedCommand)
+            {
+                return;
+            }
+
             var tabPosition = e.GetPosition(this);
             if (tabPosition is Point point)
             {
-                var barcodeResult = this.BarcodeResults?.FirstOrDefault(r => r.PreviewBoundingBox.Contains(point));
+                var barcodeDrawable = (IBarcodeDrawable)this.Drawable;
+
+                var barcodeResult = this.BarcodeResults?.FirstOrDefault(r =>
+                {
+                    if (barcodeDrawable is ImageBoundingBoxBarcodeDrawable)
+                    {
+                        return barcodeDrawable.ConvertRectF(r.ImageBoundingBox).Contains(point);
+                    }
+                    else
+                    {
+                        return barcodeDrawable.ConvertRectF(r.PreviewBoundingBox).Contains(point);
+                    }
+                });
                 if (barcodeResult != null &&
-                    this.BarcodeResultTappedCommand is ICommand barcodeResultTappedCommand &&
                     barcodeResultTappedCommand.CanExecute(barcodeResult))
                 {
                     barcodeResultTappedCommand.Execute(barcodeResult);

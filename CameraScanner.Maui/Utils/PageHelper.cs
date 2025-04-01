@@ -1,11 +1,8 @@
-using System.ComponentModel;
-
 namespace CameraScanner.Maui.Utils
 {
-    [EditorBrowsable(EditorBrowsableState.Never)]
-    public static class PageHelper
+    internal static class PageHelper
     {
-        public static Page GetTarget(Page target)
+        internal static Page GetTarget(Page target)
         {
             return target switch
             {
@@ -18,7 +15,7 @@ namespace CameraScanner.Maui.Utils
             };
         }
 
-        public static string PrintNavigationPath()
+        internal static string PrintNavigationPath()
         {
             var mainPage = Application.Current.MainPage;
             var navigation = mainPage.Navigation;
@@ -32,7 +29,7 @@ namespace CameraScanner.Maui.Utils
             return pages.Aggregate("", (current, page) => $"{current}/{(page?.GetType().Name ?? "")}");
         }
 
-        public static IEnumerable<Page> GetNavigationTree(INavigation navigation, Page page, bool modal = false)
+        internal static IEnumerable<Page> GetNavigationTree(INavigation navigation, Page page, bool modal = false)
         {
             switch (page)
             {
