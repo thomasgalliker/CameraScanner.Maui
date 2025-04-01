@@ -157,10 +157,31 @@ namespace CameraScanner.Maui
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
-        internal async void UpdateCameraFacing()
+        internal void UpdateCameraFacing()
         {
             this.logger.LogDebug("UpdateCameraFacing");
-            await this.StartAsync();
+
+            if (this.cameraController is not null)
+            {
+                if (this.cameraView.CameraFacing == CameraFacing.Front)
+                {
+                    this.cameraController.CameraSelector = CameraSelector.DefaultFrontCamera;
+                }
+                else
+                {
+                    this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
+                }
+
+                // If camera facing is switched, the torch may be turned off
+                //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
+                //{
+                //    this.cameraView.TorchOn = true;
+                //}
+                //if ((int)this.cameraController.TorchState.Value == TorchState.Off && this.cameraView.TorchOn == true)
+                //{
+                //    this.cameraView.TorchOn = false;
+                //}
+            }
         }
 
         internal async Task StartAsync()
@@ -202,9 +223,10 @@ namespace CameraScanner.Maui
                         return;
                     }
 
-                    if (this.cameraController.CameraSelector == null)
+                    if (this.cameraController.CameraSelector != CameraSelector.DefaultBackCamera &&
+                        this.cameraController.CameraSelector != CameraSelector.DefaultFrontCamera )
                     {
-                        this.UpdateCamera();
+                        this.UpdateCameraFacing();
                     }
 
                     if (this.cameraController.ImageAnalysisTargetSize == null)
@@ -261,31 +283,6 @@ namespace CameraScanner.Maui
                 this.barcodeScanner = MLKitBarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
                     .SetBarcodeFormats(mlKitBarcodeFormats)
                     .Build());
-            }
-        }
-
-        internal void UpdateCamera()
-        {
-            if (this.cameraController is not null)
-            {
-                if (this.cameraView.CameraFacing == CameraFacing.Front)
-                {
-                    this.cameraController.CameraSelector = CameraSelector.DefaultFrontCamera;
-                }
-                else
-                {
-                    this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
-                }
-
-                // If camera facing is switched, the torch may be turned off
-                //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
-                //{
-                //    this.cameraView.TorchOn = true;
-                //}
-                //if ((int)this.cameraController.TorchState.Value == TorchState.Off && this.cameraView.TorchOn == true)
-                //{
-                //    this.cameraView.TorchOn = false;
-                //}
             }
         }
 
