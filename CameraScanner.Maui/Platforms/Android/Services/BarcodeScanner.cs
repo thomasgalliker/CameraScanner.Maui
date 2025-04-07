@@ -42,10 +42,7 @@ namespace CameraScanner.Maui.Platforms.Services
 
         private static async Task<HashSet<BarcodeResult>> ProcessBitmapAsync(Bitmap bitmap)
         {
-            if (bitmap is null)
-            {
-                return null;
-            }
+            ArgumentNullException.ThrowIfNull(bitmap);
 
             var barcodeResults = new HashSet<BarcodeResult>();
             using var scanner = Xamarin.Google.MLKit.Vision.BarCode.BarcodeScanning.GetClient(new BarcodeScannerOptions.Builder()
@@ -53,7 +50,8 @@ namespace CameraScanner.Maui.Platforms.Services
                 .Build());
 
             using var image = InputImage.FromBitmap(bitmap, 0);
-            ProcessBarcodeResult(await scanner.Process(image), barcodeResults);
+            var results = ProcessBarcodeResult(await scanner.Process(image));
+            barcodeResults.UnionWith(results);
 
             using var invertedBitmap = Bitmap.CreateBitmap(bitmap.Height, bitmap.Width, Bitmap.Config.Argb8888);
             using var canvas = new Canvas(invertedBitmap);
@@ -72,23 +70,28 @@ namespace CameraScanner.Maui.Platforms.Services
             paint.SetColorFilter(filter);
             canvas.DrawBitmap(bitmap, 0, 0, paint);
 
-            using var invertedImage = InputImage.FromBitmap(invertedBitmap, 0);
-            ProcessBarcodeResult(await scanner.Process(invertedImage), barcodeResults);
+            using (var invertedImage = InputImage.FromBitmap(invertedBitmap, 0))
+            {
+                var resultsInverted = ProcessBarcodeResult(await scanner.Process(invertedImage));
+                barcodeResults.UnionWith(resultsInverted);
+            }
 
             return barcodeResults;
         }
 
-        internal static void ProcessBarcodeResult(Java.Lang.Object inputResults, HashSet<BarcodeResult> outputResults, CoordinateTransform transform = null)
+        internal static HashSet<BarcodeResult> ProcessBarcodeResult(Java.Lang.Object inputResults, CoordinateTransform transform = null)
         {
+            var barcodeResults = new HashSet<BarcodeResult>();
+
             if (inputResults is null)
             {
-                return;
+                return barcodeResults;
             }
 
             using var inputResultsArrayList = inputResults.JavaCast<ArrayList>();
             if (inputResultsArrayList?.IsEmpty ?? true)
             {
-                return;
+                return barcodeResults;
             }
 
             foreach (var inputResult in inputResultsArrayList.ToArray())
@@ -134,18 +137,26 @@ namespace CameraScanner.Maui.Platforms.Services
                        .ToArray();
                 }
 
+                var barcodeResult = new BarcodeResult(
+                    displayValue: barcode.DisplayValue,
+                    barcodeType: ConvertBarcodeResultTypes(barcode.ValueType),
+                    barcodeFormat: ConvertBarcodeFormat(barcode),
+                    rawValue: barcode.RawValue,
+                    rawBytes: barcode.GetRawBytes(),
+                    previewBoundingBox: previewRect,
+                    imageBoundingBox: imageRect,
+                    cornerPoints: cornerPoints);
 
-                outputResults.Add(new BarcodeResult(barcode.DisplayValue)
-                {
-                    BarcodeType = ConvertBarcodeResultTypes(barcode.ValueType),
-                    BarcodeFormat = (BarcodeFormats)barcode.Format,
-                    RawValue = barcode.RawValue,
-                    RawBytes = barcode.GetRawBytes(),
-                    PreviewBoundingBox = previewRect,
-                    ImageBoundingBox = imageRect,
-                    CornerPoints = cornerPoints,
-                });
+                barcodeResults.Add(barcodeResult);
             }
+
+            return barcodeResults;
+        }
+
+        private static BarcodeFormats ConvertBarcodeFormat(Barcode barcode)
+        {
+            // TODO: Add more safety + logging here
+            return (BarcodeFormats)barcode.Format;
         }
 
         internal static void InvertLuminance(Image image)
