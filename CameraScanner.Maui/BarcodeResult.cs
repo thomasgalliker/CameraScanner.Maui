@@ -7,19 +7,12 @@ namespace CameraScanner.Maui
     {
         public BarcodeResult(string displayValue)
         {
-            this.DisplayValue = displayValue;
+            this.DisplayValue = this.RawValue = displayValue;
         }
 
-        public BarcodeResult(string displayValue, BarcodeTypes barcodeType)
+        public BarcodeResult(string displayValue, BarcodeFormats barcodeFormat)
+            : this(displayValue)
         {
-            this.DisplayValue = displayValue;
-            this.BarcodeType = barcodeType;
-        }
-
-        public BarcodeResult(string displayValue, BarcodeTypes barcodeType, BarcodeFormats barcodeFormat)
-        {
-            this.DisplayValue = displayValue;
-            this.BarcodeType = barcodeType;
             this.BarcodeFormat = barcodeFormat;
         }
 
