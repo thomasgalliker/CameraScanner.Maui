@@ -94,11 +94,11 @@ namespace CameraScanner.Maui
             nameof(CameraEnabled),
             typeof(bool),
             typeof(CameraView),
-            true);
+            false);
 
         /// <summary>
         /// Enables or disables the camera preview.
-        /// Default: <c>true</c>
+        /// Default: <c>false</c>
         /// </summary>
         public bool CameraEnabled
         {

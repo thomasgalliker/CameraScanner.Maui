@@ -39,7 +39,11 @@
     <Company>superdev GmbH</Company>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-    <PackageReleaseNotes>1.4
+    <PackageReleaseNotes>1.5
+- CameraEnabled property is now 'false' by default (see github issue #45).
+- Camera facing issue on Android.
+      
+1.4
 - Optimize camera device selection on iOS.
 - Optimize default zoom selection on iOS.
 - Improve automatic disconnection from handler.
