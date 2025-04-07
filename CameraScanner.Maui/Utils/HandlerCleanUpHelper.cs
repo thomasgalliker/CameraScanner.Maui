@@ -17,6 +17,13 @@ namespace CameraScanner.Maui.Utils
 
             var parentPage = element.GetRealParentPages().FirstOrDefault();
             var targetPage = PageHelper.GetTarget(parentPage);
+            if (targetPage == null)
+            {
+                Trace.WriteLine(
+                    "HandlerCleanUpHelper.AddCleanUpEvent: RealParent is not a Page " +
+                    "--> Make sure you call CameraView.Handler.DisconnectHandler() manually as soon as CameraView is no longer used!");
+                return;
+            }
 
             async void OnDisappearing(object sender, EventArgs e)
             {
