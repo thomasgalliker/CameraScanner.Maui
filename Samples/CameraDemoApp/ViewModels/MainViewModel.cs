@@ -39,7 +39,6 @@ namespace CameraDemoApp.ViewModels
             this.launcher = launcher;
         }
 
-
         public IAsyncRelayCommand AppearingCommand
         {
             get => this.appearingCommand ??= new AsyncRelayCommand(this.OnAppearingAsync);
