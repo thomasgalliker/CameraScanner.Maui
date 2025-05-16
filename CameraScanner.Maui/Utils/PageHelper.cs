@@ -35,57 +35,40 @@ namespace CameraScanner.Maui.Utils
                 yield break;
             }
 
-            var navigation = page.Navigation;
-
             switch (page)
             {
                 case FlyoutPage flyoutPage:
                     yield return flyoutPage;
-                    foreach (var p in GetNavigationTree(flyoutPage.Flyout))
+                    foreach (var childPage in GetChildPages(flyoutPage))
                     {
-                        yield return p;
+                        yield return childPage;
                     }
-
-                    foreach (var p in GetNavigationTree(flyoutPage.Detail))
-                    {
-                        yield return p;
-                    }
-
                     break;
 
                 case TabbedPage tabbedPage:
                     yield return tabbedPage;
-                    foreach (var tab in tabbedPage.Children)
+                    foreach (var childPage in GetChildPages(tabbedPage))
                     {
-                        foreach (var p in GetNavigationTree(tab))
-                        {
-                            yield return p;
-                        }
+                        yield return childPage;
                     }
-
                     break;
 
                 case NavigationPage navigationPage:
                     yield return navigationPage;
-
-                    foreach (var childPage in navigationPage.InternalChildren.OfType<Page>())
+                    foreach (var childPage in GetChildPages(navigationPage))
                     {
-                        foreach (var p in GetNavigationTree(childPage))
-                        {
-                            yield return p;
-                        }
+                        yield return childPage;
                     }
-
                     break;
 
                 case ContentPage contentPage:
                     yield return contentPage;
-
                     break;
             }
 
             if (modal == false)
             {
+                var navigation = page.Navigation;
                 foreach (var modalPage in navigation.ModalStack)
                 {
                     foreach (var p in GetNavigationTree(modalPage, modal: true))
@@ -93,6 +76,54 @@ namespace CameraScanner.Maui.Utils
                         yield return p;
                     }
                 }
+            }
+        }
+
+        private static IEnumerable<Page> GetChildPages(NavigationPage navigationPage)
+        {
+            var pages = navigationPage.InternalChildren.OfType<Page>().ToArray();
+            foreach (var page in pages)
+            {
+                yield return page;
+
+                if (page is FlyoutPage flyoutPage)
+                {
+                    foreach (var childPage in GetChildPages(flyoutPage))
+                    {
+                        yield return childPage;
+                    }
+                }
+                else if (page is TabbedPage tabbedPage)
+                {
+                    foreach (var childPage in GetChildPages(tabbedPage))
+                    {
+                        yield return childPage;
+                    }
+                }
+            }
+        }
+
+        private static IEnumerable<Page> GetChildPages(TabbedPage tabbedPage)
+        {
+            foreach (var c in tabbedPage.Children)
+            {
+                foreach (var p in GetNavigationTree(c))
+                {
+                    yield return p;
+                }
+            }
+        }
+
+        private static IEnumerable<Page> GetChildPages(FlyoutPage flyoutPage)
+        {
+            foreach (var p in GetNavigationTree(flyoutPage.Flyout))
+            {
+                yield return p;
+            }
+
+            foreach (var p in GetNavigationTree(flyoutPage.Detail))
+            {
+                yield return p;
             }
         }
     }
