@@ -15,13 +15,20 @@ namespace CameraScanner.Maui.Utils
                 return;
             }
 
+            var viewName = view.GetType().Name;
+            var viewNameWithAutomationId = string.IsNullOrWhiteSpace(view.AutomationId)
+                ? viewName
+                : $"\"{view.AutomationId}\" ({viewName})";
+
             var parentPage = element.GetRealParentPages().FirstOrDefault();
             var targetPage = PageHelper.GetTarget(parentPage);
             if (targetPage == null)
             {
                 Trace.WriteLine(
-                    "HandlerCleanUpHelper.AddCleanUpEvent: RealParent is not a Page " +
-                    "--> Make sure you call CameraView.Handler.DisconnectHandler() manually as soon as CameraView is no longer used!");
+                    "HandlerCleanUpHelper.AddCleanUpEvent: RealParent is not a Page. " +
+                    $"Make sure you call {viewName}.Handler.DisconnectHandler() manually as soon as " +
+                    $"{viewNameWithAutomationId} is no longer used!");
+
                 return;
             }
 
@@ -47,7 +54,7 @@ namespace CameraScanner.Maui.Utils
                 {
                     Trace.WriteLine(
                         $"HandlerCleanUpHelper.OnNavigatedFrom: Page \"{GetPageNameForLogging(targetPage)}\" is no longer present on the navigation stack " +
-                        $"--> {view.GetType().Name}.Handler is null");
+                        $"--> {viewName}.Handler is null");
                 }
                 else
                 {
@@ -60,7 +67,8 @@ namespace CameraScanner.Maui.Utils
 
             targetPage.Disappearing += OnDisappearing;
 
-            Trace.WriteLine($"HandlerCleanUpHelper.AddCleanUpEvent for \"{view.GetType().Name}\" on page \"{GetPageNameForLogging(targetPage)}\"");
+            Trace.WriteLine(
+                $"HandlerCleanUpHelper.AddCleanUpEvent for {viewNameWithAutomationId} on page \"{GetPageNameForLogging(targetPage)}\"");
         }
 
         private static string GetPageNameForLogging(Page targetPage)
@@ -90,8 +98,7 @@ namespace CameraScanner.Maui.Utils
             // is part of the NavigationStack or the ModalStack.
             {
                 var mainPage = Application.Current.MainPage;
-                var navigation = mainPage.Navigation;
-                var pages = PageHelper.GetNavigationTree(navigation, mainPage).ToArray();
+                var pages = PageHelper.GetNavigationTree(mainPage).ToArray();
                 var pageExists = pages.Any(p => p == targetPage);
                 return pageExists;
             }
@@ -117,7 +124,7 @@ namespace CameraScanner.Maui.Utils
                 }
             }
 
-            return hashSet;
+            return hashSet.Where(p => p != null);
         }
 
         private static IEnumerable<Page> WalkToPage(Element element)
@@ -133,7 +140,10 @@ namespace CameraScanner.Maui.Utils
                 case ShellSection shellSection:
                     IShellSectionController controller = shellSection;
                     var children = controller.GetItems().OfType<IShellContentController>();
-                    return children.Select(c => c.Page);
+                    var childPages = children
+                        .Select(c => c.Page)
+                        .SelectMany(p => PageHelper.GetNavigationTree(p));
+                    return childPages;
             }
 
             return [];
