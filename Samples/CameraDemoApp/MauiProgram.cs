@@ -27,7 +27,6 @@ namespace CameraDemoApp
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                 });
 
-
             builder.Services.AddLogging(b =>
             {
                 b.ClearProviders();

@@ -1,18 +1,14 @@
+using AndroidX.Camera.Core;
+
 namespace CameraScanner.Maui.Platforms.Android
 {
     internal class ZoomStateChangedEventArgs : EventArgs
     {
-        internal ZoomStateChangedEventArgs(float zoomRatio, float minZoomRatio, float maxZoomRatio)
+        internal ZoomStateChangedEventArgs(IZoomState zoomState)
         {
-            this.ZoomRatio = zoomRatio;
-            this.MinZoomRatio = minZoomRatio;
-            this.MaxZoomRatio = maxZoomRatio;
+            this.ZoomState = zoomState;
         }
 
-        public float ZoomRatio { get; }
-
-        public float MinZoomRatio { get; }
-
-        public float MaxZoomRatio { get; }
+        public IZoomState ZoomState { get; }
     }
 }
