@@ -118,7 +118,7 @@
   </ItemGroup>
   
   <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
-    <TrimmerRootDescriptor Include="ILLink.Descriptors.xml" />
+    <TrimmerRootDescriptor Include="ILLink.Descriptors.xml" RootMode="All" />
     <EmbeddedResource Include="Platforms\Android\ILLink.Descriptors.xml" LogicalName="ILLink.Descriptors.xml" />
   </ItemGroup>
 
