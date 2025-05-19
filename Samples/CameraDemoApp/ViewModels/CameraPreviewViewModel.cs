@@ -38,7 +38,7 @@ namespace CameraDemoApp.ViewModels
             this.navigationService = navigationService;
             this.dialogService = dialogService;
 
-            this.CameraFacing = CameraFacing.Front;
+            this.CameraFacing = CameraFacing.Back;
         }
 
         public CameraFacing CameraFacing
