@@ -5,7 +5,7 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <MauiVersion>8.0.91</MauiVersion>
+    <MauiVersion>8.0.100</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
@@ -128,5 +128,5 @@
   <ItemGroup>
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
-
+  
 </Project>
