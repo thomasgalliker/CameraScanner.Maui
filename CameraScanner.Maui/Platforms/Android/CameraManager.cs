@@ -74,6 +74,7 @@ namespace CameraScanner.Maui
 
             this.cameraController = new LifecycleCameraController(this.context)
             {
+                PinchToZoomEnabled = true,
                 TapToFocusEnabled = this.cameraView.TapToFocusEnabled,
                 ImageAnalysisBackpressureStrategy = ImageAnalysis.StrategyKeepOnlyLatest
             };
