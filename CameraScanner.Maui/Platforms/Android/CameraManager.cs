@@ -186,9 +186,7 @@ namespace CameraScanner.Maui
 
             this.logger.LogDebug("UpdateRequestZoomFactor");
 
-            var zoomRatio = Math.Max(requestZoomFactor, zoomState.MinZoomRatio);
-            zoomRatio = Math.Min(zoomRatio, zoomState.MaxZoomRatio);
-
+            var zoomRatio = Math.Clamp(requestZoomFactor, zoomState.MinZoomRatio, zoomState.MaxZoomRatio);
             if (Math.Abs(zoomRatio - zoomState.ZoomRatio) > 0.001F)
             {
                 this.cameraController.SetZoomRatio(zoomRatio);
