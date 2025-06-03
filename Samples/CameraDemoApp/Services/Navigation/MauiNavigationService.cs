@@ -38,13 +38,20 @@ namespace CameraDemoApp.Services.Navigation
             }
         }
 
-        public async Task PushModalAsync(string pageName)
+        public Task PushModalAsync(string pageName)
+        {
+            return this.PushModalAsync<object>(pageName, null);
+        }
+
+        public async Task PushModalAsync<T>(string pageName, T parameter)
         {
             try
             {
                 var page = this.ResolvePage(pageName);
                 var navigation = GetNavigation();
                 await navigation.PushModalAsync(new NavigationPage(page));
+                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
+                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
             }
             catch (Exception ex)
             {

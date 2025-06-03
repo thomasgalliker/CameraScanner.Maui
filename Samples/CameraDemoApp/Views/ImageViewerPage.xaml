@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage
+    xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:c="http://camerascanner.maui"
+    xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
+    x:Class="CameraDemoApp.Views.ImageViewerPage"
+    Title="Image Viewer"
+    Padding="16"
+    x:DataType="vm:ImageViewerViewModel">
+
+    <ContentPage.ToolbarItems>
+        <ToolbarItem
+            Command="{Binding CloseCommand}"
+            IconImageSource="close.png"
+            Priority="99" />
+    </ContentPage.ToolbarItems>
+
+    <Grid
+        RowDefinitions="*, Auto"
+        RowSpacing="16">
+        <Image
+            Grid.Row="0"
+            Source="{Binding Image}"
+            Aspect="AspectFit" />
+        <Button
+            Grid.Row="1"
+            Command="{Binding ShareCommand}"
+            Text="Share" />
+    </Grid>
+</ContentPage>
