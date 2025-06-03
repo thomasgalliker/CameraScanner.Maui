@@ -22,7 +22,6 @@
 
     <Grid RowDefinitions="*">
         <c:CameraView
-            x:Name="CameraView"
             Grid.Row="0"
             CameraEnabled="True"
             CameraFacing="{Binding CameraFacing}"

@@ -511,8 +511,9 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            var videoZoomFactor = Math.Max(requestZoomFactor, (float)this.captureDevice.MinAvailableVideoZoomFactor);
-            videoZoomFactor = Math.Min(videoZoomFactor, (float)this.captureDevice.MaxAvailableVideoZoomFactor);
+            var videoZoomFactor = Math.Clamp(requestZoomFactor,
+                (float)this.captureDevice.MinAvailableVideoZoomFactor,
+                (float)this.captureDevice.MaxAvailableVideoZoomFactor);
 
             CaptureDeviceLock(this.captureDevice, () =>
             {
