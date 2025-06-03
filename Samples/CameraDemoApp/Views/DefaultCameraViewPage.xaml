@@ -7,6 +7,6 @@
     Title="CameraView (default)">
 
     <Grid>
-        <c:CameraView />
+        <c:CameraView CameraEnabled="True" />
     </Grid>
 </ContentPage>

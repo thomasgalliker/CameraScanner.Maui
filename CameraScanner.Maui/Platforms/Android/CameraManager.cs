@@ -3,6 +3,7 @@ using Android.Gms.Extensions;
 using Android.Graphics;
 using Android.Widget;
 using AndroidX.Camera.Core;
+using AndroidX.Core.Content;
 using AndroidX.Camera.View;
 using AndroidX.Camera.View.Transform;
 using AndroidX.Lifecycle;
@@ -39,12 +40,14 @@ namespace CameraScanner.Maui
         private readonly LifecycleCameraController cameraController;
         private readonly PreviewView previewView;
         private readonly RelativeLayout relativeLayout;
-        private readonly ZoomStateObserver zoomStateObserver;
-        private readonly TorchStateObserver torchStateObserver;
-        private readonly HashSet<BarcodeResult> barcodeResults = [];
+
+        private ZoomStateObserver zoomStateObserver;
+        private TorchStateObserver torchStateObserver;
+        private CameraStateObserver cameraStateObserver;
 
         private BarcodeAnalyzer barcodeAnalyzer;
         private IMLKitBarcodeScanner barcodeScanner;
+        private ICameraInfo cameraInfo;
 
         internal CameraManager(
             ILogger<CameraManager> logger,
@@ -62,16 +65,27 @@ namespace CameraScanner.Maui
             this.cameraView = cameraView;
 
             this.cameraExecutor = Executors.NewSingleThreadExecutor();
+
             this.zoomStateObserver = new ZoomStateObserver();
             this.zoomStateObserver.ValueChanged += this.OnZoomStateChanged;
 
+            this.cameraStateObserver = new CameraStateObserver();
+            this.cameraStateObserver.ValueChanged += this.OnCameraStateChanged;
+
             this.cameraController = new LifecycleCameraController(this.context)
             {
+                PinchToZoomEnabled = true,
                 TapToFocusEnabled = this.cameraView.TapToFocusEnabled,
                 ImageAnalysisBackpressureStrategy = ImageAnalysis.StrategyKeepOnlyLatest
             };
             this.cameraController.SetEnabledUseCases(CameraController.ImageAnalysis);
             this.cameraController.ZoomState.ObserveForever(this.zoomStateObserver);
+            this.cameraController.InitializationFuture.AddListener(new Java.Lang.Runnable(() =>
+            {
+                this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
+                this.cameraInfo = this.cameraController.CameraInfo;
+                this.cameraInfo?.CameraState.ObserveForever(this.cameraStateObserver);
+            }), ContextCompat.GetMainExecutor(this.context));
 
             this.torchStateObserver = new TorchStateObserver();
             this.torchStateObserver.ValueChanged += this.OnTorchStateChanged;
@@ -105,50 +119,77 @@ namespace CameraScanner.Maui
             this.deviceDisplay.MainDisplayInfoChanged += this.OnMainDisplayInfoChanged;
         }
 
+        private void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
+        {
+            this.logger.Log(e.CameraState.Error == null ? LogLevel.Debug : LogLevel.Error, $"OnCameraStateChanged: {e.CameraState}");
+
+            if (e.CameraState?.GetType() == CameraState.Type.Open)
+            {
+                if (this.cameraController?.ZoomState.Value is IZoomState zoomState)
+                {
+                    this.UpdateCurrentZoomFactor(zoomState);
+                    this.UpdateRequestZoomFactor();
+                }
+            }
+        }
+
         private void OnTorchStateChanged(object sender, TorchStateEventArgs e)
         {
-            if (this.cameraView is not null)
+            if (this.cameraView == null)
             {
-                this.cameraView.TorchOn = e.TorchOn;
+                return;
             }
+
+            this.logger.LogDebug($"OnTorchStateChanged: TorchOn={e.TorchOn}");
+
+            this.cameraView.TorchOn = e.TorchOn;
         }
 
         private void OnZoomStateChanged(object sender, ZoomStateChangedEventArgs e)
         {
-            if (this.cameraView is not null)
+            this.logger.LogDebug("OnZoomStateChanged");
+
+            this.UpdateCurrentZoomFactor(e.ZoomState);
+        }
+
+        private void UpdateCurrentZoomFactor(IZoomState zoomState)
+        {
+            if (this.cameraView == null)
             {
-                this.UpdateCurrentZoomFactor(e.ZoomRatio);
-                this.UpdateMinMaxZoomFactor(e.MinZoomRatio, e.MaxZoomRatio);
-
-                this.UpdateRequestZoomFactor();
+                return;
             }
-        }
 
-        private void UpdateCurrentZoomFactor(float zoomRatio)
-        {
-            this.cameraView.CurrentZoomFactor = zoomRatio;
-        }
+            this.logger.LogDebug($"UpdateCurrentZoomFactor: CurrentZoomFactor={zoomState.ZoomRatio}, " +
+                                 $"MinZoomRatio={zoomState.MinZoomRatio}, MaxZoomRatio={zoomState.MaxZoomRatio}");
 
-        private void UpdateMinMaxZoomFactor(float minZoomRatio, float maxZoomRatio)
-        {
-            this.cameraView.MinZoomFactor = minZoomRatio;
-            this.cameraView.MaxZoomFactor = maxZoomRatio;
+            this.cameraView.CurrentZoomFactor = zoomState.ZoomRatio;
+            this.cameraView.MinZoomFactor = zoomState.MinZoomRatio;
+            this.cameraView.MaxZoomFactor = zoomState.MaxZoomRatio;
         }
 
         internal void UpdateRequestZoomFactor()
         {
-            if (this.cameraController is { ZoomState.IsInitialized: true } &&
-                this.zoomStateObserver.LastValue is IZoomState zoomState &&
-                this.cameraView is not null &&
-                this.cameraView.RequestZoomFactor is float requestZoomFactor and > 0F)
+            if (this.cameraController == null || this.cameraController?.ZoomState.IsInitialized == false)
             {
-                var zoomRatio = Math.Max(requestZoomFactor, zoomState.MinZoomRatio);
-                zoomRatio = Math.Min(zoomRatio, zoomState.MaxZoomRatio);
+                return;
+            }
 
-                if (Math.Abs(zoomRatio - zoomState.ZoomRatio) > 0.001F)
-                {
-                    this.cameraController.SetZoomRatio(zoomRatio);
-                }
+            if (this.cameraController.ZoomState.Value is not IZoomState zoomState)
+            {
+                return;
+            }
+
+            if (this.cameraView?.RequestZoomFactor is not (float requestZoomFactor and > 0F))
+            {
+                return;
+            }
+
+            this.logger.LogDebug("UpdateRequestZoomFactor");
+
+            var zoomRatio = Math.Clamp(requestZoomFactor, zoomState.MinZoomRatio, zoomState.MaxZoomRatio);
+            if (Math.Abs(zoomRatio - zoomState.ZoomRatio) > 0.001F)
+            {
+                this.cameraController.SetZoomRatio(zoomRatio);
             }
         }
 
@@ -158,10 +199,31 @@ namespace CameraScanner.Maui
 
         internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
 
-        internal async void UpdateCameraFacing()
+        internal void UpdateCameraFacing()
         {
             this.logger.LogDebug("UpdateCameraFacing");
-            await this.StartAsync();
+
+            if (this.cameraController is not null)
+            {
+                if (this.cameraView.CameraFacing == CameraFacing.Front)
+                {
+                    this.cameraController.CameraSelector = CameraSelector.DefaultFrontCamera;
+                }
+                else
+                {
+                    this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
+                }
+
+                // If camera facing is switched, the torch may be turned off
+                //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
+                //{
+                //    this.cameraView.TorchOn = true;
+                //}
+                //if ((int)this.cameraController.TorchState.Value == TorchState.Off && this.cameraView.TorchOn == true)
+                //{
+                //    this.cameraView.TorchOn = false;
+                //}
+            }
         }
 
         internal async Task StartAsync()
@@ -203,9 +265,10 @@ namespace CameraScanner.Maui
                         return;
                     }
 
-                    if (this.cameraController.CameraSelector == null)
+                    if (this.cameraController.CameraSelector != CameraSelector.DefaultBackCamera &&
+                        this.cameraController.CameraSelector != CameraSelector.DefaultFrontCamera )
                     {
-                        this.UpdateCamera();
+                        this.UpdateCameraFacing();
                     }
 
                     if (this.cameraController.ImageAnalysisTargetSize == null)
@@ -265,31 +328,6 @@ namespace CameraScanner.Maui
             }
         }
 
-        internal void UpdateCamera()
-        {
-            if (this.cameraController is not null)
-            {
-                if (this.cameraView.CameraFacing == CameraFacing.Front)
-                {
-                    this.cameraController.CameraSelector = CameraSelector.DefaultFrontCamera;
-                }
-                else
-                {
-                    this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
-                }
-
-                // If camera facing is switched, the torch may be turned off
-                //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
-                //{
-                //    this.cameraView.TorchOn = true;
-                //}
-                //if ((int)this.cameraController.TorchState.Value == TorchState.Off && this.cameraView.TorchOn == true)
-                //{
-                //    this.cameraView.TorchOn = false;
-                //}
-            }
-        }
-
         //TODO Implement setImageAnalysisResolutionSelector
         //https://developer.android.com/reference/androidx/camera/view/CameraController#setImageAnalysisResolutionSelector(androidx.camera.core.resolutionselector.ResolutionSelector)
         internal async void UpdateCaptureQuality()
@@ -316,18 +354,22 @@ namespace CameraScanner.Maui
 
         internal void UpdateTorch()
         {
-            if (this.cameraController != null)
+            this.logger.LogDebug("UpdateTorch");
+
+            if (this.cameraController == null)
             {
-                var hasFlashUnit = this.cameraController.CameraInfo?.HasFlashUnit;
-                if (hasFlashUnit == false)
-                {
-                    this.cameraView.TorchOn = false;
-                }
-                else
-                {
-                    var requestedTorchOn = this.cameraView.TorchOn;
-                    this.cameraController.EnableTorch(requestedTorchOn);
-                }
+                return;
+            }
+
+            var hasFlashUnit = this.cameraController.CameraInfo?.HasFlashUnit;
+            if (hasFlashUnit == false)
+            {
+                this.cameraView.TorchOn = false;
+            }
+            else
+            {
+                var requestedTorchOn = this.cameraView.TorchOn;
+                this.cameraController.EnableTorch(requestedTorchOn);
             }
         }
 
@@ -393,52 +435,60 @@ namespace CameraScanner.Maui
 
             //this.logger.LogDebug("PerformBarcodeDetectionAsync");
 
-            this.barcodeResults.Clear();
-            using var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false);
-            using var source = new ImageProxyTransformFactory { UsingRotationDegrees = true }.GetOutputTransform(proxy);
-            using var coordinateTransform = new CoordinateTransform(source, target);
-
-            using var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
-            using var results = await this.barcodeScanner.Process(image);
-
-            Platforms.Services.BarcodeScanner.ProcessBarcodeResult(results, this.barcodeResults, coordinateTransform);
-
-            if (this.cameraView.ForceInverted)
+            using (var target = await MainThread.InvokeOnMainThreadAsync(() => this.previewView?.OutputTransform).ConfigureAwait(false))
             {
-                Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
-                using var invertedImage = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
-                using var invertedResults = await this.barcodeScanner.Process(invertedImage);
-
-                Platforms.Services.BarcodeScanner.ProcessBarcodeResult(invertedResults, this.barcodeResults, coordinateTransform);
-            }
-
-            if (this.cameraView.AimMode)
-            {
-                var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
-
-                foreach (var barcode in this.barcodeResults)
+                using (var source = new ImageProxyTransformFactory { UsingRotationDegrees = true }.GetOutputTransform(proxy))
                 {
-                    if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                    using (var coordinateTransform = new CoordinateTransform(source, target))
                     {
-                        this.barcodeResults.Remove(barcode);
+                        using (var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees))
+                        {
+                            using (var resultsArray = await this.barcodeScanner.Process(image))
+                            {
+                                var barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArray, coordinateTransform);
+
+                                if (this.cameraView.ForceInverted)
+                                {
+                                    Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
+                                    using var imageInverted = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
+                                    using var resultsArrayInverted = await this.barcodeScanner.Process(imageInverted);
+
+                                    var barcodeResultsInverted = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArrayInverted, coordinateTransform);
+                                    barcodeResults.UnionWith(barcodeResultsInverted);
+                                }
+
+                                if (this.cameraView.AimMode)
+                                {
+                                    var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
+
+                                    foreach (var barcode in barcodeResults)
+                                    {
+                                        if (!barcode.PreviewBoundingBox.Contains(previewCenter))
+                                        {
+                                            barcodeResults.Remove(barcode);
+                                        }
+                                    }
+                                }
+
+                                if (this.cameraView.ViewfinderMode)
+                                {
+                                    var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
+
+                                    foreach (var barcode in barcodeResults)
+                                    {
+                                        if (!previewRect.Contains(barcode.PreviewBoundingBox))
+                                        {
+                                            barcodeResults.Remove(barcode);
+                                        }
+                                    }
+                                }
+
+                                this.cameraView.DetectionFinished(barcodeResults.ToArray());
+                            }
+                        }
                     }
                 }
             }
-
-            if (this.cameraView.ViewfinderMode)
-            {
-                var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
-
-                foreach (var barcode in this.barcodeResults)
-                {
-                    if (!previewRect.Contains(barcode.PreviewBoundingBox))
-                    {
-                        this.barcodeResults.Remove(barcode);
-                    }
-                }
-            }
-
-            this.cameraView.DetectionFinished(this.barcodeResults);
         }
 
         internal void CaptureImage(IImageProxy proxy)
@@ -454,6 +504,7 @@ namespace CameraScanner.Maui
             {
                 this.cameraController.ClearImageAnalysisAnalyzer();
                 this.barcodeAnalyzer?.Dispose();
+                this.barcodeAnalyzer = null;
 
                 var barcodeAnalyzerLogger = this.loggerFactory.CreateLogger<BarcodeAnalyzer>();
                 this.barcodeAnalyzer = new BarcodeAnalyzer(barcodeAnalyzerLogger, this);
@@ -497,13 +548,29 @@ namespace CameraScanner.Maui
 
                 this.Stop();
 
-                this.zoomStateObserver.ValueChanged -= this.OnZoomStateChanged;
-                this.cameraController?.ZoomState.RemoveObserver(this.zoomStateObserver);
-                this.zoomStateObserver?.Dispose();
+                if (this.cameraStateObserver != null)
+                {
+                    this.cameraStateObserver.ValueChanged -= this.OnCameraStateChanged;
+                    this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
+                    this.cameraStateObserver.Dispose();
+                    this.cameraStateObserver = null;
+                }
 
-                this.torchStateObserver.ValueChanged -= this.OnTorchStateChanged;
-                this.cameraController?.TorchState.RemoveObserver(this.torchStateObserver);
-                this.torchStateObserver?.Dispose();
+                if (this.zoomStateObserver != null)
+                {
+                    this.zoomStateObserver.ValueChanged -= this.OnZoomStateChanged;
+                    this.cameraController?.ZoomState.RemoveObserver(this.zoomStateObserver);
+                    this.zoomStateObserver.Dispose();
+                    this.zoomStateObserver = null;
+                }
+
+                if (this.torchStateObserver != null)
+                {
+                    this.torchStateObserver.ValueChanged -= this.OnTorchStateChanged;
+                    this.cameraController?.TorchState.RemoveObserver(this.torchStateObserver);
+                    this.torchStateObserver.Dispose();
+                    this.torchStateObserver = null;
+                }
 
                 this.BarcodeView?.RemoveAllViews();
                 this.relativeLayout?.RemoveAllViews();
@@ -513,7 +580,9 @@ namespace CameraScanner.Maui
                 this.imageView?.Dispose();
                 this.previewView?.Dispose();
                 this.cameraController?.Dispose();
+                this.cameraInfo?.Dispose();
                 this.barcodeAnalyzer?.Dispose();
+                this.barcodeAnalyzer = null;
                 this.barcodeScanner?.Dispose();
                 this.cameraExecutor?.Dispose();
             }

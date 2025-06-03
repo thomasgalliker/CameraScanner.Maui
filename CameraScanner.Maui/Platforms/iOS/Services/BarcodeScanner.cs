@@ -80,60 +80,63 @@ namespace CameraScanner.Maui.Platforms.Services
                         {
                         }
                     });
-                    var barcodeResults = new HashSet<BarcodeResult>();
-                    ProcessBarcodeResult(observations, barcodeResults);
+
+                    var barcodeResults = ProcessBarcodeResult(observations);
                     return barcodeResults;
                 }
             }
         }
 
-        internal static void ProcessBarcodeResult(VNBarcodeObservation[] inputResults, HashSet<BarcodeResult> outputResults,
-            AVCaptureVideoPreviewLayer previewLayer = null)
+        internal static HashSet<BarcodeResult> ProcessBarcodeResult(VNBarcodeObservation[] inputResults, AVCaptureVideoPreviewLayer previewLayer = null)
         {
+            var barcodeResults = new HashSet<BarcodeResult>();
+
             if (inputResults is null || inputResults.Length == 0)
             {
-                return;
+                return barcodeResults;
             }
 
-            lock (outputResults)
+            foreach (var barcode in inputResults)
             {
-                foreach (var barcode in inputResults)
+                RectF previewBoundingBox;
+                Point[] cornerPoints;
+
+                if (previewLayer != null)
                 {
-                    RectF previewBoundingBox;
-                    Point[] cornerPoints;
+                    var boundingBoxInvertedY = barcode.BoundingBox.InvertY();
+                    previewBoundingBox = previewLayer.MapToLayerCoordinates(boundingBoxInvertedY).AsRectangleF();
 
-                    if (previewLayer != null)
-                    {
-                        var boundingBoxInvertedY = barcode.BoundingBox.InvertY();
-                        previewBoundingBox = previewLayer.MapToLayerCoordinates(boundingBoxInvertedY).AsRectangleF();
+                    var topLeft = GetPoint(previewLayer, barcode.TopLeft);
+                    var topRight = GetPoint(previewLayer, barcode.TopRight);
+                    var bottomLeft = GetPoint(previewLayer, barcode.BottomLeft);
+                    var bottomRight = GetPoint(previewLayer, barcode.BottomRight);
 
-                        var topLeft = GetPoint(previewLayer, barcode.TopLeft);
-                        var topRight = GetPoint(previewLayer, barcode.TopRight);
-                        var bottomLeft = GetPoint(previewLayer, barcode.BottomLeft);
-                        var bottomRight = GetPoint(previewLayer, barcode.BottomRight);
-
-                        cornerPoints = new[] { topLeft, bottomLeft, bottomRight, topRight, };
-                    }
-                    else
-                    {
-                        previewBoundingBox = RectF.Zero;
-                        cornerPoints = Array.Empty<Point>();
-                    }
-
-                    var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
-
-                    outputResults.Add(new BarcodeResult(barcode.PayloadStringValue)
-                    {
-                        BarcodeType = BarcodeTypes.Unknown, // TODO: Implement mapping
-                        BarcodeFormat = barcode.Symbology.ToBarcodeFormats(),
-                        RawValue = barcode.PayloadStringValue,
-                        RawBytes = GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
-                        PreviewBoundingBox = previewBoundingBox,
-                        ImageBoundingBox = imageBoundingBox,
-                        CornerPoints = cornerPoints,
-                    });
+                    cornerPoints = new[] { topLeft, bottomLeft, bottomRight, topRight, };
                 }
+                else
+                {
+                    previewBoundingBox = RectF.Zero;
+                    cornerPoints = Array.Empty<Point>();
+                }
+
+                var imageBoundingBox = barcode.BoundingBox.AsRectangleF();
+
+                // TODO: Implement mapping for BarcodeTypes
+
+                var barcodeResult = new BarcodeResult(
+                    displayValue: barcode.PayloadStringValue,
+                    barcodeType: BarcodeTypes.Unknown,
+                    barcodeFormat: barcode.Symbology.ToBarcodeFormats(),
+                    rawValue: barcode.PayloadStringValue,
+                    rawBytes: GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
+                    previewBoundingBox: previewBoundingBox,
+                    imageBoundingBox: imageBoundingBox,
+                    cornerPoints: cornerPoints);
+
+                barcodeResults.Add(barcodeResult);
             }
+
+            return barcodeResults;
         }
 
         private static Point GetPoint(AVCaptureVideoPreviewLayer previewLayer, CGPoint cornerPoint)

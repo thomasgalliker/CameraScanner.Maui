@@ -44,7 +44,7 @@ namespace CameraDemoApp.Services.Logging
             // Debug Target
             var debugTarget = new DebugTarget("debug");
             debugTarget.Layout = layout;
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, consoleTarget);
+            config.AddRule(LogLevel.Trace, LogLevel.Fatal, debugTarget);
 
             // File Target
             var fileTarget = new FileTarget();

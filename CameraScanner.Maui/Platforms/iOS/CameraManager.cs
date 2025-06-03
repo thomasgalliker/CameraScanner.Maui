@@ -44,11 +44,11 @@ namespace CameraScanner.Maui
         private readonly CameraView cameraView;
         private readonly CAShapeLayer shapeLayer;
         private readonly NSObject subjectAreaChangedNotification;
-        private readonly VNDetectBarcodesRequest detectBarcodesRequest;
-        private readonly VNSequenceRequestHandler sequenceRequestHandler;
+        private VNDetectBarcodesRequest detectBarcodesRequest;
+        private VNSequenceRequestHandler sequenceRequestHandler;
         private readonly UITapGestureRecognizer tapGestureRecognizer;
 
-        private readonly HashSet<BarcodeResult> barcodeResults = [];
+        private HashSet<BarcodeResult> barcodeResults = [];
         private const int AimRadius = 8;
 
         internal CameraManager(
@@ -72,7 +72,7 @@ namespace CameraScanner.Maui
                 if (error is null)
                 {
                     var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
-                    Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.barcodeResults, this.previewLayer);
+                    this.barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.previewLayer);
                 }
                 else
                 {
@@ -267,9 +267,9 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            if (this.detectBarcodesRequest is not null && this.cameraView.BarcodeFormats is BarcodeFormats barcodeFormats)
+            if (this.detectBarcodesRequest is not null)
             {
-                var vnBarcodeSymbologies = barcodeFormats.ToPlatform();
+                var vnBarcodeSymbologies = this.cameraView.BarcodeFormats.ToPlatform();
                 this.detectBarcodesRequest.Symbologies = vnBarcodeSymbologies;
             }
         }
@@ -511,8 +511,9 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            var videoZoomFactor = Math.Max(requestZoomFactor, (float)this.captureDevice.MinAvailableVideoZoomFactor);
-            videoZoomFactor = Math.Min(videoZoomFactor, (float)this.captureDevice.MaxAvailableVideoZoomFactor);
+            var videoZoomFactor = Math.Clamp(requestZoomFactor,
+                (float)this.captureDevice.MinAvailableVideoZoomFactor,
+                (float)this.captureDevice.MaxAvailableVideoZoomFactor);
 
             CaptureDeviceLock(this.captureDevice, () =>
             {
@@ -634,8 +635,6 @@ namespace CameraScanner.Maui
                     return;
                 }
 
-                this.barcodeResults.Clear();
-
                 this.sequenceRequestHandler?.Perform([this.detectBarcodesRequest], cvPixelBuffer, out _);
 
                 if (this.cameraView.AimMode)
@@ -664,11 +663,15 @@ namespace CameraScanner.Maui
                     }
                 }
 
-                this.cameraView.DetectionFinished(this.barcodeResults);
+                this.cameraView.DetectionFinished(this.barcodeResults.ToArray());
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "PerformBarcodeDetection failed with exception");
+            }
+            finally
+            {
+                this.barcodeResults.Clear();
             }
         }
 
@@ -808,8 +811,6 @@ namespace CameraScanner.Maui
 
                     this.Stop();
 
-                    //await Task.Delay(200);
-
                     // this.logger.LogDebug("RemoveObserver");
                     NSNotificationCenter.DefaultCenter.RemoveObserver(this.subjectAreaChangedNotification);
 
@@ -856,9 +857,11 @@ namespace CameraScanner.Maui
 
                     // this.logger.LogDebug("sequenceRequestHandler.Dispose");
                     this.sequenceRequestHandler?.Dispose();
+                    this.sequenceRequestHandler = null;
 
                     // this.logger.LogDebug("detectBarcodesRequest.Dispose");
                     this.detectBarcodesRequest?.Dispose();
+                    this.detectBarcodesRequest = null;
 
                     // this.logger.LogDebug("tapGestureRecognizer.Dispose");
                     this.tapGestureRecognizer?.Dispose();

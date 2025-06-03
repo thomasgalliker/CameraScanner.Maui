@@ -12,23 +12,23 @@
     <ContentPage.ToolbarItems>
         <ToolbarItem
             Command="{Binding CloseCommand}"
-            Priority="99"
-            IconImageSource="close.png" />
+            IconImageSource="close.png"
+            Priority="99" />
         <ToolbarItem
             Command="{Binding ToggleTorchCommand}"
-            Priority="0"
-            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}" />
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
+            Priority="0" />
     </ContentPage.ToolbarItems>
 
     <Grid RowDefinitions="*">
         <c:CameraView
-            x:Name="CameraView"
             Grid.Row="0"
+            CameraEnabled="True"
             CameraFacing="{Binding CameraFacing}"
             CaptureNextFrame="{Binding CaptureNextFrame}"
             CurrentZoomFactor="{Binding CurrentZoomFactor}"
-            MinZoomFactor="{Binding MinZoomFactor}"
             MaxZoomFactor="{Binding MaxZoomFactor}"
+            MinZoomFactor="{Binding MinZoomFactor}"
             OnImageCapturedCommand="{Binding ImageCapturedCommand}"
             RequestZoomFactor="{Binding RequestZoomFactor}"
             TorchOn="{Binding TorchOn}" />
