@@ -14,7 +14,7 @@
     <ApplicationTitle>CameraDemoApp</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>com.companyname.camerademoapp</ApplicationId>
+    <ApplicationId>ch.superdev.camerascanner</ApplicationId>
 
     <!-- Versions -->
     <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
