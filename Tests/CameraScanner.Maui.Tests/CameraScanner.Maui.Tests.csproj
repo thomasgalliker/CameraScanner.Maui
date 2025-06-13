@@ -17,7 +17,7 @@
 		<PackageReference Include="Moq.AutoMock" Version="3.5.0" />
 		<PackageReference Include="FluentAssertions" Version="6.12.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0" />
-		<PackageReference Include="ObjectDumper.NET" Version="4.2.7" />
+		<PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
 		<PackageReference Include="xunit" Version="2.7.0" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.5.7">
