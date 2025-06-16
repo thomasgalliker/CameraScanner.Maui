@@ -32,6 +32,13 @@ You can use this library in any .NET MAUI project compatible to .NET 8 and highe
    ```
    Permission strings can also be localized on iOS using lproj-folders and InfoPlist.strings files. Read [this](https://learn.microsoft.com/en-us/dotnet/maui/fundamentals/localization) if you're interested in this topic.
 
+### Sample App
+In the **Samples** folder of this repository, you will find the **CameraDemoApp**, which demonstrates the features of CameraScanner.Maui. To debug, clone the repository and run the sample app directly in your development environment.
+
+You can also download the Android version of the sample app from Google Play.
+
+<a href="https://play.google.com/store/apps/details?id=ch.superdev.camerascanner"><img alt="Get it on Google Play" src="https://play.google.com/intl/en_us/badges/images/generic/en-play-badge.png" height=60px /></a>
+
 ### API Usage
 The following documentation guides you trough the most important use cases of this library. Not all aspects are covered. If you think there is something important missing here, feel free to open a new issue.
 
