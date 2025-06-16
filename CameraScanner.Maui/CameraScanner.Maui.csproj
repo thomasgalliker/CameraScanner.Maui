@@ -38,7 +38,10 @@
     <Company>superdev GmbH</Company>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-    <PackageReleaseNotes>1.5
+    <PackageReleaseNotes>1.6
+- Build and release pipeline updates
+
+1.5
 - CameraEnabled property is now 'false' by default (see GitHub issue #45).
 - Fixed an issue with camera facing on Android.
 - Fixed a zoom issue on Android.
