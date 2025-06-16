@@ -10,7 +10,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
-    <GenerateDocumentationFile>True</GenerateDocumentationFile>
 
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">12.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
@@ -73,6 +72,10 @@
     <None Include="..\LICENSE" Pack="True" PackagePath="\" />
     <None Include="..\Images\logo.png" Pack="True" PackagePath="\" />
   </ItemGroup>
+
+  <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+  </PropertyGroup>
 
   <!-- Android build properties -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
