@@ -52,9 +52,11 @@ steps:
     script: |
       branch_name=$(git rev-parse --abbrev-ref HEAD)
       echo "branch_name=$branch_name"
-      echo "System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)"
+      echo "System.PullRequest.SourceBranch=$System.PullRequest.SourceBranch"
+      echo "System.PullRequest.TargetBranch=$System.PullRequest.TargetBranch"
       
       if [ -n "$(System.PullRequest.SourceBranch)" ]; then
+       git fetch origin $(System.PullRequest.TargetBranch)
        changelog=$(git log origin/$(System.PullRequest.TargetBranch)..HEAD --pretty=format:"- %s (%an)")
       else
        changelog=$(git log -n 1 --pretty=format:"- %s (%an)")
