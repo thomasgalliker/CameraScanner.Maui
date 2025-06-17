@@ -138,6 +138,7 @@ steps:
     Contents: |
       **\bin\*.nupkg
       **\bin\*.snupkg
+      **\ReleaseNotes.txt
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
      
 - task: PublishCodeCoverageResults@2
