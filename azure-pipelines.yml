@@ -45,6 +45,24 @@ steps:
     targetType: 'inline'
     script: 'env | sort'
    
+- task: Bash@3
+  displayName: 'Generate change log'
+  inputs:
+    targetType: 'inline'
+    script: |
+      branch_name=$(git rev-parse --abbrev-ref HEAD)
+      echo "branch_name=$(branch_name)"
+      echo "System.PullRequest.SourceBranch=$(System.PullRequest.SourceBranch)"
+      
+      if [ -n "$(System.PullRequest.SourceBranch)" ]; then
+       changelog=$(git log origin/$(System.PullRequest.TargetBranch)..HEAD --pretty=format:"- %s (%an)")
+      else
+       changelog=$(git log -n 1 --pretty=format:"- %s (%an)")
+      fi
+      
+      echo "changelog=$(changelog)"
+      echo "$(changelog)" >> changelog.md
+   
 - task: Assembly-Info-NetCore@3
   displayName: 'Update Assembly Info'
   inputs:
@@ -146,6 +164,7 @@ steps:
       **\bin\*.nupkg
       **\bin\*.snupkg
       **\ReleaseNotes.txt
+      **\changelog.md
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
      
 - task: PublishCodeCoverageResults@2
