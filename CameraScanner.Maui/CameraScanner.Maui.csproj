@@ -38,32 +38,7 @@
     <Company>superdev GmbH</Company>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
     <Copyright>Copyright $([System.DateTime]::Now.ToString(`yyyy`)) © Thomas Galliker</Copyright>
-    <PackageReleaseNotes>1.6
-- Build and release pipeline updates
-
-1.5
-- CameraEnabled property is now 'false' by default (see GitHub issue #45).
-- Fixed an issue with camera facing on Android.
-- Fixed a zoom issue on Android.
-      
-1.4
-- Optimize camera device selection on iOS.
-- Optimize default zoom selection on iOS.
-- Improve automatic disconnection from handler.
-
-1.3
-- Cleanup ICameraPermissions interface, add static Current to ICameraPermissions.
-- Add support for AppShell apps.
-
-1.2
-- Automatically call DisconnectHandler if CameraView is no longer used on a ContentPage.
-
-1.1
-- Internal refactorings and stability improvements.
-
-1.0
-- Initial release.
-    </PackageReleaseNotes>
+    <PackageReleaseNotes>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)/../ReleaseNotes.txt"))</PackageReleaseNotes>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
     <EmbedAllSources>true</EmbedAllSources>

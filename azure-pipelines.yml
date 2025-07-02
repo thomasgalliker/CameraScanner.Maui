@@ -105,14 +105,21 @@ steps:
     projects: |
       CameraScanner.Maui/**/*.csproj
       Tests/**/*.Tests.csproj
-    arguments: '--no-restore --configuration $(buildConfiguration)'
+    arguments: >
+      --no-restore --configuration $(buildConfiguration)
     
 - task: DotNetCoreCLI@2
   displayName: 'Run UnitTests'
   inputs:
     command: test
     projects: 'Tests/**/*.Tests.csproj'
-    arguments: '--no-restore --no-build --configuration $(buildConfiguration) /p:CollectCoverage=true /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" /p:CoverletOutput=UnitTests.coverage.cobertura.xml /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json /p:CoverletOutputFormat=cobertura'
+    arguments: >
+      --no-restore --no-build --configuration $(buildConfiguration) 
+      /p:CollectCoverage=true 
+      /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" 
+      /p:CoverletOutput=UnitTests.coverage.cobertura.xml 
+      /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json 
+      /p:CoverletOutputFormat=cobertura
     
 - task: reportgenerator@5
   displayName: 'Create Code Coverage Report'
@@ -138,6 +145,7 @@ steps:
     Contents: |
       **\bin\*.nupkg
       **\bin\*.snupkg
+      **\ReleaseNotes.txt
     TargetFolder: '$(Build.ArtifactStagingDirectory)'
      
 - task: PublishCodeCoverageResults@2
