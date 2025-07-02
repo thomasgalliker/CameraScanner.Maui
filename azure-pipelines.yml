@@ -62,7 +62,7 @@ steps:
       else
        echo "Build.SourceBranch=$(Build.SourceBranch)"
        echo "Build.SourceBranchName=$(Build.SourceBranchName)"
-       changelog=$(git log $(Build.SourceBranch)..HEAD --pretty=format:"- %s (%an)")
+       changelog=$(git log $(Build.SourceBranchName)..HEAD --pretty=format:"- %s (%an)")
       fi
       
       echo "changelog=$changelog"
