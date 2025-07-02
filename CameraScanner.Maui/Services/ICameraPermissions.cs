@@ -5,7 +5,7 @@
         /// <summary>
         /// Gets the singleton instance of <see cref="ICameraPermissions"/>.
         /// </summary>
-        public static ICameraPermissions Current { get; set; } = CameraPermissions.Current;
+        public static ICameraPermissions Current { get; } = CameraPermissions.Current;
 
         /// <summary>
         /// Checks if the camera permission is granted.
