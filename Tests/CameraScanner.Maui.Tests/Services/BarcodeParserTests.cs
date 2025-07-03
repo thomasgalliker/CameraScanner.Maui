@@ -120,5 +120,37 @@ namespace CameraScanner.Maui.Services.Tests
             result.Subject.Should().Contain("Subject");
             result.Body.Should().Contain("Body");
         }
+
+        [Fact]
+        public void ShouldParseEmediplan()
+        {
+            // Arrange
+            var barcodeParser = new BarcodeParser();
+            const string source = "CHMED23A.H4sIAAAAAAAACq2OOw4CMQxE7zIt2ZUTAmzcLZsGiU+KUCEKYKlokIACRbk7jkLBAWisZz/NyAmb6/gAHxJWI7hsGgqhnsIOnBDBRmF4+9cebCuBtUL0Xy38g73MnIu+DxX/1nRUkCRiv1zLl9tzOF1uIloqxj9FGTKmId1oHcnxtGM7a+28c9YtJqSZCPkD+iD8fPQAAAA=";
+
+            // Act
+            var result = barcodeParser.Parse<EmediplanParsedResult>(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.ReleaseYear.Should().Be("23");
+            result.SubVersion.Should().Be("A");
+            result.AdditionalMetaData.Should().Be(".H4sIAAAAAAAACq2OOw4CMQxE7zIt2ZUTAmzcLZsGiU+KUCEKYKlokIACRbk7jkLBAWisZz/NyAmb6/gAHxJWI7hsGgqhnsIOnBDBRmF4+9cebCuBtUL0Xy38g73MnIu+DxX/1nRUkCRiv1zLl9tzOF1uIloqxj9FGTKmId1oHcnxtGM7a+28c9YtJqSZCPkD+iD8fPQAAAA=");
+            result.Data.Should().Be("");
+        }
+    }
+
+    public class DelegateResultParser : ResultParser
+    {
+        private readonly Func<string, ParsedResult> parseAction;
+
+        public DelegateResultParser(Func<string, ParsedResult> parseAction)
+        {
+            this.parseAction = parseAction;
+        }
+        public override ParsedResult Parse(string source)
+        {
+            return this.parseAction(source);
+        }
     }
 }
