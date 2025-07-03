@@ -26,6 +26,31 @@ namespace CameraScanner.Maui.Services.Tests
         }
 
         [Fact]
+        public void ShouldClearParsers()
+        {
+            // Arrange
+            var callCount = 0;
+            var barcodeParser = new BarcodeParser();
+            barcodeParser.Parsers.Clear();
+            barcodeParser.Parsers.Add(new DelegateResultParser(s =>
+            {
+                callCount++;
+                return null;
+            }));
+
+            const string source = "tel:00418008080";
+
+            // Act
+            var result = barcodeParser.Parse(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Should().BeOfType<TextParsedResult>();
+
+            callCount.Should().Be(1);
+        }
+
+        [Fact]
         public void ShouldParseVCard()
         {
             // Arrange

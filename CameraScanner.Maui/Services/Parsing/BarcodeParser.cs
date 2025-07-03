@@ -20,7 +20,8 @@ namespace CameraScanner.Maui
         {
         }
 
-        private static readonly ResultParser[] Parsers = new ResultParser[]
+
+        public ICollection<ResultParser> Parsers { get; } = new List<ResultParser>
         {
             new VCardResultParser(),
             new EmailResultParser(),
@@ -37,7 +38,7 @@ namespace CameraScanner.Maui
         {
             if (source != null)
             {
-                foreach (var parser in Parsers)
+                foreach (var parser in this.Parsers)
                 {
                     var parsedResult = parser.Parse(source);
                     if (parsedResult != null)
