@@ -28,6 +28,7 @@ namespace CameraScanner.Maui
             new SMSResultParser(),
             new GeoResultParser(),
             new WifiResultParser(),
+            new ISBNResultParser(),
             new URIResultParser(),
         };
 

@@ -72,5 +72,53 @@ namespace CameraScanner.Maui.Services.Tests
             result.NetworkEncryption.Should().Be("WPA");
             result.Hidden.Should().BeFalse();
         }
+
+        [Fact]
+        public void ShouldParseTel()
+        {
+            // Arrange
+            var barcodeParser = new BarcodeParser();
+            const string source = "TEL:00418008080";
+
+            // Act
+            var result = barcodeParser.Parse<TelParsedResult>(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Number.Should().Be("00418008080");
+            result.TelUri.Should().Be(new Uri("tel:00418008080"));
+        }
+
+        [Fact]
+        public void ShouldParseISBN()
+        {
+            // Arrange
+            var barcodeParser = new BarcodeParser();
+            const string source = "978-0-13-235088-4";
+
+            // Act
+            var result = barcodeParser.Parse<ISBNParsedResult>(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.ISBN.Should().Be(source);
+        }
+
+        [Fact]
+        public void ShouldParseEmail()
+        {
+            // Arrange
+            var barcodeParser = new BarcodeParser();
+            const string source = "mailto:email@test.com?subject=Subject&body=Body";
+
+            // Act
+            var result = barcodeParser.Parse<EmailParsedResult>(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Tos.Should().Contain("email@test.com");
+            result.Subject.Should().Contain("Subject");
+            result.Body.Should().Contain("Body");
+        }
     }
 }

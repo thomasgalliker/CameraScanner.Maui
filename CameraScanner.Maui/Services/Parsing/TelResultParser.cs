@@ -1,16 +1,28 @@
 namespace CameraScanner.Maui
 {
-    public class TelResultParser : ResultParser
+    public sealed class TelResultParser : ResultParser
     {
+        private const string TelPrefix = "tel:";
+
         public override ParsedResult Parse(string source)
         {
-            var text = source?.Trim();
-            if (!string.IsNullOrEmpty(text) && text.StartsWith("tel:", StringComparison.OrdinalIgnoreCase))
+            var rawText = GetMassagedText(source);
+            if (!rawText.StartsWith(TelPrefix, StringComparison.InvariantCultureIgnoreCase))
             {
-                return new TelParsedResult(text.Substring("tel:".Length));
+                return null;
             }
 
-            return null;
+            // Normalize "TEL:" to "tel:"
+            var telPrefixLength = TelPrefix.Length;
+            var telUri = rawText.StartsWith(TelPrefix, StringComparison.InvariantCultureIgnoreCase)
+                ? TelPrefix + rawText[telPrefixLength..]
+                : rawText;
+
+            // Drop tel: and optional query portion
+            var queryStart = rawText.IndexOf('?', telPrefixLength);
+            var number = queryStart < 0 ? rawText[telPrefixLength..] : rawText.Substring(telPrefixLength, queryStart - telPrefixLength);
+
+            return new TelParsedResult(number, new Uri(telUri));
         }
     }
 }
