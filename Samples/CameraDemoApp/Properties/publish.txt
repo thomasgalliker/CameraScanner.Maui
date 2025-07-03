@@ -2,14 +2,11 @@ dotnet publish CameraDemoApp.csproj \
   -f net8.0-android \
   -c Release \
   -p:Platform=Device \
-  -p:ApplicationDisplayVersion=1.0.0 \
-  -p:ApplicationVersion=2 \
+  -p:ApplicationDisplayVersion=1.0.1 \
+  -p:ApplicationVersion=3 \
   -p:AndroidPackageFormats="aab" \
   -p:AndroidKeyStore=true \
   -p:AndroidSigningKeyStore="ch.superdev.camerascanner.keystore" \
   -p:AndroidSigningStorePass=storepass \
   -p:AndroidSigningKeyAlias=alias \
   -p:AndroidSigningKeyPass=keypass
-  
-  
-  
