@@ -163,6 +163,24 @@ namespace CameraScanner.Maui.Services.Tests
             result.AdditionalMetaData.Should().Be(".H4sIAAAAAAAACq2OOw4CMQxE7zIt2ZUTAmzcLZsGiU+KUCEKYKlokIACRbk7jkLBAWisZz/NyAmb6/gAHxJWI7hsGgqhnsIOnBDBRmF4+9cebCuBtUL0Xy38g73MnIu+DxX/1nRUkCRiv1zLl9tzOF1uIloqxj9FGTKmId1oHcnxtGM7a+28c9YtJqSZCPkD+iD8fPQAAAA=");
             result.Data.Should().Be("");
         }
+
+        [Fact]
+        public void ShouldParseGeo()
+        {
+            // Arrange
+            var barcodeParser = new BarcodeParser();
+            const string source = "geo:37.7749,-122.4194,50.0?layer=traffic";
+
+            // Act
+            var result = barcodeParser.Parse<GeoParsedResult>(source);
+
+            // Assert
+            result.Should().NotBeNull();
+            result.Latitude.Should().Be(37.7749d);
+            result.Longitude.Should().Be(-122.4194d);
+            result.Altitude.Should().Be(50d);
+            result.Query.Should().Be("layer=traffic");
+        }
     }
 
     public class DelegateResultParser : ResultParser

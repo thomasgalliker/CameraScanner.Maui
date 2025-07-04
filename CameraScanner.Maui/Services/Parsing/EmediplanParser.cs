@@ -7,7 +7,7 @@ namespace CameraScanner.Maui
     /// </summary>
     public sealed class EmediplanParser : ResultParser
     {
-        private static readonly Regex ChmedPattern = new Regex(@"^CHMED([0-9]{2})([A-Z]+)(.*)$");
+        private static readonly Regex ChmedPattern = new Regex("^CHMED([0-9]{2})([A-Z]+)(.*)$");
 
         public override ParsedResult Parse(string source)
         {
