@@ -10,6 +10,7 @@ namespace CameraDemoApp.ViewModels
     {
         private readonly ILogger logger;
         private readonly IDialogService dialogService;
+        private readonly IBarcodeParser barcodeParser;
 
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private bool isScannerPause;
@@ -21,10 +22,12 @@ namespace CameraDemoApp.ViewModels
 
         public QRCodeScannerViewModel(
             ILogger<QRCodeScannerViewModel> logger,
-            IDialogService dialogService)
+            IDialogService dialogService,
+            IBarcodeParser barcodeParser)
         {
             this.logger = logger;
             this.dialogService = dialogService;
+            this.barcodeParser = barcodeParser;
 
             this.IsScannerEnabled = true;
 
@@ -62,10 +65,13 @@ namespace CameraDemoApp.ViewModels
                 {
                     this.IsScannerPause = true;
 
+                    var parsedResult = this.barcodeParser.Parse(barcodeResult.RawValue);
+
                     var stop = await this.dialogService.DisplayAlertAsync(
                         "Barcode found",
                         $"BarcodeType=\"{barcodeResult.BarcodeType}\"{Environment.NewLine}" +
                         $"BarcodeFormat=\"{barcodeResult.BarcodeFormat}\"{Environment.NewLine}" +
+                        $"ParsedResult=\"{parsedResult.GetType().Name}\"{Environment.NewLine}" +
                         $"DisplayValue=\"{barcodeResult.DisplayValue}\"",
                         "Stop", "Continue");
 
