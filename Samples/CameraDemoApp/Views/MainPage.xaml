@@ -2,15 +2,15 @@
 <ContentPage
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+    xmlns:behaviors="clr-namespace:Superdev.Maui.Behaviors;assembly=Superdev.Maui"
     xmlns:controls="clr-namespace:CameraDemoApp.Controls"
-    xmlns:mct="http://schemas.microsoft.com/dotnet/2022/maui/toolkit"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.MainPage"
     Title="Camera Scanner .NET MAUI"
     x:DataType="vm:MainViewModel">
 
     <ContentPage.Behaviors>
-        <mct:EventToCommandBehavior
+        <behaviors:EventToCommandBehavior
             Command="{Binding AppearingCommand}"
             EventName="Appearing" />
     </ContentPage.Behaviors>
