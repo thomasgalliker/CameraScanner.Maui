@@ -41,6 +41,7 @@ namespace CameraDemoApp
             builder.Services.AddSingleton<ILauncher>(_ => Launcher.Default);
             builder.Services.AddSingleton<IMediaPicker>(_ => MediaPicker.Default);
             builder.Services.AddSingleton<IClipboard>(_ => Clipboard.Default);
+            builder.Services.AddSingleton<IShare>(_ => Share.Default);
 
             // Register pages and view models
             builder.Services.AddTransient<MainPage>();
@@ -62,6 +63,9 @@ namespace CameraDemoApp
 
             builder.Services.AddTransient<BarcodeResultDetailPage>();
             builder.Services.AddTransient<BarcodeResultDetailViewModel>();
+
+            builder.Services.AddTransient<ImageViewerPage>();
+            builder.Services.AddTransient<ImageViewerViewModel>();
 
             builder.Services.AddTransientPopup<ScannerConfigPopup, ScannerConfigViewModel>();
 

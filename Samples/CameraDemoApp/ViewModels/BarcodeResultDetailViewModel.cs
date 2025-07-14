@@ -25,10 +25,9 @@ namespace CameraDemoApp.ViewModels
             this.clipboard = clipboard;
 
             this.dumpOptions = new DumpOptions { DumpStyle = DumpStyle.Console };
-            this.dumpOptions.CustomInstanceFormatters.AddFormatter<byte[]>(b => Convert.ToHexString(b));
+            this.dumpOptions.CustomInstanceFormatters.AddFormatter<byte[]>(Convert.ToHexString);
             this.dumpOptions.CustomInstanceFormatters.AddFormatter<RectF>(rectF => $"{rectF.Width} x {rectF.Height}");
-            this.dumpOptions.CustomInstanceFormatters.AddFormatter<Point[]>(points =>
-                $"[{string.Join(", ", points.Select(x => $"{{{x.X}, {x.Y}}}"))}]");
+            this.dumpOptions.CustomInstanceFormatters.AddFormatter<Point[]>(points => $"[{string.Join(", ", points.Select(x => $"{{{x.X}, {x.Y}}}"))}]");
         }
 
         public BarcodeResult BarcodeResult

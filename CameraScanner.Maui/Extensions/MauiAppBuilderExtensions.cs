@@ -18,6 +18,8 @@ namespace CameraScanner.Maui
             builder.Services.TryAddSingleton<IDeviceDisplay>(_ => DeviceDisplay.Current);
 #endif
 
+            builder.Services.TryAddSingleton<IBarcodeParser>(_ => IBarcodeParser.Current);
+
             return builder;
         }
     }

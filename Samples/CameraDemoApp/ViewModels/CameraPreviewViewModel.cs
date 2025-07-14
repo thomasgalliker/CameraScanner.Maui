@@ -23,7 +23,7 @@ namespace CameraDemoApp.ViewModels
         private bool torchOn;
         private IRelayCommand toggleTorchCommand;
         private IRelayCommand shutterCommand;
-        private IRelayCommand imageCapturedCommand;
+        private IAsyncRelayCommand imageCapturedCommand;
         private bool captureNextFrame;
         private float? minZoomFactor;
         private float? maxZoomFactor;
@@ -147,17 +147,14 @@ namespace CameraDemoApp.ViewModels
             set => this.SetProperty(ref this.captureNextFrame, value);
         }
 
-        public IRelayCommand ImageCapturedCommand
+        public IAsyncRelayCommand ImageCapturedCommand
         {
-            get => this.imageCapturedCommand ??= new RelayCommand<PlatformImage>(this.ImageCaptured);
+            get => this.imageCapturedCommand ??= new AsyncRelayCommand<PlatformImage>(this.ImageCapturedAsync);
         }
 
-        private void ImageCaptured(PlatformImage image)
+        private async Task ImageCapturedAsync(PlatformImage platformImage)
         {
-            _ = this.dialogService.DisplayAlertAsync(
-                "ImageCaptured",
-                "Successfully returned PlatformImage",
-                "OK");
+            await this.navigationService.PushModalAsync("ImageViewerPage", platformImage);
         }
 
         public bool TorchOn

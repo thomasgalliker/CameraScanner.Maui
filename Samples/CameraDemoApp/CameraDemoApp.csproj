@@ -14,14 +14,17 @@
     <ApplicationTitle>CameraDemoApp</ApplicationTitle>
 
     <!-- App Identifier -->
-    <ApplicationId>com.companyname.camerademoapp</ApplicationId>
+    <ApplicationId>ch.superdev.camerascanner</ApplicationId>
 
     <!-- Versions -->
-    <ApplicationDisplayVersion>1.0</ApplicationDisplayVersion>
+    <ApplicationDisplayVersion>1.0.0</ApplicationDisplayVersion>
     <ApplicationVersion>1</ApplicationVersion>
+    
+    <AppendTargetFrameworkToOutputPath>true</AppendTargetFrameworkToOutputPath>
+    <AppendRuntimeIdentifierToOutputPath>true</AppendRuntimeIdentifierToOutputPath>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios'">11.0</SupportedOSPlatformVersion>
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">21.0</SupportedOSPlatformVersion>
+    <Configurations>Debug;Release</Configurations>
+    <Platforms>AnyCPU;Simulator;Device</Platforms>
   </PropertyGroup>
 
   <ItemGroup>
@@ -67,6 +70,8 @@
 
   <!-- Android build properties -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-android'))">
+    <SupportedOSPlatformVersion>24</SupportedOSPlatformVersion> <!-- android:minSdkVersion -->
+    <!--<TargetPlatformVersion>35</TargetPlatformVersion>  android:targetSdkVersion -->
     <AndroidEnableMultiDex>true</AndroidEnableMultiDex>
     <UseInterpreter>false</UseInterpreter>
     <AndroidUseAapt2>true</AndroidUseAapt2>
@@ -90,6 +95,7 @@
 
   <!-- iOS build properties -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
+    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion> <!-- MinimumOSVersion -->
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
