@@ -2,8 +2,8 @@ dotnet publish CameraDemoApp.csproj \
   -f net9.0-android \
   -c Release \
   -p:Platform=Device \
-  -p:ApplicationDisplayVersion=1.0.2 \
-  -p:ApplicationVersion=9 \
+  -p:ApplicationDisplayVersion=1.0.3 \
+  -p:ApplicationVersion=10 \
   -p:AndroidPackageFormats="aab" \
   -p:AndroidKeyStore=true \
   -p:AndroidSigningKeyStore="ch.superdev.camerascanner.keystore" \
