@@ -80,7 +80,7 @@
     <AndroidLinkMode>None</AndroidLinkMode>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
-    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
@@ -120,7 +120,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Maui" Version="9.0.1" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
@@ -128,7 +128,7 @@
     <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
     <PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
     <PackageReference Include="Sentry.Maui" Version="5.11.2" />
-    <PackageReference Include="Superdev.Maui" Version="1.0.107-pre" />
+    <PackageReference Include="Superdev.Maui" Version="1.0.119-pre" />
     <PackageReference Include="ValueConverters.MAUI" Version="3.1.22" />
   </ItemGroup>
 

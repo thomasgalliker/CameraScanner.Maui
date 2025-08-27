@@ -1,19 +1,18 @@
-﻿using System.Reflection;
-using Microsoft.Extensions.Logging;
+﻿using Microsoft.Extensions.Logging;
 
 namespace CameraDemoApp.Services.Navigation
 {
     public class MauiNavigationService : INavigationService
     {
         private readonly ILogger logger;
-        private readonly IServiceProvider serviceProvider;
+        private readonly IPageResolver pageResolver;
 
         public MauiNavigationService(
             ILogger<MauiNavigationService> logger,
-            IServiceProvider serviceProvider)
+            IPageResolver pageResolver)
         {
             this.logger = logger;
-            this.serviceProvider = serviceProvider;
+            this.pageResolver = pageResolver;
         }
 
         public Task PushAsync(string pageName)
@@ -25,11 +24,18 @@ namespace CameraDemoApp.Services.Navigation
         {
             try
             {
-                var page = this.ResolvePage(pageName);
+                var page = this.pageResolver.ResolvePage(pageName);
                 var navigation = GetNavigation();
                 await navigation.PushAsync(page);
-                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
-                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
+
+                if (parameter == null)
+                {
+                    await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
+                }
+                else
+                {
+                    await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
+                }
             }
             catch (Exception ex)
             {
@@ -47,58 +53,24 @@ namespace CameraDemoApp.Services.Navigation
         {
             try
             {
-                var page = this.ResolvePage(pageName);
+                var page = this.pageResolver.ResolvePage(pageName);
                 var navigation = GetNavigation();
                 await navigation.PushModalAsync(new NavigationPage(page));
-                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
-                await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
+
+                if (parameter == null)
+                {
+                    await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo>(page, p => p.NavigatedToAsync());
+                }
+                else
+                {
+                    await PageUtilities.InvokeViewAndViewModelActionAsync<INavigatedTo<T>>(page, p => p.NavigatedToAsync(parameter));
+                }
             }
             catch (Exception ex)
             {
                 this.logger.LogError(ex, "PushModalAsync failed with exception");
                 throw;
             }
-        }
-
-        private Page ResolvePage(string pageName)
-        {
-            var pageTypes = FindTypesWithName(pageName);
-            if (pageTypes.Length == 0)
-            {
-                throw new PageNavigationException($"Page with name '{pageName}' not found");
-            }
-
-            if (pageTypes.Length > 1)
-            {
-                throw new PageNavigationException(
-                    $"Multiple pages found for name '{pageName}': " +
-                    $"{string.Join($"> {Environment.NewLine}", pageTypes.Select(t => t.FullName))}");
-            }
-
-            var pageType = pageTypes.Single();
-            var page = (Page)this.serviceProvider.GetRequiredService(pageType);
-
-            var viewModelName = pageName.Substring(0, pageName.LastIndexOf("Page")) + "ViewModel";
-            var viewModelTypes = FindTypesWithName(viewModelName);
-
-            if (viewModelTypes.Length == 0)
-            {
-                this.logger.LogInformation($"View model with name '{viewModelName}' not found");
-            }
-            else if (viewModelTypes.Length == 1)
-            {
-                var viewModelType = viewModelTypes.Single();
-                var viewModel = this.serviceProvider.GetRequiredService(viewModelType);
-                page.BindingContext = viewModel;
-            }
-            else
-            {
-                throw new PageNavigationException(
-                    $"Multiple view models found for name '{viewModelName}': " +
-                    $"{string.Join($"> {Environment.NewLine}", viewModelTypes.Select(t => t.FullName))}");
-            }
-
-            return page;
         }
 
         private static INavigation GetNavigation()
@@ -129,14 +101,6 @@ namespace CameraDemoApp.Services.Navigation
                 null => null,
                 _ => throw new NotSupportedException($"The page type '{target.GetType().FullName}' is not supported.")
             };
-        }
-
-        private static Type[] FindTypesWithName(string typeName)
-        {
-            return Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(t => string.Equals(t.Name, typeName, StringComparison.InvariantCultureIgnoreCase))
-                .ToArray();
         }
 
         public async Task PopAsync()
@@ -180,6 +144,8 @@ namespace CameraDemoApp.Services.Navigation
                 throw;
             }
         }
+
+        public INavigation Navigation => Application.Current?.Windows[0].Page?.Navigation ?? throw new InvalidOperationException($"{nameof(Page.Navigation)} not found");
     }
 
     public class PageNavigationException : Exception

@@ -36,5 +36,7 @@
         /// Pops a modal page from the navigation stack.
         /// </summary>
         Task PopModalAsync();
+
+        INavigation Navigation { get; }
     }
 }

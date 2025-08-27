@@ -3,7 +3,7 @@ dotnet publish CameraDemoApp.csproj \
   -c Release \
   -p:Platform=Device \
   -p:ApplicationDisplayVersion=1.0.3 \
-  -p:ApplicationVersion=10 \
+  -p:ApplicationVersion=11 \
   -p:AndroidPackageFormats="aab" \
   -p:AndroidKeyStore=true \
   -p:AndroidSigningKeyStore="ch.superdev.camerascanner.keystore" \

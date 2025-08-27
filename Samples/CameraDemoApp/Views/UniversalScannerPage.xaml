@@ -64,7 +64,6 @@
                 RowDefinitions="Auto, Auto"
                 RowSpacing="8"
                 VerticalOptions="Fill">
-
                 <Grid
                     Grid.Row="0"
                     ColumnDefinitions="*, *"
