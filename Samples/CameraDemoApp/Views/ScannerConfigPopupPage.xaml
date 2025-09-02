@@ -1,22 +1,26 @@
-<?xml version="1.0" encoding="utf-8"?>
-
-<mct:Popup
+<?xml version="1.0" encoding="utf-8" ?>
+<t:Popup
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-    xmlns:mct="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
+    xmlns:t="clr-namespace:CommunityToolkit.Maui.Views;assembly=CommunityToolkit.Maui"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
-    x:Class="CameraDemoApp.Views.ScannerConfigPopup"
+    x:Class="CameraDemoApp.Views.ScannerConfigPopupPage"
     x:Name="Page"
-    x:DataType="vm:ScannerConfigViewModel"
+    Margin="0"
+    Padding="0"
+    x:DataType="vm:ScannerConfigPopupViewModel"
+    BackgroundColor="Transparent"
     CanBeDismissedByTappingOutsideOfPopup="False"
-    Color="Transparent"
+    Shadow="{x:Null}"
     HorizontalOptions="Fill"
     VerticalOptions="End">
 
     <Border
-        Padding="0"
+        Margin="0,0,0,-50"
+        Padding="0,0,0,46"
         BackgroundColor="#FFEAE7EC"
-        Stroke="Transparent">
+        Stroke="Transparent"
+        HorizontalOptions="Fill">
         <Border.StrokeShape>
             <RoundRectangle CornerRadius="20,20,0,0" />
         </Border.StrokeShape>
@@ -41,8 +45,7 @@
                                     Text="All"
                                     VerticalOptions="Center" />
                             </Grid>
-                            <VerticalStackLayout
-                                BindableLayout.ItemsSource="{Binding BarcodeFormats}">
+                            <VerticalStackLayout BindableLayout.ItemsSource="{Binding BarcodeFormats}">
                                 <BindableLayout.ItemTemplate>
                                     <DataTemplate x:DataType="{x:Type vm:BarcodeFormatViewModel}">
                                         <Grid ColumnDefinitions="Auto, *">
@@ -58,21 +61,21 @@
                                 </BindableLayout.ItemTemplate>
                             </VerticalStackLayout>
                         </VerticalStackLayout>
-                        
+
                         <Label
                             Style="{StaticResource Heading2LabelStyle}"
                             Text="Capture Quality" />
                         <StackLayout
-                            Orientation="Vertical"
                             BindableLayout.ItemsSource="{Binding CaptureQualities}"
+                            Orientation="Vertical"
                             RadioButtonGroup.GroupName="captureQualities">
                             <BindableLayout.ItemTemplate>
                                 <DataTemplate x:DataType="{x:Type vm:CaptureQualityViewModel}">
                                     <Grid ColumnDefinitions="Auto, *">
                                         <RadioButton
                                             Grid.Column="0"
-                                            Value="{Binding Value}"
-                                            IsChecked="{Binding IsSelected}" />
+                                            IsChecked="{Binding IsSelected}"
+                                            Value="{Binding Value}" />
                                         <Label
                                             Grid.Column="1"
                                             Text="{Binding Value}"
@@ -86,8 +89,8 @@
                             Style="{StaticResource Heading2LabelStyle}"
                             Text="Barcode Detection Frame Rate" />
                         <Entry
-                            Text="{Binding BarcodeDetectionFrameRate}"
-                            Keyboard="Numeric" />
+                            Keyboard="Numeric"
+                            Text="{Binding BarcodeDetectionFrameRate}" />
                     </VerticalStackLayout>
                 </ScrollView>
 
@@ -107,7 +110,13 @@
                 </Grid>
 
             </VerticalStackLayout>
+
+            <!--  Workaround to push the ContentView to the full width of the page  -->
+            <Rectangle
+                BackgroundColor="Transparent"
+                HeightRequest="1"
+                ZIndex="-99"
+                VerticalOptions="End" />
         </Grid>
     </Border>
-
-</mct:Popup>
+</t:Popup>
