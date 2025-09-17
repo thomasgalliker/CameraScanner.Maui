@@ -82,7 +82,7 @@ steps:
 - task: JavaToolInstaller@0
   displayName: "Install Java"
   inputs:
-    versionSpec: '11'
+    versionSpec: '17'
     jdkArchitectureOption: 'x64'
     jdkSourceOption: 'PreInstalled'
 
@@ -114,7 +114,9 @@ steps:
     command: test
     projects: 'Tests/**/*.Tests.csproj'
     arguments: >
-      --no-restore --no-build --configuration $(buildConfiguration) 
+      --no-restore 
+      --no-build 
+      --configuration $(buildConfiguration) 
       /p:CollectCoverage=true 
       /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" 
       /p:CoverletOutput=UnitTests.coverage.cobertura.xml 
