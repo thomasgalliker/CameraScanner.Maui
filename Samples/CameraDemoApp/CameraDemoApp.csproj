@@ -11,7 +11,7 @@
     <Nullable>disable</Nullable>
 
     <!-- Display name -->
-    <ApplicationTitle>CameraDemoApp</ApplicationTitle>
+    <ApplicationTitle>Camera Scanner SDK</ApplicationTitle>
 
     <!-- App Identifier -->
     <ApplicationId>ch.superdev.camerascanner</ApplicationId>
