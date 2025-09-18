@@ -34,18 +34,13 @@ namespace CameraScanner.Maui
             }
         }
 
+#if !NET9_0_OR_GREATER
         /// <summary>
         /// Defines if the platform handler is automatically disconnected
         /// or if <c>Handler.DisconnectHandler();</c> is called manually.
-        /// Default: .NET 8.0 <c>true</c> (automatically disconnected if parent page is no longer in use)
-        /// Default: .NET 9.0 and greater <c>false</c> (Use built-in HandlerProperties.DisconnectPolicy to control disconnect behavior)
+        /// Default: <c>true</c> (automatically disconnected if parent page is no longer in use)
         /// </summary>
-        public bool AutoDisconnectHandler { get; set; }
-            =
-#if NET9_0_OR_GREATER
-            false;
-#else
-            true;
+        public bool AutoDisconnectHandler { get; set; } = true;
 #endif
 
         public static readonly BindableProperty OnDetectionFinishedCommandProperty = BindableProperty.Create(
