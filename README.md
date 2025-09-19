@@ -40,7 +40,7 @@ You can also download the sample app from the Google Play Store and the App Stor
 <a href="https://play.google.com/store/apps/details?id=ch.superdev.camerascanner">
     <img src="https://raw.githubusercontent.com/thomasgalliker/CameraScanner.Maui/refs/heads/develop/Images/GooglePlay/en_badge_web_generic.png" height="44px" alt="Get it on Google Play" />
 </a>
-<a href="https://apps.apple.com/app/_______________">
+<a href="https://apps.apple.com/ch/app/camera-scanner-sdk/id6752654209">
     <img src="https://raw.githubusercontent.com/thomasgalliker/CameraScanner.Maui/refs/heads/develop/Images/AppStore/download-on-the-app-store.svg" height="44px" alt="Download on the App Store">
 </a>
 
