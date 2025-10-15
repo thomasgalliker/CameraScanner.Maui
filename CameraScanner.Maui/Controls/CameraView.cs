@@ -1,4 +1,6 @@
-﻿using System.Windows.Input;
+﻿using System.Reflection;
+using System.Windows.Input;
+using CameraScanner.Maui.Extensions;
 using Microsoft.Maui.Graphics.Platform;
 using Timer = System.Timers.Timer;
 
@@ -6,6 +8,9 @@ namespace CameraScanner.Maui
 {
     public class CameraView : View
     {
+        private static readonly Assembly CurrentAssembly = typeof(CameraView).Assembly;
+        private static readonly Stream DefaultBeepStream = CurrentAssembly.GetManifestResourceStream("beep-401570.mp3");
+
         private readonly IVibration vibration;
         private readonly IAudioService audioService;
         private readonly List<BarcodeResult> pooledResults;
@@ -23,8 +28,7 @@ namespace CameraScanner.Maui
         {
             this.vibration = vibration;
             this.audioService = audioService;
-            var defaultSound = typeof(CameraView).Assembly.GetManifestResourceStream("CameraScanner.Maui.Resources.Sound.beep-401570.mp3");
-            this.audioService.SetSource(defaultSound);
+            this.audioService.SetSource(DefaultBeepStream.Rewind());
         }
 
         protected override void OnHandlerChanged()
