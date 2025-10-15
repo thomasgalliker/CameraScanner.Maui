@@ -8,7 +8,6 @@ namespace CameraScanner.Maui.Platforms.Services
         private const float DefaultVolume = 1.0f;
         private readonly MediaPlayer player;
         private byte[] audioBytes;
-        private MemoryStream stream;
         private float volume;
 
         public AudioService()
@@ -61,16 +60,9 @@ namespace CameraScanner.Maui.Platforms.Services
         {
             ArgumentNullException.ThrowIfNull(audioStream);
 
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                using var memoryStream = new MemoryStream();
-                audioStream.CopyTo(memoryStream);
-                this.audioBytes = memoryStream.ToArray();
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            using var memoryStream = new MemoryStream();
+            audioStream.CopyTo(memoryStream);
+            this.audioBytes = memoryStream.ToArray();
 
             this.player.Reset();
 
@@ -84,16 +76,9 @@ namespace CameraScanner.Maui.Platforms.Services
                 throw new ArgumentException("audio source is not set");
             }
 
-            if (OperatingSystem.IsAndroidVersionAtLeast(23))
-            {
-                var stream = new MemoryStream(data);
-                var mediaSource = new StreamMediaDataSource(stream);
-                this.player.SetDataSource(mediaSource);
-            }
-            else
-            {
-                throw new NotSupportedException();
-            }
+            var stream = new MemoryStream(data);
+            var mediaSource = new StreamMediaDataSource(stream);
+            this.player.SetDataSource(mediaSource);
 
             this.player.Prepare();
         }
