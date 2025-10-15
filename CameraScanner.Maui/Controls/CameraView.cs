@@ -7,18 +7,24 @@ namespace CameraScanner.Maui
     public class CameraView : View
     {
         private readonly IVibration vibration;
+        private readonly IAudioService audioService;
         private readonly List<BarcodeResult> pooledResults;
         private readonly Timer poolingTimer;
 
-        public CameraView() : this(Vibration.Default)
+        public CameraView() : this(Vibration.Default, IAudioService.Current)
         {
             this.pooledResults = [];
             this.poolingTimer = new Timer { AutoReset = false };
         }
 
-        internal CameraView(IVibration vibration)
+        internal CameraView(
+            IVibration vibration,
+            IAudioService audioService)
         {
             this.vibration = vibration;
+            this.audioService = audioService;
+            var defaultSound = typeof(CameraView).Assembly.GetManifestResourceStream("CameraScanner.Maui.Resources.Sound.beep-401570.mp3");
+            this.audioService.SetSource(defaultSound);
         }
 
         protected override void OnHandlerChanged()
@@ -90,6 +96,72 @@ namespace CameraScanner.Maui
         {
             get => (bool)this.GetValue(VibrationOnDetectedProperty);
             set => this.SetValue(VibrationOnDetectedProperty, value);
+        }
+
+        public static readonly BindableProperty SoundSourceProperty = BindableProperty.Create(
+            nameof(SoundSource),
+            typeof(Stream),
+            typeof(CameraView),
+            defaultValue: null,
+            propertyChanged: OnSoundSourcePropertyChanged);
+
+        private static void OnSoundSourcePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var cameraView = (CameraView)bindable;
+
+            if (newValue is Stream soundStream)
+            {
+                cameraView.audioService.SetSource(soundStream);
+            }
+            else
+            {
+                cameraView.audioService.Reset();
+            }
+        }
+
+        public Stream SoundSource
+        {
+            get => (Stream)this.GetValue(SoundSourceProperty);
+            set => this.SetValue(SoundSourceProperty, value);
+        }
+
+        public static readonly BindableProperty SoundOnDetectedProperty = BindableProperty.Create(
+            nameof(SoundOnDetected),
+            typeof(bool),
+            typeof(CameraView),
+            false);
+
+        /// <summary>
+        /// Enables or disables sound on successful barcode detection.
+        /// Default: <c>false</c>
+        /// </summary>
+        public bool SoundOnDetected
+        {
+            get => (bool)this.GetValue(SoundOnDetectedProperty);
+            set => this.SetValue(SoundOnDetectedProperty, value);
+        }
+
+        public static readonly BindableProperty SoundVolumeProperty = BindableProperty.Create(
+            nameof(SoundVolume),
+            typeof(float),
+            typeof(CameraView),
+            1f,
+            propertyChanged: OnSoundVolumePropertyChanged);
+
+        private static void OnSoundVolumePropertyChanged(BindableObject bindable, object oldValue, object newValue)
+        {
+            var cameraView = (CameraView)bindable;
+
+            if (newValue is float volume)
+            {
+                cameraView.audioService.Volume = volume;
+            }
+        }
+
+        public float SoundVolume
+        {
+            get => (float)this.GetValue(SoundVolumeProperty);
+            set => this.SetValue(SoundVolumeProperty, value);
         }
 
         public static readonly BindableProperty CameraEnabledProperty = BindableProperty.Create(
@@ -461,6 +533,18 @@ namespace CameraScanner.Maui
                 if (this.VibrationOnDetected)
                 {
                     this.vibration.Vibrate();
+                }
+            }
+            catch
+            {
+                // Ignore exceptions
+            }
+
+            try
+            {
+                if (this.SoundOnDetected)
+                {
+                    this.audioService.Play();
                 }
             }
             catch

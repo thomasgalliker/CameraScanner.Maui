@@ -1,10 +1,9 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0;net8.0-android;net8.0-ios17.0;net9.0;net9.0-android;net9.0-ios18.0</TargetFrameworks>
+    <TargetFrameworks>net9.0;net9.0-android;net9.0-ios18.0</TargetFrameworks>
     <OutputType>Library</OutputType>
     <UseMaui>true</UseMaui>
-    <MauiVersion Condition="$(TargetFramework.Contains('net8.0'))">8.0.3</MauiVersion>
     <MauiVersion Condition="$(TargetFramework.Contains('net9.0'))">9.0.0</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -12,7 +11,6 @@
     <Nullable>disable</Nullable>
     <IsPackable>true</IsPackable>
 
-    <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' and $(TargetFramework.Contains('net8.0'))">12.0</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'ios' and $(TargetFramework.Contains('net9.0'))">12.2</SupportedOSPlatformVersion>
     <SupportedOSPlatformVersion Condition="$([MSBuild]::GetTargetPlatformIdentifier('$(TargetFramework)')) == 'android'">24.0</SupportedOSPlatformVersion>
 
@@ -103,6 +101,12 @@
   <ItemGroup Condition="$(TargetFramework.Contains('-android'))">
     <TrimmerRootDescriptor Include="ILLink.Descriptors.xml" RootMode="All" />
     <EmbeddedResource Include="Platforms\Android\ILLink.Descriptors.xml" LogicalName="ILLink.Descriptors.xml" />
+  </ItemGroup>
+  
+  <ItemGroup>
+    <!-- Sound -->
+    <None Remove="Resources\Sound\**" />
+    <EmbeddedResource Include="Resources\Sound\*" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
   </ItemGroup>
 
 </Project>
