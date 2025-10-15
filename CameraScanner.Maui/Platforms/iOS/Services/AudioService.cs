@@ -1,4 +1,5 @@
 using AVFoundation;
+using CameraScanner.Maui.Extensions;
 using Foundation;
 
 namespace CameraScanner.Maui.Platforms.Services
@@ -26,8 +27,19 @@ namespace CameraScanner.Maui.Platforms.Services
                 player.Dispose();
             }
 
-            var data = NSData.FromStream(audioStream)
-                       ?? throw new ArgumentException("Unable to convert audioStream to NSData.", nameof(audioStream));
+            audioStream.Rewind();
+
+            var data = NSData.FromStream(audioStream);
+            if (data == null)
+            {
+                throw new ArgumentNullException(nameof(audioStream), "Unable to convert audioStream to NSData.");
+            }
+
+            if (data.Length == 0)
+            {
+                throw new ArgumentException("Unable to create AVAudioPlayer from empty data.", nameof(audioStream));
+            }
+
             this.player = AVAudioPlayer.FromData(data)
                           ?? throw new ArgumentException("Unable to create AVAudioPlayer from data.", nameof(audioStream));
 
