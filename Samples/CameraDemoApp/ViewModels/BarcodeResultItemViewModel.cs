@@ -2,6 +2,7 @@ using CameraDemoApp.Services.Navigation;
 using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Superdev.Maui.Navigation;
 
 namespace CameraDemoApp.ViewModels
 {

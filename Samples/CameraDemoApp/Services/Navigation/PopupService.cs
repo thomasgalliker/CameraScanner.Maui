@@ -3,6 +3,7 @@ using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Extensions;
 using CommunityToolkit.Maui.Views;
 using Microsoft.Extensions.Logging;
+using Superdev.Maui.Navigation;
 
 namespace CameraDemoApp.Services.Navigation
 {

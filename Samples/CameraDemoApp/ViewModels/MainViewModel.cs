@@ -4,6 +4,7 @@ using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Superdev.Maui.Navigation;
 using ResourceLoader = System.Reflection.ResourceLoader;
 
 namespace CameraDemoApp.ViewModels

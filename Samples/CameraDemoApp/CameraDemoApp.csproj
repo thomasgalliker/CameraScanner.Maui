@@ -136,7 +136,7 @@
     <PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
     <PackageReference Include="ResourceLoader" Version="3.3.1" />
     <PackageReference Include="Sentry.Maui" Version="5.11.2" />
-    <PackageReference Include="Superdev.Maui" Version="1.1.51-pre" />
+    <PackageReference Include="Superdev.Maui" Version="1.2.5-pre" />
     <PackageReference Include="ValueConverters.MAUI" Version="3.1.22" />
   </ItemGroup>
 
