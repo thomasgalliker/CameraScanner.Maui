@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net9.0-android;net9.0-ios</TargetFrameworks>
+    <TargetFrameworks>net9.0-android;net9.0-ios18.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
@@ -25,6 +25,8 @@
 
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;Simulator;Device</Platforms>
+
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -66,6 +68,11 @@
 
     <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    
+    <!-- Sound -->
+    <None Remove="Resources\Sound\**" />
+    <EmbeddedResource Include="Resources\Sound\*" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
   </ItemGroup>
 
   <!-- Android build properties -->
@@ -116,6 +123,7 @@
     <MtouchDebug>false</MtouchDebug>
     <CreatePackage>true</CreatePackage>
     <ArchiveOnBuild>true</ArchiveOnBuild>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
 
@@ -127,13 +135,14 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
     <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
     <PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
+    <PackageReference Include="ResourceLoader" Version="3.3.1" />
     <PackageReference Include="Sentry.Maui" Version="5.11.2" />
-    <PackageReference Include="Superdev.Maui" Version="1.0.125-pre" />
+    <PackageReference Include="Superdev.Maui" Version="1.2.5-pre" />
     <PackageReference Include="ValueConverters.MAUI" Version="3.1.22" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
-  
+
 </Project>

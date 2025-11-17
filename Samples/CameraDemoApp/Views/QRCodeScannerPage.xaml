@@ -3,17 +3,18 @@
     xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
     xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
     xmlns:c="http://camerascanner.maui"
+    xmlns:s="clr-namespace:Superdev.Maui.Controls;assembly=Superdev.Maui"
     xmlns:vm="clr-namespace:CameraDemoApp.ViewModels"
     x:Class="CameraDemoApp.Views.QRCodeScannerPage"
     Title="QR Code Scanner"
     x:DataType="vm:QRCodeScannerViewModel">
-    
+
     <ContentPage.ToolbarItems>
-        <ToolbarItem 
-            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}"
-            Command="{Binding ToggleTorchCommand}"  />
+        <ToolbarItem
+            Command="{Binding ToggleTorchCommand}"
+            IconImageSource="{Binding TorchOn, Converter={StaticResource BoolToTorchConverter}}" />
     </ContentPage.ToolbarItems>
-    
+
     <Grid RowDefinitions="*, Auto">
         <c:CameraView
             Grid.Row="0"
@@ -21,7 +22,11 @@
             CameraEnabled="{Binding IsScannerEnabled}"
             OnDetectionFinishedCommand="{Binding OnDetectionFinishedCommand}"
             PauseScanning="{Binding IsScannerPause}"
-            TorchOn="{Binding TorchOn}"/>
+            SoundOnDetected="True"
+            SoundSource="{s:EmbeddedResource beep-90395.mp3}"
+            SoundVolume="0.5"
+            TorchOn="{Binding TorchOn}"
+            VibrationOnDetected="True" />
 
         <c:QRCodeOverlay
             BracketColor="{StaticResource Primary}"

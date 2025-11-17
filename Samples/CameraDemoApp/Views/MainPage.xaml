@@ -52,7 +52,6 @@
             <Label
                 Style="{StaticResource Heading2LabelStyle}"
                 Text="ICameraPermissions" />
-
             <Button
                 Command="{Binding CheckCameraPermissionsCommand}"
                 Text="Check camera permission"
@@ -105,6 +104,20 @@
                 Command="{Binding NavigateToPageCommand}"
                 CommandParameter="FilePickerPage"
                 Text="File Picker Demo"
+                HorizontalOptions="Fill" />
+
+            <controls:DividerLine />
+
+            <Label
+                Style="{StaticResource Heading2LabelStyle}"
+                Text="IAudioService" />
+            <Button
+                Command="{Binding PlaySoundCommand}"
+                Text="Play"
+                HorizontalOptions="Fill" />
+            <Button
+                Command="{Binding StopSoundCommand}"
+                Text="Stop"
                 HorizontalOptions="Fill" />
         </VerticalStackLayout>
     </ScrollView>

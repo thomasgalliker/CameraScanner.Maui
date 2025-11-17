@@ -1,9 +1,9 @@
-dotnet publish CameraDemoApp.csproj \
+dotnet publish Samples/CameraDemoApp/CameraDemoApp.csproj \
   -f net9.0-android \
   -c Release \
   -p:Platform=Device \
-  -p:ApplicationDisplayVersion=1.0.4 \
-  -p:ApplicationVersion=13 \
+  -p:ApplicationDisplayVersion=1.0.6 \
+  -p:ApplicationVersion=22 \
   -p:AndroidPackageFormats="aab" \
   -p:AndroidKeyStore=true \
   -p:AndroidSigningKeyStore="ch.superdev.camerascanner.keystore" \
@@ -12,12 +12,12 @@ dotnet publish CameraDemoApp.csproj \
   -p:AndroidSigningKeyPass=keypass
 
 
-dotnet publish CameraDemoApp.csproj \
-  -f net9.0-ios \
+dotnet publish Samples/CameraDemoApp/CameraDemoApp.csproj \
+  -f net9.0-ios18.0 \
   -c Release \
   -p:Platform=Device \
-  -p:ApplicationDisplayVersion=1.0.4 \
-  -p:ApplicationVersion=13 \
+  -p:ApplicationDisplayVersion=1.0.6 \
+  -p:ApplicationVersion=22 \
   -p:ArchiveOnBuild=true \
   -p:RuntimeIdentifier=ios-arm64 \
   -p:CodesignKey="iPhone Distribution" \

@@ -14,6 +14,7 @@ namespace CameraScanner.Maui
 
             builder.Services.TryAddSingleton<ICameraPermissions>(_ => ICameraPermissions.Current);
             builder.Services.TryAddSingleton<IBarcodeScanner>(_ => IBarcodeScanner.Current);
+            builder.Services.TryAddSingleton<IAudioService>(_ => IAudioService.Current);
             builder.Services.TryAddSingleton<IDeviceInfo>(_ => DeviceInfo.Current);
             builder.Services.TryAddSingleton<IDeviceDisplay>(_ => DeviceDisplay.Current);
 #endif

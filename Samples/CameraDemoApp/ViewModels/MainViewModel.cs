@@ -4,6 +4,8 @@ using CameraScanner.Maui;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.Extensions.Logging;
+using Superdev.Maui.Navigation;
+using ResourceLoader = System.Reflection.ResourceLoader;
 
 namespace CameraDemoApp.ViewModels
 {
@@ -14,6 +16,7 @@ namespace CameraDemoApp.ViewModels
         private readonly IDialogService dialogService;
         private readonly ICameraPermissions cameraPermissions;
         private readonly ILauncher launcher;
+        private readonly IAudioService audioService;
 
         private IAsyncRelayCommand appearingCommand;
         private bool isInitialized;
@@ -24,19 +27,23 @@ namespace CameraDemoApp.ViewModels
         private IAsyncRelayCommand<string> navigateToPageCommand;
         private IAsyncRelayCommand<string> navigateToModalPageCommand;
         private IAsyncRelayCommand<string> openUrlCommand;
+        private IRelayCommand playSoundCommand;
+        private IRelayCommand stopSoundCommand;
 
         public MainViewModel(
             ILogger<MainViewModel> logger,
             INavigationService navigationService,
             IDialogService dialogService,
             ICameraPermissions cameraPermissions,
-            ILauncher launcher)
+            ILauncher launcher,
+            IAudioService audioService)
         {
             this.logger = logger;
             this.navigationService = navigationService;
             this.dialogService = dialogService;
             this.cameraPermissions = cameraPermissions;
             this.launcher = launcher;
+            this.audioService = audioService;
         }
 
         public IAsyncRelayCommand AppearingCommand
@@ -162,6 +169,30 @@ namespace CameraDemoApp.ViewModels
             {
                 // Ignore exceptions
             }
+        }
+
+        public IRelayCommand PlaySoundCommand
+        {
+            get => this.playSoundCommand ??= new RelayCommand(this.PlaySoundAsync);
+        }
+
+        private void PlaySoundAsync()
+        {
+            var assembly = typeof(App).Assembly;
+            var beepStream = ResourceLoader.Current.GetEmbeddedResourceStream(assembly, "beep-90395.mp3");
+            this.audioService.SetSource(beepStream);
+            this.audioService.Volume = 1f;
+            this.audioService.Play();
+        }
+
+        public IRelayCommand StopSoundCommand
+        {
+            get => this.stopSoundCommand ??= new RelayCommand(this.StopSoundAsync);
+        }
+
+        private void StopSoundAsync()
+        {
+            this.audioService.Stop();
         }
     }
 }
