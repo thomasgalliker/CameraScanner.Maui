@@ -1,17 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFrameworks>net8.0-android;net8.0-ios</TargetFrameworks>
+    <TargetFrameworks>net9.0-android;net9.0-ios18.0</TargetFrameworks>
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <MauiVersion>8.0.100</MauiVersion>
+    <MauiVersion>9.0.110</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
 
     <!-- Display name -->
-    <ApplicationTitle>CameraDemoApp</ApplicationTitle>
+    <ApplicationTitle>Camera Scanner SDK</ApplicationTitle>
 
     <!-- App Identifier -->
     <ApplicationId>ch.superdev.camerascanner</ApplicationId>
@@ -25,6 +25,8 @@
 
     <Configurations>Debug;Release</Configurations>
     <Platforms>AnyCPU;Simulator;Device</Platforms>
+
+    <MauiEnableXamlCBindingWithSourceCompilation>true</MauiEnableXamlCBindingWithSourceCompilation>
   </PropertyGroup>
 
   <ItemGroup>
@@ -66,6 +68,11 @@
 
     <!-- Raw Assets (also remove the "Resources\Raw" prefix) -->
     <MauiAsset Include="Resources\Raw\**" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+    
+    <!-- Sound -->
+    <None Remove="Resources\Sound\**" />
+    <EmbeddedResource Include="Resources\Sound\*" LogicalName="%(RecursiveDir)%(Filename)%(Extension)" />
+
   </ItemGroup>
 
   <!-- Android build properties -->
@@ -80,7 +87,7 @@
     <AndroidLinkMode>None</AndroidLinkMode>
     <AndroidPackageFormat>apk</AndroidPackageFormat>
     <AndroidCreatePackagePerAbi>false</AndroidCreatePackagePerAbi>
-    <EmbedAssembliesIntoApk>true</EmbedAssembliesIntoApk>
+    <EmbedAssembliesIntoApk>false</EmbedAssembliesIntoApk>
   </PropertyGroup>
   <PropertyGroup Condition="$(TargetFramework.Contains('-android')) and '$(Configuration)' == 'Release'">
     <AndroidLinkMode>SdkOnly</AndroidLinkMode>
@@ -95,7 +102,7 @@
 
   <!-- iOS build properties -->
   <PropertyGroup Condition="$(TargetFramework.Contains('-ios'))">
-    <SupportedOSPlatformVersion>12.0</SupportedOSPlatformVersion> <!-- MinimumOSVersion -->
+    <SupportedOSPlatformVersion>12.2</SupportedOSPlatformVersion> <!-- MinimumOSVersion -->
     <ConsolePause>false</ConsolePause>
     <CodesignKey>iPhone Developer</CodesignKey>
   </PropertyGroup>
@@ -116,23 +123,26 @@
     <MtouchDebug>false</MtouchDebug>
     <CreatePackage>true</CreatePackage>
     <ArchiveOnBuild>true</ArchiveOnBuild>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Maui" Version="9.0.1" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="12.2.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
     <PackageReference Include="Microsoft.Maui.Controls.Compatibility" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="8.0.0" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.3.11" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="9.0.7" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
     <PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
-    <PackageReference Include="Sentry.Maui" Version="4.12.1" />
-    <PackageReference Include="ValueConverters.MAUI" Version="3.0.26" />
+    <PackageReference Include="ResourceLoader" Version="3.3.1" />
+    <PackageReference Include="Sentry.Maui" Version="5.11.2" />
+    <PackageReference Include="Superdev.Maui" Version="1.2.5-pre" />
+    <PackageReference Include="ValueConverters.MAUI" Version="3.1.22" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
-  
+
 </Project>

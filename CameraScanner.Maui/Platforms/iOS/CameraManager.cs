@@ -110,7 +110,15 @@ namespace CameraScanner.Maui
 
         internal async Task StartAsync()
         {
-            this.logger.LogDebug("StartAsync");
+            if (this.deviceInfo.DeviceType == DeviceType.Physical)
+            {
+                this.logger.LogDebug("StartAsync");
+            }
+            else
+            {
+                this.logger.LogInformation("StartAsync: No camera available on iOS simulator.");
+                return;
+            }
 
             try
             {
@@ -170,10 +178,20 @@ namespace CameraScanner.Maui
 
         internal void Stop()
         {
-            this.logger.LogDebug("Stop");
+            if (this.deviceInfo.DeviceType == DeviceType.Physical)
+            {
+                this.logger.LogDebug("Stop");
+            }
+            else
+            {
+                this.logger.LogInformation("Stop: No camera available on iOS simulator.");
+                return;
+            }
 
             try
             {
+
+
                 if (!this.started)
                 {
                     return;
@@ -284,9 +302,11 @@ namespace CameraScanner.Maui
         {
             using (await this.updateCameraLock.LockAsync())
             {
-                this.logger.LogDebug("UpdateCameraAsync");
-
-                if (this.deviceInfo.DeviceType == DeviceType.Virtual)
+                if (this.deviceInfo.DeviceType == DeviceType.Physical)
+                {
+                    this.logger.LogDebug("UpdateCameraAsync");
+                }
+                else
                 {
                     this.logger.LogInformation("UpdateCameraAsync: No camera available on iOS simulator.");
                     return;

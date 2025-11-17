@@ -6,6 +6,8 @@ using CameraScanner.Maui;
 using CommunityToolkit.Maui;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
+using Superdev.Maui;
+using Superdev.Maui.Navigation;
 
 namespace CameraDemoApp
 {
@@ -17,7 +19,25 @@ namespace CameraDemoApp
             builder
                 .UseMauiApp<App>()
                 .UseCameraScanner()
-                .UseMauiCommunityToolkit()
+                .UseSuperdevMaui()
+                .UseMauiCommunityToolkit(o =>
+                {
+                    o.SetPopupDefaults(new DefaultPopupSettings
+                    {
+                        Margin = 0,
+                        Padding = 0,
+                        VerticalOptions = LayoutOptions.Center,
+                        HorizontalOptions = LayoutOptions.Center,
+                        CanBeDismissedByTappingOutsideOfPopup = false,
+                    });
+                    o.SetPopupOptionsDefaults(new DefaultPopupOptionsSettings
+                    {
+                        PageOverlayColor = Colors.Black.WithAlpha(0.5f),
+                        Shadow = null,
+                        Shape = null,
+                        CanBeDismissedByTappingOutsideOfPopup = false,
+                    });
+                })
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("IBMPlexMono-Bold.ttf", "IBMPlexMonoBold");
@@ -36,7 +56,7 @@ namespace CameraDemoApp
             });
 
             // Register services
-            builder.Services.AddSingleton<INavigationService, MauiNavigationService>();
+            builder.Services.AddSingleton<IPopupService2, PopupService>();
             builder.Services.AddSingleton<IDialogService, DialogService>();
             builder.Services.AddSingleton<ILauncher>(_ => Launcher.Default);
             builder.Services.AddSingleton<IMediaPicker>(_ => MediaPicker.Default);
@@ -44,30 +64,16 @@ namespace CameraDemoApp
             builder.Services.AddSingleton<IShare>(_ => Share.Default);
 
             // Register pages and view models
-            builder.Services.AddTransient<MainPage>();
-            builder.Services.AddTransient<MainViewModel>();
-
-            builder.Services.AddTransient<DefaultCameraViewPage>();
-
-            builder.Services.AddTransient<QRCodeScannerPage>();
-            builder.Services.AddTransient<QRCodeScannerViewModel>();
-
-            builder.Services.AddTransient<UniversalScannerPage>();
-            builder.Services.AddTransient<UniversalScannerViewModel>();
-
-            builder.Services.AddTransient<CameraPreviewPage>();
-            builder.Services.AddTransient<CameraPreviewViewModel>();
-
-            builder.Services.AddTransient<FilePickerPage>();
-            builder.Services.AddTransient<FilePickerViewModel>();
-
-            builder.Services.AddTransient<BarcodeResultDetailPage>();
-            builder.Services.AddTransient<BarcodeResultDetailViewModel>();
-
-            builder.Services.AddTransient<ImageViewerPage>();
-            builder.Services.AddTransient<ImageViewerViewModel>();
-
-            builder.Services.AddTransientPopup<ScannerConfigPopup, ScannerConfigViewModel>();
+            builder.Services.RegisterForNavigation<MainPage, MainViewModel>();
+            builder.Services.RegisterForNavigation<DefaultCameraViewPage>();
+            builder.Services.RegisterForNavigation<QRCodeScannerPage, QRCodeScannerViewModel>();
+            builder.Services.RegisterForNavigation<UniversalScannerPage, UniversalScannerViewModel>();
+            builder.Services.RegisterForNavigation<CameraPreviewPage, CameraPreviewViewModel>();
+            builder.Services.RegisterForNavigation<FilePickerPage, FilePickerViewModel>();
+            builder.Services.RegisterForNavigation<BarcodeResultDetailPage, BarcodeResultDetailViewModel>();
+            builder.Services.RegisterForNavigation<ImageViewerPage, ImageViewerViewModel>();
+            builder.Services.RegisterForNavigation<ScannerConfigPopupPage, ScannerConfigPopupViewModel>();
+            builder.Services.RegisterForNavigation<ScannerConfigPage, ScannerConfigViewModel>();
 
             return builder.Build();
         }

@@ -1,24 +1,39 @@
-﻿using CameraScanner.Maui;
+﻿using CameraDemoApp.Services.Navigation;
+using CameraScanner.Maui;
 using CameraScanner.Maui.Extensions;
+using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Maui.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Superdev.Maui.Navigation;
 
 namespace CameraDemoApp.ViewModels
 {
-    public class ScannerConfigViewModel : ObservableObject
+    public class ScannerConfigViewModel : ScannerConfigPopupViewModel
     {
+        public ScannerConfigViewModel(IPopupService2 popupService)
+            : base(popupService)
+        {
+        }
+    }
+
+    public class ScannerConfigPopupViewModel : ObservableObject, INavigatedTo<ScannerConfigPopupViewModel.NavigationParameter>
+    {
+        private readonly IPopupService2 popupService;
+
         private IAsyncRelayCommand<Popup> cancelCommand;
         private IAsyncRelayCommand<Popup> confirmCommand;
         private BarcodeFormatViewModel[] barcodeFormats;
         private CaptureQualityViewModel[] captureQualities;
         private string barcodeDetectionFrameRate;
 
-        public ScannerConfigViewModel()
+        public ScannerConfigPopupViewModel(
+            IPopupService2 popupService)
         {
+            this.popupService = popupService;
         }
 
-        public void Initialize(NavigationParameter navigationParameter)
+        public Task NavigatedToAsync(NavigationParameter navigationParameter)
         {
             var selectedBarcodeFormats = navigationParameter.BarcodeFormat.ToArray();
 
@@ -34,6 +49,8 @@ namespace CameraDemoApp.ViewModels
                 .ToArray();
 
             this.BarcodeDetectionFrameRate = navigationParameter.BarcodeDetectionFrameRate?.ToString();
+
+            return Task.CompletedTask;
         }
 
         public bool AllBarcodeFormatsChecked
@@ -82,7 +99,7 @@ namespace CameraDemoApp.ViewModels
 
         private async Task CancelAsync(Popup popup)
         {
-            await popup.CloseAsync();
+            await this.popupService.ClosePopupAsync();
         }
 
         public IAsyncRelayCommand<Popup> ConfirmCommand
@@ -106,7 +123,7 @@ namespace CameraDemoApp.ViewModels
                 popupResult.BarcodeDetectionFrameRate = frameRate;
             }
 
-            await popup.CloseAsync(popupResult);
+            await this.popupService.ClosePopupAsync(popupResult);
         }
 
         public class PopupResult

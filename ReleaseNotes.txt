@@ -1,3 +1,8 @@
+1.7
+- Update to .NET 9.
+- Maintenance updates and cleanup.
+- Play sound on barcode detection.
+
 1.6
 - Build and release pipeline updates
 

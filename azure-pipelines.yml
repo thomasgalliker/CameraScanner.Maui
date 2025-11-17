@@ -7,7 +7,7 @@
 name: $[format('{0}', variables['buildName'])]
 
 pool:
-  vmImage: 'windows-2022'
+  vmImage: 'windows-latest'
 
 trigger:
   branches:
@@ -25,7 +25,7 @@ variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   majorVersion: 1
-  minorVersion: 6
+  minorVersion: 7
   patchVersion: $[counter(format('{0}.{1}', variables.majorVersion, variables.minorVersion), 0)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     # Versioning: 1.0.0
@@ -67,9 +67,9 @@ steps:
     DisableTelemetry: true
     
 - task: UseDotNet@2
-  displayName: 'Use .NET 8.x'
+  displayName: 'Use .NET 9.0.x'
   inputs:
-    version: 8.x
+    version: 9.0.x
     
 - task: Bash@3
   displayName: Install .NET MAUI
@@ -82,7 +82,7 @@ steps:
 - task: JavaToolInstaller@0
   displayName: "Install Java"
   inputs:
-    versionSpec: '11'
+    versionSpec: '17'
     jdkArchitectureOption: 'x64'
     jdkSourceOption: 'PreInstalled'
 
@@ -114,7 +114,9 @@ steps:
     command: test
     projects: 'Tests/**/*.Tests.csproj'
     arguments: >
-      --no-restore --no-build --configuration $(buildConfiguration) 
+      --no-restore 
+      --no-build 
+      --configuration $(buildConfiguration) 
       /p:CollectCoverage=true 
       /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" 
       /p:CoverletOutput=UnitTests.coverage.cobertura.xml 

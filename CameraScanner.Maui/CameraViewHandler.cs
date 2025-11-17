@@ -47,7 +47,9 @@ namespace CameraScanner.Maui
             this.logger.LogDebug("ConnectHandler");
             base.ConnectHandler(platformView);
 
+#if !NET9_0_OR_GREATER
             if (this.VirtualView.AutoDisconnectHandler)
+#endif
             {
                 this.VirtualView.AddCleanUpEvent();
             }

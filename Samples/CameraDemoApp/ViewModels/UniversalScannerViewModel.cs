@@ -1,5 +1,7 @@
 ﻿using CameraDemoApp.Services.Navigation;
+using CameraDemoApp.Views;
 using CameraScanner.Maui;
+using CommunityToolkit.Maui;
 using CommunityToolkit.Maui.Core;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -11,7 +13,7 @@ namespace CameraDemoApp.ViewModels
     {
         private readonly ILogger logger;
         private readonly IDialogService dialogService;
-        private readonly IPopupService popupService;
+        private readonly IPopupService2 popupService;
 
         private IAsyncRelayCommand<BarcodeResult[]> onDetectionFinishedCommand;
         private BarcodeFormats barcodeFormats;
@@ -32,7 +34,7 @@ namespace CameraDemoApp.ViewModels
         public UniversalScannerViewModel(
             ILogger<UniversalScannerViewModel> logger,
             IDialogService dialogService,
-            IPopupService popupService)
+            IPopupService2 popupService)
         {
             this.logger = logger;
             this.dialogService = dialogService;
@@ -265,20 +267,21 @@ namespace CameraDemoApp.ViewModels
 
         private async Task ConfigureAsync()
         {
-            var navigationParameter = new ScannerConfigViewModel.NavigationParameter
+            var navigationParameter = new ScannerConfigPopupViewModel.NavigationParameter
             {
                 BarcodeFormat = this.BarcodeFormats,
                 CaptureQuality = this.CaptureQuality,
                 BarcodeDetectionFrameRate = this.BarcodeDetectionFrameRate,
             };
 
-            var result = await this.popupService.ShowPopupAsync<ScannerConfigViewModel>(onPresenting: vm =>
-                vm.Initialize(navigationParameter));
-            if (result is ScannerConfigViewModel.PopupResult popupResult)
+            var result = await this.popupService.ShowPopupAsync<ScannerConfigPopupViewModel.NavigationParameter, ScannerConfigPopupViewModel.PopupResult>("ScannerConfigPopupPage",  navigationParameter);
+            //var result = await this.popupService.ShowPopupAsync<ScannerConfigPopupViewModel.NavigationParameter, ScannerConfigPopupViewModel.PopupResult>("ScannerConfigPage",  navigationParameter);
+
+            if (result is ScannerConfigPopupViewModel.PopupResult p)
             {
-                this.BarcodeFormats = popupResult.BarcodeFormats;
-                this.CaptureQuality = popupResult.CaptureQuality;
-                this.BarcodeDetectionFrameRate = popupResult.BarcodeDetectionFrameRate;
+                this.BarcodeFormats = p.BarcodeFormats;
+                this.CaptureQuality = p.CaptureQuality;
+                this.BarcodeDetectionFrameRate = p.BarcodeDetectionFrameRate;
             }
         }
     }
