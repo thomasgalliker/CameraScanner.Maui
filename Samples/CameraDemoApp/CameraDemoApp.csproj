@@ -123,6 +123,7 @@
     <MtouchDebug>false</MtouchDebug>
     <CreatePackage>true</CreatePackage>
     <ArchiveOnBuild>true</ArchiveOnBuild>
+    <MtouchUseLlvm>true</MtouchUseLlvm>
     <MtouchLink>SdkOnly</MtouchLink>
   </PropertyGroup>
 
