@@ -14,14 +14,14 @@ namespace CameraScanner.Maui.Tests
         }
 
         [Fact]
-        public void DetectionFinished_ShouldReturn_IfBarcodeResultsIsNull()
+        public void DetectionFinished_ShouldReturn_IfBarcodeResultsIsEmpty()
         {
             // Arrange
             var vibrationMock = new Mock<IVibration>();
             var cameraView = this.autoMocker.CreateInstance<CameraView>(enablePrivate: true);
 
             // Act
-            cameraView.DetectionFinished(null);
+            cameraView.DetectionFinished(Array.Empty<BarcodeResult>());
 
             // Assert
             vibrationMock.VerifyNoOtherCalls();

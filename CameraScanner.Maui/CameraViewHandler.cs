@@ -60,6 +60,8 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("DisconnectHandler");
             this.cameraManager?.Dispose();
+            this.cameraManager = null;
+
             base.DisconnectHandler(barcodeView);
         }
     }
