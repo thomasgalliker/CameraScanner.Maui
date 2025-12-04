@@ -9,17 +9,17 @@ namespace CameraScanner.Maui
     public class CameraView : View
     {
         private static readonly Assembly CurrentAssembly = typeof(CameraView).Assembly;
-        private static readonly Stream DefaultBeepStream = CurrentAssembly.GetManifestResourceStream("beep-401570.mp3");
+        private static readonly Stream DefaultBeepStream = CurrentAssembly.GetManifestResourceStream("beep-401570.mp3")!;
 
         private readonly IVibration vibration;
         private readonly IAudioService audioService;
+
         private readonly List<BarcodeResult> pooledResults;
         private readonly Timer poolingTimer;
 
-        public CameraView() : this(Vibration.Default, IAudioService.Current)
+        public CameraView()
+            : this(Vibration.Default, IAudioService.Current)
         {
-            this.pooledResults = [];
-            this.poolingTimer = new Timer { AutoReset = false };
         }
 
         internal CameraView(
@@ -29,6 +29,9 @@ namespace CameraScanner.Maui
             this.vibration = vibration;
             this.audioService = audioService;
             this.audioService.SetSource(DefaultBeepStream.Rewind());
+
+            this.pooledResults = new List<BarcodeResult>();
+            this.poolingTimer = new Timer { AutoReset = false };
         }
 
         protected override void OnHandlerChanged()
@@ -123,9 +126,9 @@ namespace CameraScanner.Maui
             }
         }
 
-        public Stream SoundSource
+        public Stream? SoundSource
         {
-            get => (Stream)this.GetValue(SoundSourceProperty);
+            get => (Stream?)this.GetValue(SoundSourceProperty);
             set => this.SetValue(SoundSourceProperty, value);
         }
 
@@ -473,17 +476,12 @@ namespace CameraScanner.Maui
             set => this.SetValue(DeviceSwitchZoomFactorsProperty, value);
         }
 
-        public event EventHandler<OnDetectionFinishedEventArg> OnDetectionFinished;
+        public event EventHandler<OnDetectionFinishedEventArg>? OnDetectionFinished;
 
-        public event EventHandler<OnImageCapturedEventArg> OnImageCaptured;
+        public event EventHandler<OnImageCapturedEventArg>? OnImageCaptured;
 
         internal void DetectionFinished(BarcodeResult[] barcodeResults)
         {
-            if (barcodeResults is null)
-            {
-                return;
-            }
-
             if (this.PoolingInterval > 0)
             {
                 foreach (var barcodeResult in barcodeResults)
@@ -514,7 +512,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        private void PoolingTimer_Elapsed(object sender, System.Timers.ElapsedEventArgs e)
+        private void PoolingTimer_Elapsed(object? sender, System.Timers.ElapsedEventArgs e)
         {
             this.TriggerOnDetectionFinished(this.pooledResults.ToArray());
             this.pooledResults.Clear();

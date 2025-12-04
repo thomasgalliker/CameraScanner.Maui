@@ -18,7 +18,6 @@ namespace CameraScanner.Maui
     [Preserve(AllMembers = true)]
     internal class CameraManager : IDisposable
     {
-        private readonly string instance = new Guid().ToString().Substring(0, 5).ToUpperInvariant();
         private static readonly AVCaptureDeviceType[] SupportedCaptureDeviceTypes = InitializeCaptureDevices();
 
         private readonly AsyncLock updateCameraLock = new AsyncLock();
@@ -29,9 +28,9 @@ namespace CameraScanner.Maui
 
         private bool started;
         private bool disposed;
-        private AVCaptureDevice captureDevice;
-        private AVCaptureInput captureInput;
-        private BarcodeAnalyzer barcodeAnalyzer;
+        private AVCaptureDevice? captureDevice;
+        private AVCaptureInput? captureInput;
+        private BarcodeAnalyzer? barcodeAnalyzer;
 
         private AVCaptureVideoDataOutput videoDataOutput;
         private readonly AVCaptureVideoPreviewLayer previewLayer;
@@ -69,7 +68,7 @@ namespace CameraScanner.Maui
             this.videoDataOutput = new AVCaptureVideoDataOutput { AlwaysDiscardsLateVideoFrames = true };
             this.detectBarcodesRequest = new VNDetectBarcodesRequest((request, error) =>
             {
-                if (error is null)
+                if (error == null)
                 {
                     var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
                     this.barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.previewLayer);
@@ -699,11 +698,17 @@ namespace CameraScanner.Maui
         {
             this.cameraView.CaptureNextFrame = false;
             using var imageBuffer = sampleBuffer.GetImageBuffer();
-            using var cIImage = new CIImage(imageBuffer);
-            using var cIContext = new CIContext();
-            using var cGImage = cIContext.CreateCGImage(cIImage, cIImage.Extent);
-            var image = new PlatformImage(new UIImage(cGImage));
-            this.cameraView.TriggerOnImageCaptured(image);
+            if (imageBuffer != null)
+            {
+                using var cIImage = new CIImage(imageBuffer);
+                using var cIContext = new CIContext();
+                using var cGImage = cIContext.CreateCGImage(cIImage, cIImage.Extent);
+                if (cGImage != null)
+                {
+                    var image = new PlatformImage(new UIImage(cGImage));
+                    this.cameraView.TriggerOnImageCaptured(image);
+                }
+            }
         }
 
         private void FocusOnTap()

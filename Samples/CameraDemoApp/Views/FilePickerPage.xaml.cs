@@ -9,13 +9,13 @@ public partial class FilePickerPage : ContentPage
         this.InitializeComponent();
     }
 
-    private void Image_SizeChanged(object sender, EventArgs e)
+    private void Image_SizeChanged(object? sender, EventArgs e)
     {
         var visualElement = (VisualElement)sender;
         Debug.WriteLine($"Image_SizeChanged: w:{visualElement.Width} x h:{visualElement.Height}");
     }
 
-    private void BarcodeResultOverlay_SizeChanged(object sender, EventArgs e)
+    private void BarcodeResultOverlay_SizeChanged(object? sender, EventArgs e)
     {
         var visualElement = (VisualElement)sender;
         Debug.WriteLine($"BarcodeResultOverlay_SizeChanged: w:{visualElement.Width} x h:{visualElement.Height}");

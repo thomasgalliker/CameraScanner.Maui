@@ -119,7 +119,7 @@ namespace CameraScanner.Maui
             this.deviceDisplay.MainDisplayInfoChanged += this.OnMainDisplayInfoChanged;
         }
 
-        private void OnCameraStateChanged(object sender, CameraStateChangedEventArgs e)
+        private void OnCameraStateChanged(object? sender, CameraStateChangedEventArgs e)
         {
             this.logger.Log(e.CameraState.Error == null ? LogLevel.Debug : LogLevel.Error, $"OnCameraStateChanged: {e.CameraState}");
 
@@ -133,7 +133,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        private void OnTorchStateChanged(object sender, TorchStateEventArgs e)
+        private void OnTorchStateChanged(object? sender, TorchStateEventArgs e)
         {
             if (this.cameraView == null)
             {
@@ -145,7 +145,7 @@ namespace CameraScanner.Maui
             this.cameraView.TorchOn = e.TorchOn;
         }
 
-        private void OnZoomStateChanged(object sender, ZoomStateChangedEventArgs e)
+        private void OnZoomStateChanged(object? sender, ZoomStateChangedEventArgs e)
         {
             this.logger.LogDebug("OnZoomStateChanged");
 
@@ -512,7 +512,7 @@ namespace CameraScanner.Maui
             }
         }
 
-        private void OnMainDisplayInfoChanged(object sender, DisplayInfoChangedEventArgs e)
+        private void OnMainDisplayInfoChanged(object? sender, DisplayInfoChangedEventArgs e)
         {
             _ = Task.Run(async () =>
             {

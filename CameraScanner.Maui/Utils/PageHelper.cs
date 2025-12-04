@@ -15,19 +15,6 @@ namespace CameraScanner.Maui.Utils
             };
         }
 
-        internal static string PrintNavigationPath()
-        {
-            var mainPage = Application.Current.MainPage;
-            var pages = GetNavigationTree(mainPage).ToArray();
-            var navigationPath = PrintNavigationPath(pages);
-            return navigationPath;
-        }
-
-        private static string PrintNavigationPath(IEnumerable<Page> pages)
-        {
-            return pages.Aggregate("", (current, page) => $"{current}/{page?.GetType().Name ?? ""}");
-        }
-
         internal static IEnumerable<Page> GetNavigationTree(Page page, bool modal = false)
         {
             if (page == null)

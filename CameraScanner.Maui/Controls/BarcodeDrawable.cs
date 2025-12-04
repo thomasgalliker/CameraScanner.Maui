@@ -4,10 +4,10 @@ namespace CameraScanner.Maui.Controls
 {
     public abstract class BarcodeDrawable : IBarcodeDrawable
     {
-        private BarcodeResult[] barcodeResults;
+        private BarcodeResult[] barcodeResults = Array.Empty<BarcodeResult>();
         private float strokeSize;
-        private Color strokeColor;
-        private Color textColor;
+        private Color? strokeColor;
+        private Color? textColor;
         private double width;
         private double height;
 
@@ -31,7 +31,6 @@ namespace CameraScanner.Maui.Controls
             this.textColor = textColor;
         }
 
-
         public virtual RectF ConvertRectF(RectF source)
         {
             return source;
@@ -39,7 +38,7 @@ namespace CameraScanner.Maui.Controls
 
         public void Reset()
         {
-            this.barcodeResults = null;
+            this.barcodeResults = Array.Empty<BarcodeResult>();
         }
 
         public void Draw(ICanvas canvas, RectF dirtyRect)
@@ -62,7 +61,12 @@ namespace CameraScanner.Maui.Controls
                         var displayValue = GetPreviewText(barcodeResult);
 
                         var textPosition = this.GetTextPosition(barcodeResult);
-                        DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, this.strokeColor, this.textColor);
+                        if (displayValue != null &&
+                            this.strokeColor is Color strokeColor &&
+                            this.textColor is Color textColor)
+                        {
+                            DrawText(canvas, $"{barcodeResult.BarcodeFormat}", displayValue, textPosition, strokeColor, textColor);
+                        }
                     }
                     else
                     {
@@ -78,9 +82,14 @@ namespace CameraScanner.Maui.Controls
 
         protected abstract PointF GetTextPosition(BarcodeResult barcodeResult);
 
-        private static string GetPreviewText(BarcodeResult barcodeResult)
+        private static string? GetPreviewText(BarcodeResult barcodeResult)
         {
-            var displayValueTopNLines = barcodeResult.DisplayValue.SplitToLines()
+            if (barcodeResult.DisplayValue is not string displayValue)
+            {
+                return null;
+            }
+
+            var displayValueTopNLines = displayValue.SplitToLines()
                 .Where(l => !string.IsNullOrWhiteSpace(l))
                 .Take(3)
                 .ToArray();
@@ -90,7 +99,7 @@ namespace CameraScanner.Maui.Controls
                 displayValueTopNLines[2] = "(...)";
             }
 
-            var displayValue = string.Join(Environment.NewLine, displayValueTopNLines);
+            displayValue = string.Join(Environment.NewLine, displayValueTopNLines);
             return displayValue;
         }
 

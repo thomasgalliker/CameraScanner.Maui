@@ -21,33 +21,43 @@ namespace CameraScanner.Maui.Platforms.Services
             return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromArray(imageArray)));
         }
 
-        public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(FileResult file)
-        {
-            return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromStream(await file.OpenReadAsync())));
-        }
-
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(string url)
         {
-            return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromUrl(new NSUrl(url))));
+            var data = NSData.FromUrl(new NSUrl(url));
+            var image = UIImage.LoadFromData(data);
+            return await ProcessBitmapAsync(image);
+        }
+
+        public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(FileResult file)
+        {
+            var stream = await file.OpenReadAsync();
+            return await this.ScanFromImageAsync(stream);
         }
 
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(Stream stream)
         {
-            return await ProcessBitmapAsync(UIImage.LoadFromData(NSData.FromStream(stream)));
-        }
-
-        private static async Task<HashSet<BarcodeResult>> ProcessBitmapAsync(UIImage image)
-        {
-            if (image is null)
+            var data = NSData.FromStream(stream);
+            if (data == null)
             {
-                return null;
+                throw new InvalidOperationException("ScanFromImageAsync failed to load NSData.FromStream");
             }
 
-            VNBarcodeObservation[] observations = null;
+            var image = UIImage.LoadFromData(data);
+            return await ProcessBitmapAsync(image);
+        }
 
-            void VNDetectBarcodesRequestCompletionHandler(VNRequest request, NSError error)
+        private static async Task<HashSet<BarcodeResult>> ProcessBitmapAsync(UIImage? image)
+        {
+            if (image == null || image.CGImage == null)
             {
-                if (error is null)
+                return new HashSet<BarcodeResult>();
+            }
+
+            VNBarcodeObservation[]? observations = null;
+
+            void VNDetectBarcodesRequestCompletionHandler(VNRequest request, NSError? error)
+            {
+                if (error == null)
                 {
                     observations = request.GetResults<VNBarcodeObservation>();
                 }
@@ -55,6 +65,11 @@ namespace CameraScanner.Maui.Platforms.Services
                 {
                     // TODO Log error
                 }
+            }
+
+            if (observations == null)
+            {
+                return new HashSet<BarcodeResult>();
             }
 
             using (var barcodeRequest = new VNDetectBarcodesRequest(VNDetectBarcodesRequestCompletionHandler))
@@ -87,7 +102,7 @@ namespace CameraScanner.Maui.Platforms.Services
             }
         }
 
-        internal static HashSet<BarcodeResult> ProcessBarcodeResult(VNBarcodeObservation[] inputResults, AVCaptureVideoPreviewLayer previewLayer = null)
+        internal static HashSet<BarcodeResult> ProcessBarcodeResult(VNBarcodeObservation[] inputResults, AVCaptureVideoPreviewLayer? previewLayer = null)
         {
             var barcodeResults = new HashSet<BarcodeResult>();
 
@@ -123,12 +138,21 @@ namespace CameraScanner.Maui.Platforms.Services
 
                 // TODO: Implement mapping for BarcodeTypes
 
+                var payloadStringValue = barcode.PayloadStringValue;
+                var barcodeFormats = barcode.Symbology.ToBarcodeFormats();
+
+                var rawBytes = GetRawBytes(barcode);
+                if (rawBytes == null)
+                {
+                    rawBytes = payloadStringValue != null ? Encoding.ASCII.GetBytes(payloadStringValue) : null;
+                }
+
                 var barcodeResult = new BarcodeResult(
-                    displayValue: barcode.PayloadStringValue,
+                    displayValue: payloadStringValue,
                     barcodeType: BarcodeTypes.Unknown,
-                    barcodeFormat: barcode.Symbology.ToBarcodeFormats(),
-                    rawValue: barcode.PayloadStringValue,
-                    rawBytes: GetRawBytes(barcode) ?? Encoding.ASCII.GetBytes(barcode.PayloadStringValue),
+                    barcodeFormat: barcodeFormats,
+                    rawValue: payloadStringValue,
+                    rawBytes: rawBytes,
                     previewBoundingBox: previewBoundingBox,
                     imageBoundingBox: imageBoundingBox,
                     cornerPoints: cornerPoints);
@@ -145,7 +169,7 @@ namespace CameraScanner.Maui.Platforms.Services
             return new Point(rectF.X, rectF.Y);
         }
 
-        private static byte[] GetRawBytes(VNBarcodeObservation barcodeObservation)
+        private static byte[]? GetRawBytes(VNBarcodeObservation barcodeObservation)
         {
             return barcodeObservation.Symbology switch
             {

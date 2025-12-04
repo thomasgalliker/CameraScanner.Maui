@@ -214,7 +214,7 @@ namespace CameraScanner.Maui.Controls
             }
         }
 
-        private void TapGestureRecognizer_OnTapped(object sender, TappedEventArgs e)
+        private void TapGestureRecognizer_OnTapped(object? sender, TappedEventArgs e)
         {
             if (this.BarcodeResultTappedCommand is not ICommand barcodeResultTappedCommand)
             {
