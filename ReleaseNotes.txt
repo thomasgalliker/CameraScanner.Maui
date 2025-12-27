@@ -1,5 +1,6 @@
 1.8
 - Add support for nullable reference types.
+- Add support for .NET MAUI 10.
 
 1.7
 - Update to .NET 9.
