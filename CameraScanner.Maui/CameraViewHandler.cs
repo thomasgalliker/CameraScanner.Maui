@@ -15,7 +15,7 @@ namespace CameraScanner.Maui
         private readonly IDeviceInfo deviceInfo;
         private readonly IDeviceDisplay deviceDisplay;
 
-        private CameraManager cameraManager;
+        private CameraManager? cameraManager;
 
         private static readonly PropertyMapper<CameraView, CameraViewHandler> CameraViewMapper = new()
         {
@@ -34,12 +34,13 @@ namespace CameraScanner.Maui
         public CameraViewHandler()
             : base(CameraViewMapper)
         {
-            var loggerFactory = IPlatformApplication.Current.Services.GetService<ILoggerFactory>();
+            var serviceProvider = IPlatformApplication.Current!.Services;
+            var loggerFactory = serviceProvider.GetRequiredService<ILoggerFactory>();
             this.logger = loggerFactory.CreateLogger<CameraViewHandler>();
             this.loggerFactory = loggerFactory;
-            this.cameraPermissions = IPlatformApplication.Current.Services.GetService<ICameraPermissions>();
-            this.deviceInfo = IPlatformApplication.Current.Services.GetService<IDeviceInfo>();
-            this.deviceDisplay = IPlatformApplication.Current.Services.GetService<IDeviceDisplay>();
+            this.cameraPermissions = serviceProvider.GetRequiredService<ICameraPermissions>();
+            this.deviceInfo = serviceProvider.GetRequiredService<IDeviceInfo>();
+            this.deviceDisplay = serviceProvider.GetRequiredService<IDeviceDisplay>();
         }
 
         protected override void ConnectHandler(BarcodeView platformView)
@@ -58,7 +59,9 @@ namespace CameraScanner.Maui
         protected override void DisconnectHandler(BarcodeView barcodeView)
         {
             this.logger.LogDebug("DisconnectHandler");
-            this.cameraManager.Dispose();
+            this.cameraManager?.Dispose();
+            this.cameraManager = null;
+
             base.DisconnectHandler(barcodeView);
         }
     }

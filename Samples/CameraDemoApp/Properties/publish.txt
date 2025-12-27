@@ -7,9 +7,9 @@ dotnet publish Samples/CameraDemoApp/CameraDemoApp.csproj \
   -p:AndroidPackageFormats="aab" \
   -p:AndroidKeyStore=true \
   -p:AndroidSigningKeyStore="ch.superdev.camerascanner.keystore" \
-  -p:AndroidSigningStorePass=storepass \
-  -p:AndroidSigningKeyAlias=alias \
-  -p:AndroidSigningKeyPass=keypass
+  -p:AndroidSigningStorePass=dOT3l6OS0oJhJH \
+  -p:AndroidSigningKeyAlias=camerascanner \
+  -p:AndroidSigningKeyPass=L44eoi9r5vnNA4
 
 
 dotnet publish Samples/CameraDemoApp/CameraDemoApp.csproj \
