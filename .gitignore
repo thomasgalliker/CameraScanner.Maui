@@ -254,3 +254,4 @@ paket-files/
 *.p8
 *.p12
 ch.superdev.camerascanner.keystore
+publish.txt
