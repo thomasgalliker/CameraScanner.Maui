@@ -3,25 +3,26 @@
 namespace CameraScanner.Maui
 {
     [DebuggerDisplay("{this.BarcodeFormat}")]
-    public class BarcodeResult : IEquatable<BarcodeResult>
+    public class BarcodeResult : IEquatable<BarcodeResult?>
     {
-        public BarcodeResult(string displayValue)
+        public BarcodeResult(string? displayValue)
         {
             this.DisplayValue = this.RawValue = displayValue;
+            this.CornerPoints = Array.Empty<Point>();
         }
 
-        public BarcodeResult(string displayValue, BarcodeFormats barcodeFormat)
+        public BarcodeResult(string? displayValue, BarcodeFormats barcodeFormat)
             : this(displayValue)
         {
             this.BarcodeFormat = barcodeFormat;
         }
 
         public BarcodeResult(
-            string displayValue,
+            string? displayValue,
             BarcodeTypes barcodeType,
             BarcodeFormats barcodeFormat,
-            string rawValue,
-            byte[] rawBytes,
+            string? rawValue,
+            byte[]? rawBytes,
             RectF previewBoundingBox,
             RectF imageBoundingBox,
             Point[] cornerPoints)
@@ -46,11 +47,11 @@ namespace CameraScanner.Maui
         /// </summary>
         public BarcodeFormats BarcodeFormat { get; }
 
-        public string DisplayValue { get; }
+        public string? DisplayValue { get; }
 
-        public string RawValue { get; }
+        public string? RawValue { get; }
 
-        public byte[] RawBytes { get; }
+        public byte[]? RawBytes { get; }
 
         public RectF PreviewBoundingBox { get; internal set; }
 
@@ -58,7 +59,7 @@ namespace CameraScanner.Maui
 
         public Point[] CornerPoints { get; }
 
-        public bool Equals(BarcodeResult other)
+        public bool Equals(BarcodeResult? other)
         {
             if (other is null)
             {
@@ -73,7 +74,7 @@ namespace CameraScanner.Maui
             return this.DisplayValue == other.DisplayValue;
         }
 
-        public override bool Equals(object obj)
+        public override bool Equals(object? obj)
         {
             if (obj is null)
             {
@@ -98,12 +99,12 @@ namespace CameraScanner.Maui
             return this.DisplayValue != null ? this.DisplayValue?.GetHashCode() ?? 0 : 0;
         }
 
-        public static bool operator ==(BarcodeResult left, BarcodeResult right)
+        public static bool operator ==(BarcodeResult? left, BarcodeResult? right)
         {
             return Equals(left, right);
         }
 
-        public static bool operator !=(BarcodeResult left, BarcodeResult right)
+        public static bool operator !=(BarcodeResult? left, BarcodeResult? right)
         {
             return !Equals(left, right);
         }

@@ -22,22 +22,44 @@ namespace CameraScanner.Maui.Platforms.Services
 
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(byte[] imageArray)
         {
-            return await ProcessBitmapAsync(await BitmapFactory.DecodeByteArrayAsync(imageArray, 0, imageArray.Length));
+            ArgumentNullException.ThrowIfNull(imageArray);
+
+            var bitmap = await BitmapFactory.DecodeByteArrayAsync(imageArray, 0, imageArray.Length);
+            if (bitmap == null)
+            {
+                throw new InvalidOperationException("ScanFromImageAsync failed to load bitmap using BitmapFactory.DecodeByteArrayAsync");
+            }
+
+            return await ProcessBitmapAsync(bitmap);
         }
 
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(FileResult file)
         {
-            return await ProcessBitmapAsync(await BitmapFactory.DecodeStreamAsync(await file.OpenReadAsync()));
+            ArgumentNullException.ThrowIfNull(file);
+
+            var stream = await file.OpenReadAsync();
+            return await this.ScanFromImageAsync(stream);
         }
 
         public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(string url)
         {
-            return await ProcessBitmapAsync(await BitmapFactory.DecodeStreamAsync(new URL(url).OpenStream()));
+            ArgumentNullException.ThrowIfNull(url);
+
+            var stream = new URL(url).OpenStream();
+            return await this.ScanFromImageAsync(stream);
         }
 
-        public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(Stream stream)
+        public async Task<HashSet<BarcodeResult>> ScanFromImageAsync(Stream? stream)
         {
-            return await ProcessBitmapAsync(await BitmapFactory.DecodeStreamAsync(stream));
+            ArgumentNullException.ThrowIfNull(stream);
+
+            var bitmap = await BitmapFactory.DecodeStreamAsync(stream);
+            if (bitmap == null)
+            {
+                throw new InvalidOperationException("ScanFromImageAsync failed to load bitmap using BitmapFactory.DecodeStreamAsync");
+            }
+
+            return await ProcessBitmapAsync(bitmap);
         }
 
         private static async Task<HashSet<BarcodeResult>> ProcessBitmapAsync(Bitmap bitmap)
@@ -53,7 +75,7 @@ namespace CameraScanner.Maui.Platforms.Services
             var results = ProcessBarcodeResult(await scanner.Process(image));
             barcodeResults.UnionWith(results);
 
-            using var invertedBitmap = Bitmap.CreateBitmap(bitmap.Height, bitmap.Width, Bitmap.Config.Argb8888);
+            using var invertedBitmap = Bitmap.CreateBitmap(bitmap.Height, bitmap.Width, Bitmap.Config.Argb8888!);
             using var canvas = new Canvas(invertedBitmap);
             using var paint = new Paint();
             using var matrixInvert = new ColorMatrix();
@@ -79,7 +101,7 @@ namespace CameraScanner.Maui.Platforms.Services
             return barcodeResults;
         }
 
-        internal static HashSet<BarcodeResult> ProcessBarcodeResult(Java.Lang.Object inputResults, CoordinateTransform transform = null)
+        internal static HashSet<BarcodeResult> ProcessBarcodeResult(Java.Lang.Object? inputResults, CoordinateTransform? transform = null)
         {
             var barcodeResults = new HashSet<BarcodeResult>();
 
@@ -89,7 +111,7 @@ namespace CameraScanner.Maui.Platforms.Services
             }
 
             using var inputResultsArrayList = inputResults.JavaCast<ArrayList>();
-            if (inputResultsArrayList?.IsEmpty ?? true)
+            if (inputResultsArrayList.IsEmpty)
             {
                 return barcodeResults;
             }
@@ -97,11 +119,6 @@ namespace CameraScanner.Maui.Platforms.Services
             foreach (var inputResult in inputResultsArrayList.ToArray())
             {
                 using var barcode = inputResult.JavaCast<Barcode>();
-                if (barcode is null)
-                {
-                    continue;
-                }
-
                 var boundingBox = barcode.BoundingBox;
                 using var rectF = boundingBox.AsRectF();
                 var imageRect = rectF.AsRectangleF();
@@ -114,7 +131,7 @@ namespace CameraScanner.Maui.Platforms.Services
                     transform.MapRect(rectF);
                     previewRect = rectF.AsRectangleF();
 
-                    cornerPoints = barcode.GetCornerPoints()
+                    cornerPoints = barcode.GetCornerPoints()?
                         .Select(p =>
                         {
                             var pointF = new global::Android.Graphics.PointF(p);
@@ -122,19 +139,19 @@ namespace CameraScanner.Maui.Platforms.Services
                             return pointF;
                         })
                         .Select(p => new Point(p.X, p.Y))
-                        .ToArray();
+                        .ToArray() ?? Array.Empty<Point>();
                 }
                 else
                 {
                     previewRect = rectF.AsRectangleF();
-                    cornerPoints = barcode.GetCornerPoints()
+                    cornerPoints = barcode.GetCornerPoints()?
                        .Select(p =>
                        {
                            var pointF = new global::Android.Graphics.PointF(p);
                            return pointF;
                        })
                        .Select(p => new Point(p.X, p.Y))
-                       .ToArray();
+                       .ToArray() ?? Array.Empty<Point>();
                 }
 
                 var barcodeResult = new BarcodeResult(
@@ -161,21 +178,31 @@ namespace CameraScanner.Maui.Platforms.Services
 
         internal static void InvertLuminance(Image image)
         {
-            var yBuffer = image.GetPlanes()[0].Buffer;
-            if (yBuffer.IsDirect)
+            var yBuffer = image.GetPlanes()?[0].Buffer;
+            if (yBuffer != null)
             {
-                unsafe
+                if (yBuffer.IsDirect)
                 {
-                    var data = (ulong*)yBuffer.GetDirectBufferAddress();
-                    Parallel.For(0, yBuffer.Capacity() / sizeof(ulong), ParallelOptions, (i) => data[i] = ~data[i]);
+                    unsafe
+                    {
+                        var data = (ulong*)yBuffer.GetDirectBufferAddress();
+                        Parallel.For(0, yBuffer.Capacity() / sizeof(ulong), ParallelOptions, i => data[i] = ~data[i]);
+                    }
                 }
-            }
-            else
-            {
-                using var bits = BitSet.ValueOf(yBuffer);
-                bits.Flip(0, bits.Length());
-                yBuffer.Rewind();
-                yBuffer.Put(bits.ToByteArray());
+                else
+                {
+                    using var bits = BitSet.ValueOf(yBuffer);
+                    if (bits != null)
+                    {
+                        bits.Flip(0, bits.Length());
+                        yBuffer.Rewind();
+                        var byteArray = bits.ToByteArray();
+                        if (byteArray != null)
+                        {
+                            yBuffer.Put(byteArray);
+                        }
+                    }
+                }
             }
         }
 
