@@ -190,8 +190,6 @@ namespace CameraScanner.Maui
 
             try
             {
-
-
                 if (!this.started)
                 {
                     return;
@@ -337,10 +335,10 @@ namespace CameraScanner.Maui
                                 .OrderByDescending(d => d.VirtualDeviceSwitchOverVideoZoomFactors.Length)
                                 .FirstOrDefault();
 
-                            virtualDeviceSwitchOverVideoZoomFactor = selectedCaptureDevice.VirtualDeviceSwitchOverVideoZoomFactors
-                                .FirstOrDefault()?.FloatValue;
-
                             this.captureDevice = selectedCaptureDevice;
+                            virtualDeviceSwitchOverVideoZoomFactor = selectedCaptureDevice?
+                                .VirtualDeviceSwitchOverVideoZoomFactors
+                                .FirstOrDefault()?.FloatValue;
                         }
 
                         if (this.captureDevice == null)
@@ -464,11 +462,16 @@ namespace CameraScanner.Maui
 
         private void SetTorchModeOn(AVCaptureTorchMode torchMode)
         {
-            CaptureDeviceLock(this.captureDevice, () =>
+            if (this.captureDevice is not AVCaptureDevice captureDevice)
             {
-                if (this.captureDevice.IsTorchModeSupported(torchMode))
+                return;
+            }
+
+            CaptureDeviceLock(captureDevice, () =>
+            {
+                if (captureDevice.IsTorchModeSupported(torchMode))
                 {
-                    this.captureDevice.TorchMode = torchMode;
+                    captureDevice.TorchMode = torchMode;
                 }
             });
         }
@@ -531,13 +534,18 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            var videoZoomFactor = Math.Clamp(requestZoomFactor,
-                (float)this.captureDevice.MinAvailableVideoZoomFactor,
-                (float)this.captureDevice.MaxAvailableVideoZoomFactor);
-
-            CaptureDeviceLock(this.captureDevice, () =>
+            if (this.captureDevice is not AVCaptureDevice captureDevice)
             {
-                this.captureDevice.VideoZoomFactor = videoZoomFactor;
+                return;
+            }
+
+            var videoZoomFactor = Math.Clamp(requestZoomFactor,
+                (float)captureDevice.MinAvailableVideoZoomFactor,
+                (float)captureDevice.MaxAvailableVideoZoomFactor);
+
+            CaptureDeviceLock(captureDevice, () =>
+            {
+                captureDevice.VideoZoomFactor = videoZoomFactor;
                 this.UpdateCurrentZoomFactor();
             });
         }
@@ -549,7 +557,12 @@ namespace CameraScanner.Maui
                 return;
             }
 
-            this.cameraView.CurrentZoomFactor = (float)this.captureDevice.VideoZoomFactor;
+            if (this.captureDevice is not AVCaptureDevice captureDevice)
+            {
+                return;
+            }
+
+            this.cameraView.CurrentZoomFactor = (float)captureDevice.VideoZoomFactor;
         }
 
         private void UpdateMinMaxZoomFactor()
@@ -865,7 +878,7 @@ namespace CameraScanner.Maui
                     // this.logger.LogDebug("RemoveObserver");
                     NSNotificationCenter.DefaultCenter.RemoveObserver(this.subjectAreaChangedNotification);
 
-                    if (this.tapGestureRecognizer is not null)
+                    if (this.tapGestureRecognizer != null)
                     {
                         // this.logger.LogDebug("RemoveGestureRecognizer");
                         this.barcodeView?.RemoveGestureRecognizer(this.tapGestureRecognizer);
