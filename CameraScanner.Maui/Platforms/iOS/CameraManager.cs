@@ -105,6 +105,7 @@ namespace CameraScanner.Maui
             this.barcodeView = new BarcodeView(this.previewLayer, this.shapeLayer);
             this.barcodeView.Layer.AddSublayer(this.previewLayer);
             this.barcodeView.AddGestureRecognizer(this.tapGestureRecognizer);
+            this.barcodeView.WindowChanged += this.BarcodeView_WindowChanged;
         }
 
         internal async Task StartAsync()
@@ -591,11 +592,36 @@ namespace CameraScanner.Maui
 
             if (this.cameraView.CameraEnabled)
             {
+                if (this.barcodeView.Window == null)
+                {
+                    // UpdateCameraEnabled deferred until BarcodeView is attached to a window
+                    return;
+                }
+
                 await this.StartAsync();
             }
             else
             {
                 this.Stop();
+            }
+        }
+
+        private void BarcodeView_WindowChanged(object? sender, EventArgs e)
+        {
+            if (this.disposed)
+            {
+                return;
+            }
+
+            if (this.barcodeView.Window == null)
+            {
+                this.Stop();
+                return;
+            }
+
+            if (this.cameraView.CameraEnabled)
+            {
+                this.UpdateCameraEnabled();
             }
         }
 
@@ -843,6 +869,11 @@ namespace CameraScanner.Maui
                     {
                         // this.logger.LogDebug("RemoveGestureRecognizer");
                         this.barcodeView?.RemoveGestureRecognizer(this.tapGestureRecognizer);
+                    }
+
+                    if (this.barcodeView != null)
+                    {
+                        this.barcodeView.WindowChanged -= this.BarcodeView_WindowChanged;
                     }
 
                     // this.logger.LogDebug("SetSampleBufferDelegate");
