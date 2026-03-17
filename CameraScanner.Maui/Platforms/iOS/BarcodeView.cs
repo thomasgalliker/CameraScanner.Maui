@@ -11,6 +11,8 @@ namespace CameraScanner.Maui
         private readonly AVCaptureVideoPreviewLayer previewLayer;
         private readonly CAShapeLayer shapeLayer;
 
+        internal event EventHandler? WindowChanged;
+
         internal BarcodeView(AVCaptureVideoPreviewLayer previewLayer, CAShapeLayer shapeLayer) : base()
         {
             this.previewLayer = previewLayer;
@@ -38,7 +40,7 @@ namespace CameraScanner.Maui
             {
                 if (UIDevice.CurrentDevice.CheckSystemVersion(13, 0))
                 {
-                    var interfaceOrientation = this.Window.WindowScene?.InterfaceOrientation;
+                    var interfaceOrientation = this.Window?.WindowScene?.InterfaceOrientation;
                     previewLayerConnection.VideoOrientation = GetVideoOrientation(interfaceOrientation);
                 }
                 else
@@ -48,6 +50,12 @@ namespace CameraScanner.Maui
                     previewLayerConnection.VideoOrientation = AVCaptureVideoOrientation.Portrait;
                 }
             }
+        }
+
+        public override void MovedToWindow()
+        {
+            base.MovedToWindow();
+            this.WindowChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private static AVCaptureVideoOrientation GetVideoOrientation(UIInterfaceOrientation? interfaceOrientation)
