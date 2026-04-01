@@ -1,73 +1,189 @@
+using System;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
 using CameraScanner.Maui.Utils;
 using FluentAssertions;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace CameraScanner.Maui.Tests.Utils
 {
     public class SyncHelperTests
     {
-        [Fact]
-        public async Task RunOnceAsyncShouldExecuteNonResultTaskOnlyOnce()
+        private readonly ITestOutputHelper testOutputHelper;
+
+        public SyncHelperTests(ITestOutputHelper testOutputHelper)
         {
-            // Arrange
-            var helper = new SyncHelper();
-            var started = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var invocationCount = 0;
-
-            var firstRun = helper.RunOnceAsync(async () =>
-            {
-                Interlocked.Increment(ref invocationCount);
-                started.TrySetResult(true);
-                await release.Task;
-            });
-
-            await started.Task;
-
-            // Act
-            var secondRun = helper.RunOnceAsync(() =>
-            {
-                Interlocked.Increment(ref invocationCount);
-                return Task.CompletedTask;
-            });
-
-            release.TrySetResult(true);
-            await Task.WhenAll(firstRun, secondRun);
-
-            // Assert
-            invocationCount.Should().Be(1);
+            this.testOutputHelper = testOutputHelper;
         }
 
         [Fact]
-        public async Task RunOnceAsyncShouldShareResultAcrossConcurrentCalls()
+        public void ShouldRunOnce_IsRunningFalse()
         {
             // Arrange
-            var helper = new SyncHelper();
-            var started = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var release = new TaskCompletionSource<bool>(TaskCreationOptions.RunContinuationsAsynchronously);
-            var invocationCount = 0;
-
-            Task<int> CreateRun(int result) => helper.RunOnceAsync(async () =>
-            {
-                Interlocked.Increment(ref invocationCount);
-                started.TrySetResult(true);
-                await release.Task;
-                return result;
-            });
-
-            var firstRun = CreateRun(42);
-            await started.Task;
+            var syncHelper = new SyncHelper();
 
             // Act
-            var secondRun = CreateRun(99);
-            var thirdRun = CreateRun(123);
-
-            release.TrySetResult(true);
-            var results = await Task.WhenAll(firstRun, secondRun, thirdRun);
+            var isRunning = syncHelper.IsRunning;
 
             // Assert
-            results.Should().Equal(42, 42, 42);
-            invocationCount.Should().Be(1);
+            isRunning.Should().BeFalse();
+        }
+
+        [Fact]
+        public void ShouldRunOnce_IsRunningTrue()
+        {
+            // Arrange
+            var isRunning = false;
+            var syncHelper = new SyncHelper();
+
+            // Act
+            syncHelper.RunOnce(() =>
+            {
+                isRunning = syncHelper.IsRunning;
+            });
+
+            // Assert
+            isRunning.Should().BeTrue();
+        }
+
+        [Fact]
+        public async Task ShouldRunOnce_WithoutReturnValue()
+        {
+            // Arrange
+            var counter = 0;
+            var parallelTasks = 64;
+            var syncHelper = new SyncHelper();
+            using var ready = new CountdownEvent(parallelTasks);
+            using var start = new ManualResetEventSlim(false);
+
+            // Act
+            var tasks = Enumerable.Range(1, parallelTasks)
+                .Select(id => Task.Run(() =>
+                {
+                    ready.Signal();
+                    start.Wait();
+
+                    syncHelper.RunOnce(() =>
+                    {
+                        Thread.Sleep(100);
+                        var value = Interlocked.Increment(ref counter);
+                        this.testOutputHelper.WriteLine($"Run #{id}: \t\tcounter={value}");
+                    });
+                }))
+                .ToList();
+            ready.Wait();
+            start.Set();
+            await Task.WhenAll(tasks);
+
+            // Assert
+            counter.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task ShouldRunOnce_WithReturnValue()
+        {
+            // Arrange
+            var counter = 0;
+            var parallelTasks = 64;
+            var syncHelper = new SyncHelper();
+            using var ready = new CountdownEvent(parallelTasks);
+            using var start = new ManualResetEventSlim(false);
+
+            // Act
+            var tasks = Enumerable.Range(1, parallelTasks)
+                .Select(id => Task.Run(() =>
+                {
+                    ready.Signal();
+                    start.Wait();
+
+                    return syncHelper.RunOnce(() =>
+                    {
+                        Thread.Sleep(100);
+                        var value = Interlocked.Increment(ref counter);
+                        this.testOutputHelper.WriteLine($"Run #{id}: \t\tcounter={value}");
+                        return value;
+                    });
+                }))
+                .ToList();
+            ready.Wait();
+            start.Set();
+            var results = await Task.WhenAll(tasks);
+
+            // Assert
+            counter.Should().Be(1);
+            results.Should().HaveCount(parallelTasks);
+            results.Should().AllSatisfy(i => i.Should().Be(1));
+        }
+
+        [Fact]
+        public async Task ShouldRunOnceAsync_WithoutReturnValue()
+        {
+            // Arrange
+            var counter = 0;
+            var parallelTasks = 64;
+            var syncHelper = new SyncHelper();
+            var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var ready = 0;
+
+            // Act
+            var tasks = Enumerable.Range(1, parallelTasks)
+                .Select(id => Task.Run(async () =>
+                {
+                    Interlocked.Increment(ref ready);
+                    await start.Task;
+
+                    await syncHelper.RunOnceAsync(async () =>
+                    {
+                        await Task.Delay(100);
+                        var value = Interlocked.Increment(ref counter);
+                        this.testOutputHelper.WriteLine($"Run #{id}: \t\tcounter={value}");
+                    });
+                }))
+                .ToList();
+            SpinWait.SpinUntil(() => Volatile.Read(ref ready) == parallelTasks, TimeSpan.FromSeconds(5)).Should().BeTrue();
+            start.SetResult();
+            await Task.WhenAll(tasks);
+
+            // Assert
+            counter.Should().Be(1);
+        }
+
+        [Fact]
+        public async Task ShouldRunOnceAsync_WithReturnValue()
+        {
+            // Arrange
+            var counter = 0;
+            var parallelTasks = 64;
+            var syncHelper = new SyncHelper();
+            var start = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+            var ready = 0;
+
+            // Act
+            var tasks = Enumerable.Range(1, parallelTasks)
+                .Select(id => Task.Run(async () =>
+                {
+                    Interlocked.Increment(ref ready);
+                    await start.Task;
+
+                    return await syncHelper.RunOnceAsync(async () =>
+                    {
+                        await Task.Delay(100);
+                        var value = Interlocked.Increment(ref counter);
+                        this.testOutputHelper.WriteLine($"Run #{id}: \t\tcounter={value}");
+                        return value;
+                    });
+                }))
+                .ToList();
+            SpinWait.SpinUntil(() => Volatile.Read(ref ready) == parallelTasks, TimeSpan.FromSeconds(5)).Should().BeTrue();
+            start.SetResult();
+            var results = await Task.WhenAll(tasks);
+
+            // Assert
+            counter.Should().Be(1);
+            results.Should().HaveCount(parallelTasks);
+            results.Should().AllSatisfy(i => i.Should().Be(1));
         }
     }
 }
