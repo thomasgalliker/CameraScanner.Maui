@@ -61,11 +61,7 @@ namespace CameraScanner.Maui
                     {
                         Task.Run(async () =>
                         {
-                            var run = await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
-                            if (run == false)
-                            {
-                                // this.logger.LogDebug("Analyze -> frame skipped (already in progress)");
-                            }
+                            await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
                         }).Wait();
                     }
 
