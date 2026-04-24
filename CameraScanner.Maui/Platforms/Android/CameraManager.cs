@@ -460,27 +460,13 @@ namespace CameraScanner.Maui
                                 if (this.cameraView.AimMode)
                                 {
                                     var previewCenter = new Point(this.previewView.Width / 2d, this.previewView.Height / 2d);
-
-                                    foreach (var barcode in barcodeResults)
-                                    {
-                                        if (!barcode.PreviewBoundingBox.Contains(previewCenter))
-                                        {
-                                            barcodeResults.Remove(barcode);
-                                        }
-                                    }
+                                    barcodeResults.RemoveWhere(b => !b.PreviewBoundingBox.Contains(previewCenter));
                                 }
 
                                 if (this.cameraView.ViewfinderMode)
                                 {
                                     var previewRect = new RectF(0f, 0f, this.previewView.Width, this.previewView.Height);
-
-                                    foreach (var barcode in barcodeResults)
-                                    {
-                                        if (!previewRect.Contains(barcode.PreviewBoundingBox))
-                                        {
-                                            barcodeResults.Remove(barcode);
-                                        }
-                                    }
+                                    barcodeResults.RemoveWhere(b => !previewRect.Contains(b.PreviewBoundingBox));
                                 }
 
                                 this.cameraView.DetectionFinished(barcodeResults.ToArray());
