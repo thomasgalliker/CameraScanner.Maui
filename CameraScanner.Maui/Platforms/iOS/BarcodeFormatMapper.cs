@@ -51,8 +51,6 @@ namespace CameraScanner.Maui
             if (barcodeFormats.HasFlag(BarcodeFormats.ITF))
             {
                 symbologiesList.Add(VNBarcodeSymbology.Itf14);
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5);
-                symbologiesList.Add(VNBarcodeSymbology.I2OF5Checksum);
             }
 
             if (barcodeFormats.HasFlag(BarcodeFormats.QR))

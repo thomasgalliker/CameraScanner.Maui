@@ -54,6 +54,11 @@ namespace CameraScanner.Maui
                     formats |= Barcode.FormatItf;
                 }
 
+                if (barcodeFormats.HasFlag(BarcodeFormats.I2OF5))
+                {
+                    formats |= Barcode.FormatItf;
+                }
+
                 if (barcodeFormats.HasFlag(BarcodeFormats.QR))
                 {
                     formats |= Barcode.FormatQrCode;
