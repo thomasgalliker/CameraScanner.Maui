@@ -15,7 +15,7 @@
 		</PackageReference>
 		<PackageReference Include="Moq" Version="4.20.72" />
 		<PackageReference Include="Moq.AutoMock" Version="3.6.1" />
-		<PackageReference Include="FluentAssertions" Version="8.8.0" />
+		<PackageReference Include="AwesomeAssertions" Version="9.4.0" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
 		<PackageReference Include="ObjectDumper.NET" Version="4.3.2" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="10.0.1" />
