@@ -84,7 +84,7 @@
   </ItemGroup>
 
   <!--Android-specific nuget packages-->
-  <ItemGroup Condition="$(TargetFramework.EndsWith('-android')) == true">
+  <ItemGroup Condition="$(TargetFramework.Contains('-android')) == true">
     <PackageReference Include="Xamarin.Google.MLKit.BarcodeScanning" Version="117.3.0.7" />
     <PackageReference Include="Xamarin.AndroidX.Camera.View" Version="1.6.1" />
     <PackageReference Include="Xamarin.AndroidX.Camera.Camera2" Version="1.6.1" />
