@@ -1,64 +1,104 @@
-﻿using NLog.Config;
+﻿using System.Text;
+using NLog.Config;
 using NLog.Targets;
+using Superdev.Maui.Extensions;
 using LogLevel = NLog.LogLevel;
 
 namespace CameraDemoApp.Services.Logging
 {
     public static class NLogLoggerConfiguration
     {
+        private static readonly string LogFilePath;
+
         static NLogLoggerConfiguration()
         {
             LogFilePath = CreateLogFile();
+            LogFolderPath = Path.GetDirectoryName(LogFilePath)!;
         }
 
-        public static string LogFilePath { get; }
+        public static string LogFolderPath { get; }
 
         private static string CreateLogFile()
         {
             var filename = $"{AppInfo.PackageName}.log";
-            var folder = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            if (!Directory.Exists(folder))
+
+            var logFolder = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments), "Logs");
+            if (!Directory.Exists(logFolder))
             {
-                folder = Directory.CreateDirectory(folder).FullName;
+                logFolder = Directory.CreateDirectory(logFolder).FullName;
             }
 
-            var filePath = Path.Combine(folder, filename);
-            if (!File.Exists(filePath))
-            {
-                File.Create(filePath);
-            }
-
-            return filePath;
+            return Path.Combine(logFolder, filename);
         }
 
         public static LoggingConfiguration GetLoggingConfiguration()
         {
+            var deviceInfo = DeviceInfo.Current;
+            var appInfo = AppInfo.Current;
+
             var config = new LoggingConfiguration();
-            var layout = "${longdate:universalTime=True}|${level}|${logger}|${message}|${exception:format=tostring}[EOL]";
+#if DEBUG
+            const bool isDebug = true;
+#else
+            const bool isDebug = false;
+#endif
+            var diagnosticsInfo = new StringBuilder()
+                .AppendLine($"App: {appInfo.PackageName}")
+                .AppendLine($"Version: {appInfo.VersionString} ({appInfo.BuildString})")
+                .AppendLine($"OS: {deviceInfo.Platform} {deviceInfo.Version}")
+                .AppendLine($"Device: {deviceInfo.Manufacturer} {deviceInfo.Model}")
+                .AppendLine($"Debug: {isDebug}")
+                .ToString()
+                .TrimStartAndEnd()
+                ;
+
+            config.Variables.Add("DiagnosticsInfo", diagnosticsInfo);
+
+            const string layout = "${longdate:universalTime=True}|${level}|${logger}|${message}${onexception:inner=${newline}${exception:format=tostring}}[EOL]";
 
             // Console Target
-            var consoleTarget = new ConsoleTarget("console");
-            consoleTarget.Layout = layout;
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, consoleTarget);
+            {
+                var target = new ConsoleTarget("console");
+                target.Layout = layout;
+
+                config.AddTarget("console", target);
+
+                var loggingRule = new LoggingRule("*", LogLevel.Trace, target);
+                config.LoggingRules.Add(loggingRule);
+            }
 
             // Debug Target
-            var debugTarget = new DebugTarget("debug");
-            debugTarget.Layout = layout;
-            config.AddRule(LogLevel.Trace, LogLevel.Fatal, debugTarget);
+            {
+                var target = new DebugTarget("debug");
+                target.Layout = layout;
+
+                config.AddTarget("debug", target);
+
+                var loggingRule = new LoggingRule("*", LogLevel.Trace, target);
+                config.LoggingRules.Add(loggingRule);
+            }
 
             // File Target
-            var fileTarget = new FileTarget();
-            fileTarget.FileName = LogFilePath;
-            fileTarget.Layout = layout;
-            fileTarget.MaxArchiveFiles = 1;
-            fileTarget.ArchiveNumbering = ArchiveNumberingMode.Rolling;
-            fileTarget.ArchiveAboveSize = 1048576; // 1MB
-            fileTarget.ConcurrentWrites = true;
-            fileTarget.KeepFileOpen = false;
-            config.AddTarget("file", fileTarget);
+            {
+                var target = new FileTarget("file");
+                target.Layout = layout;
+                target.FileName = LogFilePath;
+                target.MaxArchiveFiles = 2;
+                target.ArchiveSuffixFormat = ".{0:00}";
+                target.ArchiveAboveSize = 102400; // 100KB
+                target.KeepFileOpen = true;
 
-            var fileRule = new LoggingRule("*", LogLevel.Trace, fileTarget);
-            config.LoggingRules.Add(fileRule);
+                target.Header = $"----------------------------------------${{newline}}" +
+                                $"${{var:name=DiagnosticsInfo}}${{newline}}" +
+                                $"Date: ${{longdate:universalTime=True}}${{newline}}" +
+                                $"----------------------------------------";
+                target.WriteHeaderWhenInitialFileNotEmpty = true;
+
+                config.AddTarget("file", target);
+
+                var loggingRule = new LoggingRule("*", LogLevel.Trace, target);
+                config.LoggingRules.Add(loggingRule);
+            }
 
             return config;
         }
