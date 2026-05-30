@@ -144,4 +144,30 @@
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
 
+  <Target Name="PrintVariables" BeforeTargets="Build">
+    <Message Importance="high" Text="----------------------" />
+    <Message Importance="high" Text="PrintVariables for $(TargetFramework)" />
+    <Message Importance="high" Text="Configuration: $(Configuration)" />
+    <Message Importance="high" Text="Platform: $(Platform)" />
+    <Message Importance="high" Text="PlatformTarget: $(PlatformTarget)" />
+    <Message Importance="high" Text="TargetFramework: $(TargetFramework)" />
+    <Message Importance="high" Text="RuntimeIdentifier: $(RuntimeIdentifier)" />
+    <Message Importance="high" Text="SupportedOSPlatformVersion: $(SupportedOSPlatformVersion)" />
+    <Message Importance="high" Text="OutputPath: $(OutputPath)" />
+    <Message Importance="high" Text="ApplicationId: $(ApplicationId)" />
+    <Message Importance="high" Text="ApplicationTitle: $(ApplicationTitle)" />
+    <Message Importance="high" Text="ApplicationDisplayVersion: $(ApplicationDisplayVersion)" />
+    <Message Importance="high" Text="ApplicationVersion: $(ApplicationVersion)" />
+    <Message Importance="high" Text="ProvisioningType: $(ProvisioningType)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignKey: $(CodesignKey)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignProvision: $(CodesignProvision)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignEntitlements: $(CodesignEntitlements)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="EmbedAssembliesIntoApk: $(EmbedAssembliesIntoApk)" Condition="$(TargetFramework.Contains('-android'))" />
+    <Message Importance="high" Text="JavaMaximumHeapSize: $(JavaMaximumHeapSize)" Condition="$(TargetFramework.Contains('-android'))" />
+    <Message Importance="high" Text="DebugSymbols: $(DebugSymbols)" />
+    <Message Importance="high" Text="DebugType: $(DebugType)" />
+    <Message Importance="high" Text="Optimize: $(Optimize)" />
+    <Message Importance="high" Text="----------------------" />
+  </Target>
+  
 </Project>
