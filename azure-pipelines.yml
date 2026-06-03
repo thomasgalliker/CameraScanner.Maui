@@ -132,6 +132,7 @@ steps:
 
   - task: DotNetCoreCLI@2
     displayName: 'Create NuGet Package'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
     inputs:
       command: pack
       packagesToPack: CameraScanner.Maui/**/*.csproj
