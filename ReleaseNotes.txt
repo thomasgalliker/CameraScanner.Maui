@@ -1,5 +1,7 @@
 1.9
 - Maintenance updates.
+- Fixed a crash on iOS when a detected barcode has no payload (see GitHub issue #64).
+- Fixed ScanFromImageAsync on iOS always returning an empty result.
 
 1.8
 - Add support for nullable reference types.
