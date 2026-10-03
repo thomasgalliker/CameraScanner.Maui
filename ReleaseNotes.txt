@@ -1,5 +1,6 @@
 1.9
 - Maintenance updates.
+- Fixed Android crashes when CameraView is removed during camera initialization or disposal (see GitHub issue #85).
 
 1.8
 - Add support for nullable reference types.

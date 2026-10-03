@@ -48,6 +48,9 @@ namespace CameraScanner.Maui
         private BarcodeAnalyzer? barcodeAnalyzer;
         private IMLKitBarcodeScanner? barcodeScanner;
         private ICameraInfo? cameraInfo;
+        private int disposed;
+
+        private bool IsDisposed => Volatile.Read(ref this.disposed) != 0;
 
         internal CameraManager(
             ILogger<CameraManager> logger,
@@ -80,12 +83,9 @@ namespace CameraScanner.Maui
             };
             this.cameraController.SetEnabledUseCases(CameraController.ImageAnalysis);
             this.cameraController.ZoomState.ObserveForever(this.zoomStateObserver);
-            this.cameraController.InitializationFuture.AddListener(new Java.Lang.Runnable(() =>
-            {
-                this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
-                this.cameraInfo = this.cameraController.CameraInfo;
-                this.cameraInfo?.CameraState.ObserveForever(this.cameraStateObserver);
-            }), ContextCompat.GetMainExecutor(this.context));
+            this.cameraController.InitializationFuture.AddListener(
+                new Java.Lang.Runnable(this.OnCameraControllerInitialized),
+                ContextCompat.GetMainExecutor(this.context));
 
             this.torchStateObserver = new TorchStateObserver();
             this.torchStateObserver.ValueChanged += this.OnTorchStateChanged;
@@ -119,8 +119,37 @@ namespace CameraScanner.Maui
             this.deviceDisplay.MainDisplayInfoChanged += this.OnMainDisplayInfoChanged;
         }
 
+        private void OnCameraControllerInitialized()
+        {
+            // This callback is queued on the main executor and may run after Dispose().
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
+            try
+            {
+                this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
+                this.cameraInfo = this.cameraController.CameraInfo;
+                this.cameraInfo?.CameraState.ObserveForever(this.cameraStateObserver);
+            }
+            catch (ObjectDisposedException ex)
+            {
+                this.logger.LogDebug(ex, "OnCameraControllerInitialized: Camera resource was already disposed");
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                this.logger.LogError(ex, "OnCameraControllerInitialized failed with exception");
+            }
+        }
+
         private void OnCameraStateChanged(object? sender, CameraStateChangedEventArgs e)
         {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             this.logger.Log(e.CameraState.Error == null ? LogLevel.Debug : LogLevel.Error, $"OnCameraStateChanged: {e.CameraState}");
 
             if (e.CameraState.GetType() == CameraState.Type.Open)
@@ -135,7 +164,7 @@ namespace CameraScanner.Maui
 
         private void OnTorchStateChanged(object? sender, TorchStateEventArgs e)
         {
-            if (this.cameraView == null)
+            if (this.IsDisposed || this.cameraView == null)
             {
                 return;
             }
@@ -147,6 +176,11 @@ namespace CameraScanner.Maui
 
         private void OnZoomStateChanged(object? sender, ZoomStateChangedEventArgs e)
         {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             this.logger.LogDebug("OnZoomStateChanged");
 
             this.UpdateCurrentZoomFactor(e.ZoomState);
@@ -169,7 +203,7 @@ namespace CameraScanner.Maui
 
         internal void UpdateRequestZoomFactor()
         {
-            if (this.cameraController == null || this.cameraController?.ZoomState.IsInitialized == false)
+            if (this.IsDisposed || this.cameraController == null || this.cameraController?.ZoomState.IsInitialized == false)
             {
                 return;
             }
@@ -197,7 +231,7 @@ namespace CameraScanner.Maui
 
         internal BarcodeView BarcodeView { get; }
 
-        internal bool CaptureNextFrame => this.cameraView.CaptureNextFrame;
+        internal bool CaptureNextFrame => !this.IsDisposed && this.cameraView.CaptureNextFrame;
 
         internal void UpdateCameraFacing()
         {
@@ -230,11 +264,23 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("StartAsync");
 
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             try
             {
                 if (!await this.cameraPermissions.CheckPermissionAsync())
                 {
                     this.logger.LogInformation("UpdateCameraAsync: Camera permission not granted");
+                    return;
+                }
+
+                // The camera view may have been removed while we were waiting for the permission check.
+                if (this.IsDisposed)
+                {
+                    this.logger.LogDebug("StartAsync: CameraManager was disposed while checking camera permission");
                     return;
                 }
 
@@ -332,6 +378,11 @@ namespace CameraScanner.Maui
         //https://developer.android.com/reference/androidx/camera/view/CameraController#setImageAnalysisResolutionSelector(androidx.camera.core.resolutionselector.ResolutionSelector)
         internal async void UpdateCaptureQuality()
         {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             if (this.cameraController is LifecycleCameraController lifecycleCameraController)
             {
                 var resolution = this.GetTargetResolution();
@@ -342,7 +393,15 @@ namespace CameraScanner.Maui
 
                     if (this.IsRunning)
                     {
-                        await this.StartAsync();
+                        try
+                        {
+                            await this.StartAsync();
+                        }
+                        catch (Exception ex)
+                        {
+                            // Exceptions must not escape from async void
+                            this.logger.LogError(ex, "UpdateCaptureQuality failed with exception");
+                        }
                     }
                 }
                 else
@@ -356,7 +415,7 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("UpdateTorch");
 
-            if (this.cameraController == null)
+            if (this.IsDisposed || this.cameraController == null)
             {
                 return;
             }
@@ -385,13 +444,26 @@ namespace CameraScanner.Maui
 
         internal async void UpdateCameraEnabled()
         {
-            if (this.cameraView.CameraEnabled)
+            if (this.IsDisposed)
             {
-                await this.StartAsync();
+                return;
             }
-            else
+
+            try
             {
-                this.Stop();
+                if (this.cameraView.CameraEnabled)
+                {
+                    await this.StartAsync();
+                }
+                else
+                {
+                    this.Stop();
+                }
+            }
+            catch (Exception ex)
+            {
+                // Exceptions must not escape from async void
+                this.logger.LogError(ex, "UpdateCameraEnabled failed with exception");
             }
         }
 
@@ -427,7 +499,7 @@ namespace CameraScanner.Maui
 
         internal async Task PerformBarcodeDetectionAsync(IImageProxy proxy)
         {
-            if (this.cameraView.PauseScanning)
+            if (this.IsDisposed || this.cameraView.PauseScanning)
             {
                 //this.logger.LogDebug("PerformBarcodeDetectionAsync --> paused");
                 return;
@@ -443,7 +515,12 @@ namespace CameraScanner.Maui
                     {
                         using (var image = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees))
                         {
-                            using (var resultsArray = await this.barcodeScanner.Process(image))
+                            if (this.IsDisposed || this.barcodeScanner is not IMLKitBarcodeScanner barcodeScanner)
+                            {
+                                return;
+                            }
+
+                            using (var resultsArray = await barcodeScanner.Process(image))
                             {
                                 var barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArray, coordinateTransform);
 
@@ -451,7 +528,7 @@ namespace CameraScanner.Maui
                                 {
                                     Platforms.Services.BarcodeScanner.InvertLuminance(proxy.Image);
                                     using var imageInverted = InputImage.FromMediaImage(proxy.Image, proxy.ImageInfo.RotationDegrees);
-                                    using var resultsArrayInverted = await this.barcodeScanner.Process(imageInverted);
+                                    using var resultsArrayInverted = await barcodeScanner.Process(imageInverted);
 
                                     var barcodeResultsInverted = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(resultsArrayInverted, coordinateTransform);
                                     barcodeResults.UnionWith(barcodeResultsInverted);
@@ -469,6 +546,11 @@ namespace CameraScanner.Maui
                                     barcodeResults.RemoveWhere(b => !previewRect.Contains(b.PreviewBoundingBox));
                                 }
 
+                                if (this.IsDisposed)
+                                {
+                                    return;
+                                }
+
                                 this.cameraView.DetectionFinished(barcodeResults.ToArray());
                             }
                         }
@@ -479,6 +561,11 @@ namespace CameraScanner.Maui
 
         internal void CaptureImage(IImageProxy proxy)
         {
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             this.cameraView.CaptureNextFrame = false;
             var image = new PlatformImage(proxy.ToBitmap());
             this.cameraView.TriggerOnImageCaptured(image);
@@ -507,7 +594,7 @@ namespace CameraScanner.Maui
                 {
                     try
                     {
-                        if (this.IsRunning && this.cameraView.CameraEnabled)
+                        if (!this.IsDisposed && this.IsRunning && this.cameraView.CameraEnabled)
                         {
                             this.UpdateCaptureQuality();
                         }
@@ -528,40 +615,69 @@ namespace CameraScanner.Maui
 
         protected virtual void Dispose(bool disposing)
         {
-            if (disposing)
+            if (!disposing || Interlocked.Exchange(ref this.disposed, 1) != 0)
             {
-                this.deviceDisplay.MainDisplayInfoChanged -= this.OnMainDisplayInfoChanged;
+                return;
+            }
 
-                this.Stop();
+            this.deviceDisplay.MainDisplayInfoChanged -= this.OnMainDisplayInfoChanged;
 
-                this.cameraStateObserver.ValueChanged -= this.OnCameraStateChanged;
-                this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
-                this.cameraStateObserver.Dispose();
+            // Stop delivering frames to the analyzer before the camera is stopped and torn down.
+            this.TryCleanup(() => this.cameraController.ClearImageAnalysisAnalyzer(), "clearing the image analysis analyzer");
+            this.TryCleanup(this.Stop, "stopping the camera");
 
-                this.zoomStateObserver.ValueChanged -= this.OnZoomStateChanged;
-                this.cameraController.ZoomState.RemoveObserver(this.zoomStateObserver);
-                this.zoomStateObserver.Dispose();
+            // Observers must be removed from their LiveData before they are disposed.
+            // Otherwise LiveData may call back into an observer whose managed peer no longer exists.
+            this.cameraStateObserver.ValueChanged -= this.OnCameraStateChanged;
+            if (this.cameraInfo is ICameraInfo cameraInfo)
+            {
+                this.TryCleanup(() => cameraInfo.CameraState.RemoveObserver(this.cameraStateObserver), "removing the camera-state observer");
+            }
 
-                this.torchStateObserver.ValueChanged -= this.OnTorchStateChanged;
-                this.cameraController.TorchState.RemoveObserver(this.torchStateObserver);
-                this.torchStateObserver.Dispose();
+            // CameraInfo is owned by CameraX and may be shared with other CameraManager instances,
+            // so we must not dispose it here.
+            this.cameraInfo = null;
+            this.TryCleanup(this.cameraStateObserver.Dispose, "disposing the camera-state observer");
 
-                this.BarcodeView?.RemoveAllViews();
-                this.relativeLayout?.RemoveAllViews();
+            this.zoomStateObserver.ValueChanged -= this.OnZoomStateChanged;
+            this.TryCleanup(() => this.cameraController.ZoomState.RemoveObserver(this.zoomStateObserver), "removing the zoom-state observer");
+            this.TryCleanup(this.zoomStateObserver.Dispose, "disposing the zoom-state observer");
 
-                this.BarcodeView?.Dispose();
-                this.relativeLayout?.Dispose();
-                this.imageView?.Dispose();
-                this.previewView?.Dispose();
-                this.cameraController?.Dispose();
-                this.cameraInfo?.Dispose();
-                this.cameraInfo = null;
-                this.barcodeAnalyzer?.Dispose();
-                this.barcodeAnalyzer = null;
-                this.barcodeScanner?.Dispose();
-                this.barcodeScanner = null;
+            this.torchStateObserver.ValueChanged -= this.OnTorchStateChanged;
+            this.TryCleanup(() => this.cameraController.TorchState.RemoveObserver(this.torchStateObserver), "removing the torch-state observer");
+            this.TryCleanup(this.torchStateObserver.Dispose, "disposing the torch-state observer");
 
-                this.cameraExecutor?.Dispose();
+            this.TryCleanup(() => this.BarcodeView?.RemoveAllViews(), "clearing the barcode view");
+            this.TryCleanup(() => this.relativeLayout?.RemoveAllViews(), "clearing the camera layout");
+
+            this.TryCleanup(() => this.BarcodeView?.Dispose(), "disposing the barcode view");
+            this.TryCleanup(() => this.relativeLayout?.Dispose(), "disposing the camera layout");
+            this.TryCleanup(() => this.imageView?.Dispose(), "disposing the aim image");
+            this.TryCleanup(() => this.previewView?.Dispose(), "disposing the camera preview");
+            this.TryCleanup(() => this.cameraController?.Dispose(), "disposing the camera controller");
+
+            this.TryCleanup(() => this.barcodeAnalyzer?.Dispose(), "disposing the barcode analyzer");
+            this.barcodeAnalyzer = null;
+            this.TryCleanup(() => this.barcodeScanner?.Dispose(), "disposing the barcode scanner");
+            this.barcodeScanner = null;
+
+            this.TryCleanup(() => this.cameraExecutor?.Shutdown(), "shutting down the camera executor");
+            this.TryCleanup(() => this.cameraExecutor?.Dispose(), "disposing the camera executor");
+        }
+
+        private void TryCleanup(Action cleanup, string operation)
+        {
+            try
+            {
+                cleanup();
+            }
+            catch (ObjectDisposedException ex)
+            {
+                this.logger.LogDebug(ex, $"Dispose: Camera resource was already disposed while {operation}");
+            }
+            catch (Java.Lang.Exception ex)
+            {
+                this.logger.LogDebug(ex, $"Dispose: Failed while {operation}");
             }
         }
 
