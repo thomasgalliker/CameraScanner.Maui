@@ -1,7 +1,7 @@
 ####################################################################
-# VSTS Build Configuration, Version 1.4
+# Azure DevOps Build Configuration
 #
-# (c)2022 superdev GmbH
+# (c)2026 superdev GmbH
 ####################################################################
 
 name: $[format('{0}', variables['buildName'])]
@@ -12,20 +12,18 @@ pool:
 trigger:
   branches:
     include:
-    - main
-    - develop
-    - feature/*
-    - bugfix/*
+      - main
+      - develop
 
   paths:
     exclude:
-    - Docs/*
+      - Docs/*
 
 variables:
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
   majorVersion: 1
-  minorVersion: 8
+  minorVersion: 9
   patchVersion: $[counter(format('{0}.{1}', variables.majorVersion, variables.minorVersion), 0)]
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/main') }}:
     # Versioning: 1.0.0
@@ -39,122 +37,125 @@ variables:
   buildName: $[format('{0}', variables.semVersion)]
 
 steps:
-- task: Bash@3
-  displayName: 'Print all variables'
-  inputs:
-    targetType: 'inline'
-    script: 'env | sort'
-   
-- task: Assembly-Info-NetCore@3
-  displayName: 'Update Assembly Info'
-  inputs:
-    Path: '$(Build.SourcesDirectory)'
-    FileNames: |
-      **/*.csproj
-    InsertAttributes: true
-    FileEncoding: 'auto'
-    WriteBOM: false
-    Product: 'CameraScanner.Maui'
-    Description: ''
-    Company: 'superdev GmbH'
-    Copyright: '(c) $(date:YYYY) superdev GmbH'
-    VersionNumber: '$(Build.BuildNumber)'
-    FileVersionNumber: '$(Build.BuildNumber)'
-    InformationalVersion: '$(Build.BuildNumber)'
-    PackageVersion: '$(Build.BuildNumber)'
-    LogLevel: 'verbose'
-    FailOnWarning: false
-    DisableTelemetry: true
-    
-- task: UseDotNet@2
-  displayName: 'Use .NET 10.0.x'
-  inputs:
-    version: 10.0.x
-    
-- task: Bash@3
-  displayName: Install .NET MAUI
-  inputs:
-    targetType: 'inline'
-    script: |
-      dotnet workload install maui --source https://api.nuget.org/v3/index.json
+  - task: Bash@3
+    displayName: 'Print All Variables'
+    inputs:
+      targetType: 'inline'
+      script: 'env | sort'
 
-- task: JavaToolInstaller@0
-  displayName: "Install Java"
-  inputs:
-    versionSpec: '21'
-    jdkArchitectureOption: 'x64'
-    jdkSourceOption: 'PreInstalled'
+  - task: Assembly-Info-NetCore@3
+    displayName: 'Update Assembly Info'
+    inputs:
+      Path: '$(Build.SourcesDirectory)'
+      FileNames: |
+        **/*.csproj
+      InsertAttributes: true
+      FileEncoding: 'auto'
+      WriteBOM: false
+      Product: 'CameraScanner.Maui'
+      Description: ''
+      Company: 'superdev GmbH'
+      Copyright: '(c) $(date:YYYY) superdev GmbH'
+      VersionNumber: '$(Build.BuildNumber)'
+      FileVersionNumber: '$(Build.BuildNumber)'
+      InformationalVersion: '$(Build.BuildNumber)'
+      PackageVersion: '$(Build.BuildNumber)'
+      LogLevel: 'verbose'
+      FailOnWarning: false
+      DisableTelemetry: true
 
-- task: NuGetToolInstaller@0
-  displayName: 'Use NuGet 6.x'
-  inputs:
-    versionSpec: 6.x
+  - task: UseDotNet@2
+    displayName: 'Use .NET SDK from global.json'
+    inputs:
+      packageType: 'sdk'
+      useGlobalJson: true
+      workingDirectory: '$(Build.SourcesDirectory)'
 
-- task: DotNetCoreCLI@2
-  displayName: 'NuGet restore'
-  inputs:
-    command: restore
-    projects: |
-      CameraScanner.Maui/**/*.csproj
-      Tests/**/*.Tests.csproj
+  - task: Bash@3
+    displayName: 'Install .NET MAUI'
+    inputs:
+      targetType: 'inline'
+      script: |
+        dotnet workload install maui
 
-- task: DotNetCoreCLI@2
-  displayName: 'Build solution'
-  inputs:
-    projects: |
-      CameraScanner.Maui/**/*.csproj
-      Tests/**/*.Tests.csproj
-    arguments: >
-      --no-restore --configuration $(buildConfiguration)
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Run UnitTests'
-  inputs:
-    command: test
-    projects: 'Tests/**/*.Tests.csproj'
-    arguments: >
-      --no-restore 
-      --no-build 
-      --configuration $(buildConfiguration) 
-      /p:CollectCoverage=true 
-      /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*" 
-      /p:CoverletOutput=UnitTests.coverage.cobertura.xml 
-      /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json 
-      /p:CoverletOutputFormat=cobertura
-    
-- task: reportgenerator@5
-  displayName: 'Create Code Coverage Report'
-  inputs:
-    reports: '$(Build.SourcesDirectory)/Tests/**/*.coverage.cobertura*.xml'
-    targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
-    reporttypes: 'Cobertura'
-    assemblyfilters: '-xunit*'
-    
-- task: DotNetCoreCLI@2
-  displayName: 'Pack CameraScanner.Maui'
-  inputs:
-    command: pack
-    packagesToPack: CameraScanner.Maui/CameraScanner.Maui.csproj
-    versioningScheme: byEnvVar
-    versionEnvVar: semVersion
-    nobuild: true
+  - task: JavaToolInstaller@0
+    displayName: 'Install Java'
+    inputs:
+      versionSpec: '21'
+      jdkArchitectureOption: 'x64'
+      jdkSourceOption: 'PreInstalled'
 
-- task: CopyFiles@2
-  displayName: 'Copy Files to: $(Build.ArtifactStagingDirectory)'
-  inputs:
-    SourceFolder: '$(system.defaultworkingdirectory)'
-    Contents: |
-      **\bin\*.nupkg
-      **\bin\*.snupkg
-      **\ReleaseNotes.txt
-    TargetFolder: '$(Build.ArtifactStagingDirectory)'
-     
-- task: PublishCodeCoverageResults@2
-  displayName: 'Publish code coverage'
-  inputs:
-    codeCoverageTool: Cobertura
-    summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
-    reportDirectory: '$(Build.SourcesDirectory)/CodeCoverage'
+  - task: NuGetToolInstaller@0
+    displayName: 'Use NuGet 6.x'
+    inputs:
+      versionSpec: 6.x
 
-- task: PublishBuildArtifacts@1
-  displayName: 'Publish Artifact: drop'
+  - task: DotNetCoreCLI@2
+    displayName: 'NuGet Restore'
+    inputs:
+      command: restore
+      projects: |
+        CameraScanner.Maui/**/*.csproj
+        Tests/**/*.Tests.csproj
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Build Projects'
+    inputs:
+      projects: |
+        CameraScanner.Maui/**/*.csproj
+        Tests/**/*.Tests.csproj
+      arguments: >
+        --no-restore --configuration $(buildConfiguration)
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Run Unit Tests'
+    inputs:
+      command: test
+      projects: 'Tests/**/*.Tests.csproj'
+      arguments: >
+        --no-restore
+        --no-build
+        --configuration $(buildConfiguration)
+        /p:CollectCoverage=true
+        /p:Exclude="[Microsoft*]*%2C[Mono*]*%2C[xunit*]*%2C[*.Testdata]*"
+        /p:CoverletOutput=UnitTests.coverage.cobertura.xml
+        /p:MergeWith=$(Build.SourcesDirectory)/Tests/CoverletOutput/coverage.json
+        /p:CoverletOutputFormat=cobertura
+  
+  - task: reportgenerator@5
+    displayName: 'Create Code Coverage Report'
+    inputs:
+      reports: '$(Build.SourcesDirectory)/Tests/**/*.coverage.cobertura*.xml'
+      targetdir: '$(Build.SourcesDirectory)/CodeCoverage'
+      reporttypes: 'Cobertura'
+      assemblyfilters: '-xunit*'
+
+  - task: DotNetCoreCLI@2
+    displayName: 'Create NuGet Package'
+    condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+    inputs:
+      command: pack
+      packagesToPack: CameraScanner.Maui/**/*.csproj
+      versioningScheme: byEnvVar
+      versionEnvVar: semVersion
+      nobuild: true
+
+  - task: CopyFiles@2
+    displayName: 'Copy Files To: $(Build.ArtifactStagingDirectory)'
+    inputs:
+      SourceFolder: '$(system.defaultworkingdirectory)'
+      Contents: |
+        **\bin\*.nupkg
+        **\bin\*.snupkg
+        **\ReleaseNotes.txt
+      TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+  - task: PublishCodeCoverageResults@2
+    displayName: 'Publish Code Coverage'
+    inputs:
+      codeCoverageTool: Cobertura
+      summaryFileLocation: '$(Build.SourcesDirectory)/CodeCoverage/Cobertura.xml'
+      reportDirectory: '$(Build.SourcesDirectory)/CodeCoverage'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish Artifact: drop'

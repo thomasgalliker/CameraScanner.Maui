@@ -5,10 +5,10 @@
     <OutputType>Exe</OutputType>
     <RootNamespace>CameraDemoApp</RootNamespace>
     <UseMaui>true</UseMaui>
-    <MauiVersion>10.0.30</MauiVersion>
+    <MauiVersion>10.0.70</MauiVersion>
     <SingleProject>true</SingleProject>
     <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>disable</Nullable>
+    <Nullable>enable</Nullable>
 
     <!-- Display name -->
     <ApplicationTitle>Camera Scanner SDK</ApplicationTitle>
@@ -128,20 +128,46 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Maui" Version="13.0.0" />
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="CommunityToolkit.Maui" Version="14.1.1" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.Maui.Controls" Version="$(MauiVersion)" />
-    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.1" />
-    <PackageReference Include="NLog.Extensions.Logging" Version="5.5.0" />
-    <PackageReference Include="ObjectDumper.NET" Version="4.4.7-pre" />
-    <PackageReference Include="ResourceLoader" Version="3.4.2-pre" />
-    <PackageReference Include="Sentry.Maui" Version="6.0.0" />
-    <PackageReference Include="Superdev.Maui" Version="1.2.22-pre" />
-    <PackageReference Include="ValueConverters.MAUI" Version="4.1.6-pre" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.8" />
+    <PackageReference Include="NLog.Extensions.Logging" Version="6.1.3" />
+    <PackageReference Include="ObjectDumper.NET" Version="4.4.13-pre" />
+    <PackageReference Include="ResourceLoader" Version="3.4.5-pre" />
+    <PackageReference Include="Sentry.Maui" Version="6.6.0" />
+    <PackageReference Include="Superdev.Maui" Version="1.2.40-pre" />
+    <PackageReference Include="ValueConverters.MAUI" Version="4.2.8-pre" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\..\CameraScanner.Maui\CameraScanner.Maui.csproj" />
   </ItemGroup>
 
+  <Target Name="PrintVariables" BeforeTargets="Build">
+    <Message Importance="high" Text="----------------------" />
+    <Message Importance="high" Text="PrintVariables for $(TargetFramework)" />
+    <Message Importance="high" Text="Configuration: $(Configuration)" />
+    <Message Importance="high" Text="Platform: $(Platform)" />
+    <Message Importance="high" Text="PlatformTarget: $(PlatformTarget)" />
+    <Message Importance="high" Text="TargetFramework: $(TargetFramework)" />
+    <Message Importance="high" Text="RuntimeIdentifier: $(RuntimeIdentifier)" />
+    <Message Importance="high" Text="SupportedOSPlatformVersion: $(SupportedOSPlatformVersion)" />
+    <Message Importance="high" Text="OutputPath: $(OutputPath)" />
+    <Message Importance="high" Text="ApplicationId: $(ApplicationId)" />
+    <Message Importance="high" Text="ApplicationTitle: $(ApplicationTitle)" />
+    <Message Importance="high" Text="ApplicationDisplayVersion: $(ApplicationDisplayVersion)" />
+    <Message Importance="high" Text="ApplicationVersion: $(ApplicationVersion)" />
+    <Message Importance="high" Text="ProvisioningType: $(ProvisioningType)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignKey: $(CodesignKey)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignProvision: $(CodesignProvision)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="CodesignEntitlements: $(CodesignEntitlements)" Condition="$(TargetFramework.Contains('-ios'))" />
+    <Message Importance="high" Text="EmbedAssembliesIntoApk: $(EmbedAssembliesIntoApk)" Condition="$(TargetFramework.Contains('-android'))" />
+    <Message Importance="high" Text="JavaMaximumHeapSize: $(JavaMaximumHeapSize)" Condition="$(TargetFramework.Contains('-android'))" />
+    <Message Importance="high" Text="DebugSymbols: $(DebugSymbols)" />
+    <Message Importance="high" Text="DebugType: $(DebugType)" />
+    <Message Importance="high" Text="Optimize: $(Optimize)" />
+    <Message Importance="high" Text="----------------------" />
+  </Target>
+  
 </Project>
