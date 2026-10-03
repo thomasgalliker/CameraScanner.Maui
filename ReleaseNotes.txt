@@ -1,5 +1,7 @@
 1.9
 - Maintenance updates.
+- Fix BarcodeResultOverlay binding in sample app (see GitHub issue #75).
+- Each BarcodeResultOverlay now gets its own default BarcodeDrawable instance.
 
 1.8
 - Add support for nullable reference types.
