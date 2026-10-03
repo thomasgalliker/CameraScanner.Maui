@@ -122,6 +122,17 @@ namespace CameraScanner.Maui
         private void OnCameraControllerInitialized()
         {
             // This callback is queued on the main executor and may run after Dispose().
+            this.UpdateCameraStateObserver();
+        }
+
+        /// <summary>
+        /// Moves the camera-state observer to the CameraState of the currently bound camera.
+        /// CameraX binds a different camera (and returns a different CameraInfo) whenever
+        /// the camera is (re)bound, e.g. after switching the CameraSelector.
+        /// Must be called on the main thread.
+        /// </summary>
+        private void UpdateCameraStateObserver()
+        {
             if (this.IsDisposed)
             {
                 return;
@@ -129,17 +140,40 @@ namespace CameraScanner.Maui
 
             try
             {
-                this.cameraInfo?.CameraState.RemoveObserver(this.cameraStateObserver);
-                this.cameraInfo = this.cameraController.CameraInfo;
-                this.cameraInfo?.CameraState.ObserveForever(this.cameraStateObserver);
+                var newCameraInfo = this.cameraController.CameraInfo;
+                if (newCameraInfo is null || newCameraInfo.Equals(this.cameraInfo))
+                {
+                    // Camera is not bound (yet) or has not changed.
+                    return;
+                }
+
+                this.logger.LogDebug("UpdateCameraStateObserver: CameraInfo changed, moving camera-state observer");
+
+                // CameraInfo is owned by CameraX and may be shared with other CameraManager instances,
+                // so we must not dispose the previous one here.
+                if (this.cameraInfo is ICameraInfo oldCameraInfo)
+                {
+                    try
+                    {
+                        oldCameraInfo.CameraState.RemoveObserver(this.cameraStateObserver);
+                    }
+                    catch (ObjectDisposedException ex)
+                    {
+                        // Still attach the observer to the new camera below.
+                        this.logger.LogDebug(ex, "UpdateCameraStateObserver: Previous camera resource was already disposed");
+                    }
+                }
+
+                this.cameraInfo = newCameraInfo;
+                this.cameraInfo.CameraState.ObserveForever(this.cameraStateObserver);
             }
             catch (ObjectDisposedException ex)
             {
-                this.logger.LogDebug(ex, "OnCameraControllerInitialized: Camera resource was already disposed");
+                this.logger.LogDebug(ex, "UpdateCameraStateObserver: Camera resource was already disposed");
             }
             catch (Java.Lang.Exception ex)
             {
-                this.logger.LogError(ex, "OnCameraControllerInitialized failed with exception");
+                this.logger.LogError(ex, "UpdateCameraStateObserver failed with exception");
             }
         }
 
@@ -237,6 +271,11 @@ namespace CameraScanner.Maui
         {
             this.logger.LogDebug("UpdateCameraFacing");
 
+            if (this.IsDisposed)
+            {
+                return;
+            }
+
             if (this.cameraController is not null)
             {
                 if (this.cameraView.CameraFacing == CameraFacing.Front)
@@ -247,6 +286,9 @@ namespace CameraScanner.Maui
                 {
                     this.cameraController.CameraSelector = CameraSelector.DefaultBackCamera;
                 }
+
+                // If the controller is already bound, CameraX rebinds to the newly selected camera synchronously.
+                this.UpdateCameraStateObserver();
 
                 // If camera facing is switched, the torch may be turned off
                 //if ((int)this.cameraController.TorchState.Value == TorchState.On && this.cameraView.TorchOn == false)
@@ -328,6 +370,8 @@ namespace CameraScanner.Maui
 
                     this.cameraController.BindToLifecycle(lifecycleOwner);
                     this.IsRunning = true;
+
+                    this.UpdateCameraStateObserver();
                 }
             }
             catch (Exception ex)
