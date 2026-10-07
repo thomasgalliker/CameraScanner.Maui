@@ -26,8 +26,8 @@ namespace CameraScanner.Maui.Controls
             nameof(BarcodeDrawable),
             typeof(IBarcodeDrawable),
             typeof(BarcodeResultOverlay),
-            new BoundingBoxBarcodeDrawable(),
-            propertyChanged: OnBarcodeDrawablePropertyChanged);
+            propertyChanged: OnBarcodeDrawablePropertyChanged,
+            defaultValueCreator: _ => new BoundingBoxBarcodeDrawable());
 
         private static void OnBarcodeDrawablePropertyChanged(BindableObject bindable, object oldValue, object newValue)
         {

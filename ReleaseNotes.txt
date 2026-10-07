@@ -4,6 +4,8 @@
 - Fixed Android CameraState observer not following the active camera after switching CameraFacing (see GitHub issue #89).
 - Fixed a crash on iOS when a detected barcode has no payload (see GitHub issue #64).
 - Fixed ScanFromImageAsync on iOS always returning an empty result.
+- Fix BarcodeResultOverlay binding in sample app (see GitHub issue #75).
+- Each BarcodeResultOverlay now gets its own default BarcodeDrawable instance.
 
 1.8
 - Add support for nullable reference types.
