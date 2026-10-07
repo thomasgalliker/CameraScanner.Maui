@@ -1,9 +1,19 @@
+using Android.Runtime;
 using AndroidX.Lifecycle;
 
 namespace CameraScanner.Maui.Platforms.Android
 {
     internal abstract class GenericObserver<TValue, TEventArgs> : Java.Lang.Object, IObserver where TEventArgs : EventArgs
     {
+        protected GenericObserver()
+        {
+        }
+
+        protected GenericObserver(IntPtr handle, JniHandleOwnership transfer)
+            : base(handle, transfer)
+        {
+        }
+
         public TValue? LastValue { get; private set; }
 
         public event EventHandler<TEventArgs>? ValueChanged;
