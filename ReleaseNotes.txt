@@ -1,5 +1,7 @@
 1.9
 - Maintenance updates.
+- Fixed Android crashes when CameraView is removed during camera initialization or disposal (see GitHub issue #85).
+- Fixed Android CameraState observer not following the active camera after switching CameraFacing (see GitHub issue #89).
 - Fix BarcodeResultOverlay binding in sample app (see GitHub issue #75).
 - Each BarcodeResultOverlay now gets its own default BarcodeDrawable instance.
 
