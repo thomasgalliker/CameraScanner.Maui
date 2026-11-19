@@ -57,19 +57,22 @@ namespace CameraScanner.Maui.Platforms.Services
 
             void VNDetectBarcodesRequestCompletionHandler(VNRequest request, NSError? error)
             {
-                if (error == null)
+                try
                 {
-                    observations = request.GetResults<VNBarcodeObservation>();
+                    if (error == null)
+                    {
+                        observations = request.GetResults<VNBarcodeObservation>();
+                    }
+                    else
+                    {
+                        // TODO Log error
+                    }
                 }
-                else
+                catch
                 {
-                    // TODO Log error
+                    // Managed exceptions must not escape a native callback.
+                    observations = null;
                 }
-            }
-
-            if (observations == null)
-            {
-                return new HashSet<BarcodeResult>();
             }
 
             using (var barcodeRequest = new VNDetectBarcodesRequest(VNDetectBarcodesRequestCompletionHandler))
@@ -102,7 +105,7 @@ namespace CameraScanner.Maui.Platforms.Services
             }
         }
 
-        internal static HashSet<BarcodeResult> ProcessBarcodeResult(VNBarcodeObservation[] inputResults, AVCaptureVideoPreviewLayer? previewLayer = null)
+        internal static HashSet<BarcodeResult> ProcessBarcodeResult(VNBarcodeObservation[]? inputResults, AVCaptureVideoPreviewLayer? previewLayer = null)
         {
             var barcodeResults = new HashSet<BarcodeResult>();
 
@@ -113,6 +116,19 @@ namespace CameraScanner.Maui.Platforms.Services
 
             foreach (var barcode in inputResults)
             {
+                var payloadStringValue = barcode.PayloadStringValue;
+                var rawBytes = GetRawBytes(barcode);
+                if (rawBytes == null)
+                {
+                    rawBytes = payloadStringValue != null ? Encoding.ASCII.GetBytes(payloadStringValue) : null;
+                }
+
+                if (payloadStringValue == null && rawBytes == null)
+                {
+                    // Vision may report a barcode which could not be decoded.
+                    continue;
+                }
+
                 RectF previewBoundingBox;
                 Point[] cornerPoints;
 
@@ -138,14 +154,7 @@ namespace CameraScanner.Maui.Platforms.Services
 
                 // TODO: Implement mapping for BarcodeTypes
 
-                var payloadStringValue = barcode.PayloadStringValue;
                 var barcodeFormats = barcode.Symbology.ToBarcodeFormats();
-
-                var rawBytes = GetRawBytes(barcode);
-                if (rawBytes == null)
-                {
-                    rawBytes = payloadStringValue != null ? Encoding.ASCII.GetBytes(payloadStringValue) : null;
-                }
 
                 var barcodeResult = new BarcodeResult(
                     displayValue: payloadStringValue,
@@ -173,11 +182,11 @@ namespace CameraScanner.Maui.Platforms.Services
         {
             return barcodeObservation.Symbology switch
             {
-                VNBarcodeSymbology.QR => ((CIQRCodeDescriptor)barcodeObservation.BarcodeDescriptor)?.ErrorCorrectedPayload?.ToArray(),
-                VNBarcodeSymbology.Aztec => ((CIAztecCodeDescriptor)barcodeObservation.BarcodeDescriptor)?.ErrorCorrectedPayload?.ToArray(),
-                VNBarcodeSymbology.Pdf417 => ((CIPdf417CodeDescriptor)barcodeObservation.BarcodeDescriptor)?.ErrorCorrectedPayload
+                VNBarcodeSymbology.QR => (barcodeObservation.BarcodeDescriptor as CIQRCodeDescriptor)?.ErrorCorrectedPayload?.ToArray(),
+                VNBarcodeSymbology.Aztec => (barcodeObservation.BarcodeDescriptor as CIAztecCodeDescriptor)?.ErrorCorrectedPayload?.ToArray(),
+                VNBarcodeSymbology.Pdf417 => (barcodeObservation.BarcodeDescriptor as CIPdf417CodeDescriptor)?.ErrorCorrectedPayload
                     ?.ToArray(),
-                VNBarcodeSymbology.DataMatrix => ((CIDataMatrixCodeDescriptor)barcodeObservation.BarcodeDescriptor)?.ErrorCorrectedPayload
+                VNBarcodeSymbology.DataMatrix => (barcodeObservation.BarcodeDescriptor as CIDataMatrixCodeDescriptor)?.ErrorCorrectedPayload
                     ?.ToArray(),
                 _ => null
             };

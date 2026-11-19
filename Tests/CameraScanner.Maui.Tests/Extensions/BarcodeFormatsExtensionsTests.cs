@@ -1,5 +1,5 @@
 using CameraScanner.Maui.Extensions;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace CameraScanner.Maui.Tests.Extensions

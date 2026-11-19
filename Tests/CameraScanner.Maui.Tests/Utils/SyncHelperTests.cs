@@ -3,7 +3,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using CameraScanner.Maui.Utils;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 using Xunit.Abstractions;
 

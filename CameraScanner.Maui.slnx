@@ -1,0 +1,34 @@
+<Solution>
+  <Configurations>
+    <Platform Name="Any CPU" />
+    <Platform Name="Device" />
+    <Platform Name="Simulator" />
+  </Configurations>
+  <Folder Name="/Samples/">
+    <Project Path="Samples/CameraDemoApp/CameraDemoApp.csproj">
+      <Deploy />
+    </Project>
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path=".editorconfig" />
+    <File Path=".gitignore" />
+    <File Path="azure-pipelines.yml" />
+    <File Path="global.json" />
+    <File Path="LICENSE" />
+    <File Path="README.md" />
+    <File Path="ReleaseNotes.txt" />
+  </Folder>
+  <Folder Name="/Solution Items/.github/">
+    <File Path=".github/ISSUE_TEMPLATE/bug_report.md" />
+    <File Path=".github/ISSUE_TEMPLATE/feature_request.md" />
+    <File Path=".github/ISSUE_TEMPLATE/refactoring.md" />
+    <File Path=".github/PULL_REQUEST_TEMPLATE/pull_request_template.md" />
+  </Folder>
+  <Folder Name="/Tests/">
+    <Project Path="Tests/CameraScanner.Maui.Tests/CameraScanner.Maui.Tests.csproj" />
+  </Folder>
+  <Project Path="CameraScanner.Maui/CameraScanner.Maui.csproj">
+    <Platform Solution="*|Device" Project="Device" />
+    <Platform Solution="*|Simulator" Project="Simulator" />
+  </Project>
+</Solution>

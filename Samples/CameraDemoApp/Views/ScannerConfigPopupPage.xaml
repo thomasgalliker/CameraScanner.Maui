@@ -100,12 +100,12 @@
                     <Button
                         Grid.Column="0"
                         Command="{Binding CancelCommand}"
-                        CommandParameter="{Binding Source={x:Reference Page}}"
+                        CommandParameter="{Binding Source={x:Reference Page}, x:DataType=t:Popup}"
                         Text="Cancel" />
                     <Button
                         Grid.Column="1"
                         Command="{Binding ConfirmCommand}"
-                        CommandParameter="{Binding Source={x:Reference Page}}"
+                        CommandParameter="{Binding Source={x:Reference Page}, x:DataType=t:Popup}"
                         Text="OK" />
                 </Grid>
 

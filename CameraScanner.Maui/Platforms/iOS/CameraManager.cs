@@ -68,15 +68,25 @@ namespace CameraScanner.Maui
             this.videoDataOutput = new AVCaptureVideoDataOutput { AlwaysDiscardsLateVideoFrames = true };
             this.detectBarcodesRequest = new VNDetectBarcodesRequest((request, error) =>
             {
-                if (error == null)
+                try
                 {
-                    var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
-                    this.barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.previewLayer);
+                    if (error == null)
+                    {
+                        var vnBarcodeObservations = request.GetResults<VNBarcodeObservation>();
+                        this.barcodeResults = Platforms.Services.BarcodeScanner.ProcessBarcodeResult(vnBarcodeObservations, this.previewLayer);
+                    }
+                    else
+                    {
+                        var exception = new NSErrorException(error);
+                        logger.LogError(exception, "VNDetectBarcodesRequest failed with error");
+                    }
                 }
-                else
+                catch (Exception ex)
                 {
-                    var exception = new NSErrorException(error);
-                    logger.LogError(exception, "VNDetectBarcodesRequest failed with error");
+                    // Managed exceptions must not escape a native callback,
+                    // otherwise they cannot be caught and terminate the app.
+                    this.barcodeResults = [];
+                    logger.LogError(ex, "VNDetectBarcodesRequest completion handler failed with exception");
                 }
             });
 

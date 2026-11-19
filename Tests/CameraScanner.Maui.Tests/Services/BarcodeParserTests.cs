@@ -1,6 +1,6 @@
 using System.Reflection;
 using CameraScanner.Maui.Tests.TestData;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace CameraScanner.Maui.Services.Tests

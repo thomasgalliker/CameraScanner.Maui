@@ -35,7 +35,7 @@
         <c:BarcodeResultOverlay
             Grid.Row="0"
             BarcodeResultTappedCommand="{Binding BarcodeResultTappedCommand}"
-            BarcodeResults="{Binding Source={x:Reference CameraView}, Path=BarcodeResults}"
+            BarcodeResults="{Binding BarcodeResults, Source={x:Reference CameraView}, x:DataType=c:CameraView}"
             StrokeColor="Red"
             StrokeSize="4">
             <c:BarcodeResultOverlay.BarcodeDrawable>

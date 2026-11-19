@@ -1,4 +1,5 @@
-﻿using AndroidX.Camera.Core;
+﻿using Android.Runtime;
+using AndroidX.Camera.Core;
 using CameraScanner.Maui.Utils;
 using Microsoft.Extensions.Logging;
 using Size = Android.Util.Size;
@@ -8,8 +9,8 @@ namespace CameraScanner.Maui
     [Preserve(AllMembers = true)]
     internal class BarcodeAnalyzer : Java.Lang.Object, ImageAnalysis.IAnalyzer
     {
-        private readonly ILogger<BarcodeAnalyzer> logger;
-        private readonly CameraManager cameraManager;
+        private readonly ILogger<BarcodeAnalyzer>? logger;
+        private readonly CameraManager? cameraManager;
 
         private uint? skippedFrames;
         private readonly SyncHelper syncHelper;
@@ -24,7 +25,17 @@ namespace CameraScanner.Maui
             this.syncHelper = new SyncHelper();
         }
 
-        public Size DefaultTargetResolution => this.cameraManager.GetTargetResolution();
+        /// <summary>
+        /// Used by the Android runtime if it needs to re-create the managed peer
+        /// (e.g. if CameraX calls into an analyzer that has already been disposed).
+        /// </summary>
+        protected BarcodeAnalyzer(IntPtr handle, JniHandleOwnership transfer)
+            : base(handle, transfer)
+        {
+            this.syncHelper = new SyncHelper();
+        }
+
+        public Size? DefaultTargetResolution => this.cameraManager?.GetTargetResolution();
 
         public int TargetCoordinateSystem => ImageAnalysis.CoordinateSystemOriginal;
 
@@ -44,7 +55,7 @@ namespace CameraScanner.Maui
         {
             try
             {
-                if (this.PauseScanning)
+                if (this.PauseScanning || this.cameraManager is not CameraManager cameraManager)
                 {
                     return;
                 }
@@ -53,15 +64,15 @@ namespace CameraScanner.Maui
                 {
                     // this.logger.LogDebug("Analyze");
 
-                    if (this.cameraManager.CaptureNextFrame)
+                    if (cameraManager.CaptureNextFrame)
                     {
-                        this.cameraManager.CaptureImage(proxyImage);
+                        cameraManager.CaptureImage(proxyImage);
                     }
                     else
                     {
                         Task.Run(async () =>
                         {
-                            await this.syncHelper.RunOnceAsync(() => this.cameraManager.PerformBarcodeDetectionAsync(proxyImage));
+                            await this.syncHelper.RunOnceAsync(() => cameraManager.PerformBarcodeDetectionAsync(proxyImage));
                         }).Wait();
                     }
 
@@ -77,7 +88,7 @@ namespace CameraScanner.Maui
             }
             catch (Exception ex)
             {
-                this.logger.LogError(ex, "Analyze failed with exception");
+                this.logger?.LogError(ex, "Analyze failed with exception");
             }
             finally
             {
